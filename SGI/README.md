@@ -1,2 +1,2 @@
-Trabalho 1 da disciplina de Computação Gráfica
-este trabalho possui entregas semanais
+# Trabalho 1 da Disciplina de Computação Gráfica  
+Este trabalho possui entregas semanais
