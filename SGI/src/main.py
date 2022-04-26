@@ -31,8 +31,6 @@ def window():
     label.setText("teste2")
     label.move(50, 50)
 
-
-
     win.show()
     sys.exit(app.exec_())
 
