@@ -10,7 +10,6 @@ from form import Form
 from viewport import Viewport
 from gui import MainWindow
 
-
 class ObjectWindow(QDialog):
     def __init__(self, viewport: Viewport, mainWindow) -> None:
         super().__init__()
