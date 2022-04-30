@@ -30,27 +30,6 @@ class Viewport(QLabel):
         self.board = self.pixmap()
         self.board.fill(QColor('white'))
 
-    def draw_axes(self, form: Form):
-        painter = QPainter(self.board)
-        pen = QPen()
-        pen.setWidthF(1)
-        pen.setColor(QColor('red'))
-        painter.setPen(pen)
-
-        xMin, yMin, xMax, yMax = self.tamWindow(self.vpCoord[0], self.vpCoord[1])
-
-        (p1_x, p1_y) = form.vp_trans(self, (0, 1000), (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-        (p2_x, p2_y) = form.vp_trans(self, (0, -1000), (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-        painter.drawLine(p1_x, p1_y, p2_x, p2_y)
-
-        (p1_x, p1_y) = form.vp_trans(self, (1000, 0), (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-        (p2_x, p2_y) = form.vp_trans(self, (-1000, 0), (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-        painter.drawLine(p1_x, p1_y, p2_x, p2_y)
-
-        self.update()
-        painter.end()
-
-
     def draw(self, form: Form):
         self.objectList = form
         painter = QPainter(self.board)
