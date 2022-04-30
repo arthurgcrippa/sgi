@@ -36,8 +36,8 @@ class ObjectWindow(QDialog):
     def point_tab(self) -> QWidget:
         generalTab = QWidget()
         layout = QVBoxLayout()
-        self.name = QLineEdit()
-        self.coordinates_tab = QLineEdit("(4,4)")
+        self.name = QLineEdit("Objeto")
+        self.coordinates_tab = QLineEdit("(-50,1);(1,1);(1,50);(-50,50)")
         self.confirmButton = QPushButton('Confirm', self)
         cancelButton = QPushButton('Cancel')
         self.confirmButton.clicked.connect(self.confirm_button)
@@ -67,13 +67,7 @@ class ObjectWindow(QDialog):
                 xy = coordinate.split(',')
                 x = int(xy[0])
                 y = int(xy[1])
-                print('Testes:')
-                print(x)
-                print(y)
                 coordinatesList.append((x,y))
-                print('TESTE FINAL:')
-                print(coordinatesList[0])
-
             form = Form(self.name, coordinatesList)
             return form
 
@@ -87,15 +81,17 @@ class ObjectWindow(QDialog):
                 print(1)
                 return False
             stack.append(char)
-            if prev == '(' and not char.isnumeric():
+            if prev == '(' and ((not char.isnumeric()) and char != '-'):
                 print(2)
                 return False
             if prev == ')' and char != ';':
                 print(3)
                 return False
+            if prev == '-' and (char == '(' or char == ')'):
+                return False
         return True
 
     def isOperator(self, char):
-        if (char == '(' or char == ')' or char == ',' or char == ';'):
+        if (char == '(' or char == ')' or char == ',' or char == ';' or char == '-'):
             return True
         return False
