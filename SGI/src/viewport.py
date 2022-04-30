@@ -49,8 +49,8 @@ class Viewport(QLabel):
             pontos = form.coordinates
             for p1 in pontos:
                 for p2 in pontos:
-                    (p1_x, p1_y) = form.vp_trans(p1, (xMin,yMin), (xMax,yMax))
-                    (p2_x, p2_y) = form.vp_trans(p2, (xMin,yMin), (xMax,yMax))
+                    (p1_x, p1_y) = form.vp_trans(p1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+                    (p2_x, p2_y) = form.vp_trans(p2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
                     painter.drawLine(p1_x, p1_y, p2_x, p2_y)
         self.update()
         painter.end()
