@@ -37,7 +37,7 @@ class ObjectWindow(QDialog):
         generalTab = QWidget()
         layout = QVBoxLayout()
         self.name = QLineEdit()
-        self.coordinates = QLineEdit("(4,4)")
+        self.coordinates_tab = QLineEdit("(4,4)")
         self.confirmButton = QPushButton('Confirm', self)
         cancelButton = QPushButton('Cancel')
         self.confirmButton.clicked.connect(self.confirm_button)
@@ -47,7 +47,7 @@ class ObjectWindow(QDialog):
         dialogBox.addButton(cancelButton, QDialogButtonBox.RejectRole)
 
         layout.addWidget(self.name)
-        layout.addWidget(self.coordinates)
+        layout.addWidget(self.coordinates_tab)
         layout.addWidget(dialogBox)
         generalTab.setLayout(layout)
         return generalTab
@@ -56,8 +56,8 @@ class ObjectWindow(QDialog):
         self.viewport.draw(self.form_setup())
 
     def form_setup(self) -> Form:
-        coordinates = list()
-        plaintext = self.coordinates.text()
+        coordinatesList = list()
+        plaintext = self.coordinates_tab.text()
         print(plaintext)
         if (self.check(plaintext)):
             coordinates = plaintext.split(';')
@@ -67,9 +67,14 @@ class ObjectWindow(QDialog):
                 xy = coordinate.split(',')
                 x = int(xy[0])
                 y = int(xy[1])
-                #coordinates.append((coordinate[0],coordinate[1]))
+                print('Testes:')
+                print(x)
+                print(y)
+                coordinatesList.append((x,y))
+                print('TESTE FINAL:')
+                print(coordinatesList[0])
 
-            form = Form(self.name, coordinates)
+            form = Form(self.name, coordinatesList)
             return form
 
     def check(self, plaintext):

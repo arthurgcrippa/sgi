@@ -9,7 +9,7 @@ class Viewport(QLabel):
         super().__init__()
         #self.viewPortHeight = viewPortHeight
         #self.viewPortWidth = viewPortWidth
-        self.vpCoord = (viewPortWidth, viewPortHeight)
+        self.vpCoord = (int(viewPortWidth), int(viewPortHeight))
         self.pen_width = 3
         self.vp_init()
 
@@ -40,8 +40,9 @@ class Viewport(QLabel):
         xMin, yMin, xMax, yMax = self.tamWindow(self.vpCoord[0], self.vpCoord[1])
 
         print(form.coordinates[0])
+        print(form.coordinates[0][0])
 
-        if (form.cord_len() == 1):
+        if (form.len() == 1):
             (x,y) = form.vp_trans(form.coordinates[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
             painter.drawPoint(x,y)
         elif (len(form.coordinates) > 1):
