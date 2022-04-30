@@ -13,11 +13,11 @@ class Viewport(QLabel):
         self.pen_width = 3
         self.vp_init()
 
-    def tamWindow(self, viewPortHeight: int, viewPortWidth: int) -> List[int]:
-        xMin = - (viewPortWidth/2)
-        yMin = - (viewPortHeight/2)
-        xMax = viewPortWidth/2
-        yMax = viewPortHeight/2
+    def tamWindow(self, viewPortHeight: int, viewPortWidth: int) -> List[float]:
+        xMin = - float(viewPortWidth/2)
+        yMin = - float(viewPortHeight/2)
+        xMax = float(viewPortWidth/2)
+        yMax = float(viewPortHeight/2)
         return (xMin, yMin, xMax, yMax)
 
     def vp_init(self):
@@ -39,10 +39,10 @@ class Viewport(QLabel):
 
         xMin, yMin, xMax, yMax = self.tamWindow(self.vpCoord[0], self.vpCoord[1])
 
-        print(form.coordinates[0]) 
+        print(form.coordinates[0])
 
         if (form.cord_len() == 1):
-            (x,y) = form.vp_trans(form.coordinates[0], (xMin,yMin), (xMax,yMax))
+            (x,y) = form.vp_trans(form.coordinates[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
             painter.drawPoint(x,y)
         elif (len(form.coordinates) > 1):
             pontos = form.coordinates

@@ -42,7 +42,7 @@ class ObjectWindow(QDialog):
         cancelButton = QPushButton('Cancel')
         self.confirmButton.clicked.connect(self.confirm_button)
         dialogBox = QDialogButtonBox()
-        dialogBox.rejected.connect(self.reject) 
+        dialogBox.rejected.connect(self.reject)
         dialogBox.addButton(self.confirmButton, QDialogButtonBox.AcceptRole)
         dialogBox.addButton(cancelButton, QDialogButtonBox.RejectRole)
 
@@ -56,55 +56,41 @@ class ObjectWindow(QDialog):
         self.viewport.draw(self.form_setup())
 
     def form_setup(self) -> Form:
+        coordinates = list()
         plaintext = self.coordinates.text()
         print(plaintext)
+        if (self.check(plaintext)):
+            coordinates = plaintext.split(';')
+            for coordinate in coordinates:
+                coordinate = coordinate.replace("(", "")
+                coordinate = coordinate.replace(")", "")
+                xy = coordinate.split(',')
+                x = int(xy[0])
+                y = int(xy[1])
+                #coordinates.append((coordinate[0],coordinate[1]))
 
-        if (self.checkString(plaintext)):
-            coordList = list()
-            coordStingList = plaintext.split(';')
-            for coordString in coordStingList:
-                x = ''
-                y = ''
-                for char in coordString:
-                    firstArgument = True
-                    if (char == '(' or char == ')'):
-                        continue
-                    if (char == ','):
-                        firstArgument = False
-                        continue
-                    if(firstArgument):
-                        x = x + char
-                    if(not firstArgument):
-                        y = y + char
-                x = int(x)
-                y = int(y)
-                coordList.append((x,y))
-
-            form = Form(self.name, coordList)
+            form = Form(self.name, coordinates)
             return form
 
-    def checkString(self, plaintext):
+    def check(self, plaintext):
+        stack = []
+        prev = ''
+        for char in plaintext:
+            if len(stack) > 0:
+               prev = stack.pop()
+            if not (self.isOperator(char) or char.isnumeric()):
+                print(1)
+                return False
+            stack.append(char)
+            if prev == '(' and not char.isnumeric():
+                print(2)
+                return False
+            if prev == ')' and char != ';':
+                print(3)
+                return False
         return True
 
-        # layout = QVBoxLayout()
-        # self.tabs = QTabWidget()
-        # tabsFormLayout = QFormLayout()
-        # self.tabs.setLayout(tabsFormLayout)
-
-        # ponto = QWidget()
-        # pontoFormLayout = QFormLayout()
-        # pontoFormLayout.setVerticalSpacing(15)
-
-        # self.pontoName = QLineEdit()
-        # pontoFormLayout.addRow(QLabel("Nome"), self.pontoName)
-        # self.pontoCoord = QLineEdit()
-        # pontoFormLayout.addRow(QLabel("Coordenadas"), self.pontoCoord)
-
-        # ponto.setLayout(pontoFormLayout)
-        # self.tabs.addTab(ponto, 'Ponto')
-
-        # layout.addWidget(self.tabs)
-
-
-        # linha = QWidget()
-        # poligono = QWidget()
+    def isOperator(self, char):
+        if (char == '(' or char == ')' or char == ',' or char == ';'):
+            return True
+        return False

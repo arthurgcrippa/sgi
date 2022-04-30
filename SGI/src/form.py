@@ -14,12 +14,17 @@ class Form():
 
     def cord_len(self) -> int:
         i = 0
-        for cordinate in self.cordinates:
+        for coordinate in self.coordinates:
             i = i + 1
         return i
 
     # transformada de viewport
-    def vp_trans(wCoord: t_coordinate, wMin: t_coordinate, wMax: t_coordinate, vpCoordinate: t_coordinate) -> t_coordinate:
+    def vp_trans(self, wCoord: t_coordinate, wMin: t_coordinate, wMax: t_coordinate, vpCoordinate: t_coordinate) -> t_coordinate:
+        print('TESTES:')
+        print(wMin[0])
+        print(wMin[1])
+        print(wMax[0])
+        print(wMax[1])
         vp_x = ((wCoord[0] - wMin[0])/(wMax[0]-wMin[0]))*vpCoordinate[0]
         vp_y = (1-((wCoord[1]-wMin[1])/(wMax[1]-wMin[1])))*vpCoordinate[1]
         return (vp_x, vp_y)
