@@ -8,12 +8,15 @@ from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxL
 
 from form import Form
 from viewport import Viewport
+from gui import MainWindow
+
 
 class ObjectWindow(QDialog):
-    def __init__(self, viewport: Viewport) -> None:
+    def __init__(self, viewport: Viewport, mainWindow) -> None:
         super().__init__()
         self.add_object()
         self.viewport = viewport
+        self.mainWindow = mainWindow
 
     def add_object(self) -> None:
         self.resize(300,300)

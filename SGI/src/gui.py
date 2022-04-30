@@ -1,7 +1,7 @@
 from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
-from ObjectWindow import ObjectWindow
+from objectWindow import ObjectWindow
 from viewport import Viewport
 
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
@@ -18,7 +18,7 @@ class MainWindow(QWidget):
         layout = QHBoxLayout()
         layout.addLayout(self.menu_setup())
         layout.addLayout(self.vp_setup())
-        self.objWindow = ObjectWindow(self.viewport)
+        self.objWindow = ObjectWindow(self.viewport, self)
         self.setLayout(layout)
         self.show()
 
