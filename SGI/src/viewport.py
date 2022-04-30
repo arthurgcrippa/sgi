@@ -7,11 +7,13 @@ from form import Form
 class Viewport(QLabel):
     def __init__(self, viewPortHeight:int, viewPortWidth:int) -> None:
         super().__init__()
+
         #self.viewPortHeight = viewPortHeight
         #self.viewPortWidth = viewPortWidth
         self.vpCoord = (int(viewPortWidth), int(viewPortHeight))
         self.pen_width = 3
         self.vp_init()
+        self.draw_axes(Form)
 
     def tamWindow(self, viewPortHeight: int, viewPortWidth: int) -> List[float]:
         xMin = - float(viewPortWidth/2)
@@ -28,19 +30,13 @@ class Viewport(QLabel):
         self.board.fill(QColor('white'))
 
     def draw(self, form: Form):
-    # def draw(self):
         painter = QPainter(self.board)
         pen = QPen()
         pen.setWidthF(2)
         pen.setColor(QColor('black'))
         painter.setPen(pen)
-        # painter.drawLine(1,1, 100,100)
-        print("cehgou aqui")
 
         xMin, yMin, xMax, yMax = self.tamWindow(self.vpCoord[0], self.vpCoord[1])
-
-        print(form.coordinates[0])
-        print(form.coordinates[0][0])
 
         if (form.len() == 1):
             (x,y) = form.vp_trans(form.coordinates[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
@@ -54,3 +50,25 @@ class Viewport(QLabel):
                     painter.drawLine(p1_x, p1_y, p2_x, p2_y)
         self.update()
         painter.end()
+
+    def draw_axes(self, form: Form):
+        # print("chegou aq")
+        painter = QPainter(self.board)
+        pen = QPen()
+        pen.setWidthF(1)
+        pen.setColor(QColor('black'))
+        painter.setPen(pen)
+
+        xMin, yMin, xMax, yMax = self.tamWindow(self.vpCoord[0], self.vpCoord[1])
+    
+        (p1_x, p1_y) = form.vp_trans(self, (0, 10000), (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+        (p2_x, p2_y) = form.vp_trans(self, (0, -10000), (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+        painter.drawLine(p1_x, p1_y, p2_x, p2_y)
+
+        (p1_x, p1_y) = form.vp_trans(self, (10000, 0), (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+        (p2_x, p2_y) = form.vp_trans(self, (-10000, 0), (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+        painter.drawLine(p1_x, p1_y, p2_x, p2_y)
+
+        self.update()
+        painter.end()
+

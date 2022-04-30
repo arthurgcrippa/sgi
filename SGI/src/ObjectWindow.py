@@ -37,7 +37,7 @@ class ObjectWindow(QDialog):
         generalTab = QWidget()
         layout = QVBoxLayout()
         self.name = QLineEdit()
-        self.coordinates_tab = QLineEdit("(4,4)")
+        self.coordinates_tab = QLineEdit()
         self.confirmButton = QPushButton('Confirm', self)
         cancelButton = QPushButton('Cancel')
         self.confirmButton.clicked.connect(self.confirm_button)
@@ -58,7 +58,6 @@ class ObjectWindow(QDialog):
     def form_setup(self) -> Form:
         coordinatesList = list()
         plaintext = self.coordinates_tab.text()
-        print(plaintext)
         if (self.check(plaintext)):
             coordinates = plaintext.split(';')
             for coordinate in coordinates:
@@ -67,12 +66,7 @@ class ObjectWindow(QDialog):
                 xy = coordinate.split(',')
                 x = int(xy[0])
                 y = int(xy[1])
-                print('Testes:')
-                print(x)
-                print(y)
                 coordinatesList.append((x,y))
-                print('TESTE FINAL:')
-                print(coordinatesList[0])
 
             form = Form(self.name, coordinatesList)
             return form
@@ -84,14 +78,11 @@ class ObjectWindow(QDialog):
             if len(stack) > 0:
                prev = stack.pop()
             if not (self.isOperator(char) or char.isnumeric()):
-                print(1)
                 return False
             stack.append(char)
             if prev == '(' and not char.isnumeric():
-                print(2)
                 return False
             if prev == ')' and char != ';':
-                print(3)
                 return False
         return True
 
