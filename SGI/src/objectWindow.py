@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxL
 
 from form import Form
 from viewport import Viewport
-from gui import MainWindow
+#from gui import MainWindow
 
 class ObjectWindow(QDialog):
     def __init__(self, viewport: Viewport, mainWindow) -> None:
@@ -55,7 +55,10 @@ class ObjectWindow(QDialog):
         return generalTab
 
     def confirm_button(self):
-        self.viewport.draw(self.form_setup())
+        form = self.form_setup()
+        self.viewport.objectList.append(form)
+        self.viewport.draw(form)
+        self.mainWindow.objList.addItem(form.name)
 
     def form_setup(self) -> Form:
         coordinatesList = list()
@@ -69,7 +72,7 @@ class ObjectWindow(QDialog):
                 x = int(xy[0])
                 y = int(xy[1])
                 coordinatesList.append((x,y))
-            form = Form(self.name, coordinatesList)
+            form = Form(self.name.text(), coordinatesList)
             return form
 
     def check(self, plaintext):

@@ -29,11 +29,11 @@ class MainWindow(QWidget):
         addObjButton = QPushButton("Adicionar Objeto")
         addObjButton.clicked.connect(self.menu_add_objects)
 
-        objList = QListWidget()
+        self.objList = QListWidget()
 
         layoutObj.addWidget(QLabel('Objetos'))
         layoutObj.addWidget(addObjButton)
-        layoutObj.addWidget(objList)
+        layoutObj.addWidget(self.objList)
 
         layoutFunctions = QGridLayout()
 
@@ -49,6 +49,10 @@ class MainWindow(QWidget):
         layoutFunctions.addWidget(down, 2, 1, Qt.Alignment())
         layoutFunctions.addWidget(left, 1, 0, Qt.Alignment())
         layoutFunctions.addWidget(right, 1, 2, Qt.Alignment())
+        up.clicked.connect(lambda: self.viewport.move(1))
+        down.clicked.connect(lambda: self.viewport.move(2))
+        left.clicked.connect(lambda: self.viewport.move(3))
+        right.clicked.connect(lambda: self.viewport.move(4))
 
         zoomIn = QToolButton()
         zoomOut = QToolButton()
