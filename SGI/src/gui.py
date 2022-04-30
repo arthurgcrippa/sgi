@@ -2,11 +2,10 @@ from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from ObjectWindow import ObjectWindow
+from viewport import Viewport
 
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QListWidget, QLayout, QGridLayout, QToolButton
-
-import sys
 
 class MainWindow(QWidget):
     def __init__(self) -> None:
@@ -18,7 +17,8 @@ class MainWindow(QWidget):
         self.setWindowTitle("SGI 1.1: Arthur Milanez e Tiago Possenti")
         layout = QHBoxLayout()
         layout.addLayout(self.menu_setup())
-        self.objWindow = ObjectWindow()
+        layout.addLayout(self.vp_setup())
+        self.objWindow = ObjectWindow(self.viewport)
         self.setLayout(layout)
         self.show()
 
@@ -38,9 +38,9 @@ class MainWindow(QWidget):
         layoutFunctions = QGridLayout()
 
         up = QToolButton()
-        down = QToolButton() 
-        left = QToolButton() 
-        right = QToolButton() 
+        down = QToolButton()
+        left = QToolButton()
+        right = QToolButton()
         up.setText(" up  ")
         down.setText("down ")
         left.setText("left ")
@@ -52,16 +52,23 @@ class MainWindow(QWidget):
 
         zoomIn = QToolButton()
         zoomOut = QToolButton()
-        zoomIn.setText("zoom in") 
+        zoomIn.setText("zoom in")
         zoomOut.setText("zoom out")
         layoutFunctions.addWidget(zoomIn, 3, 0, Qt.Alignment())
-        layoutFunctions.addWidget(zoomOut, 3, 2, Qt.Alignment()) 
+        layoutFunctions.addWidget(zoomOut, 3, 2, Qt.Alignment())
 
         layout.addLayout(layoutObj)
         layout.addLayout(layoutFunctions)
-        return layout 
-        
-        
+        return layout
+
+    def vp_setup(self) -> QLayout:
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel('Viewport'))
+        self.viewport = Viewport(500, 500)
+        layout.addWidget(self.viewport)
+        return layout
+
+
     def menu_add_objects(self):
         self.objWindow.exec()
 
@@ -70,9 +77,5 @@ class MainWindow(QWidget):
         # addObjWindow.setWindowTitle("Adicionar Objetos")
         # layout = QHBoxLayout()
         # layout.addLayout(self.menu_setup())
-        # self.setLayout(layout)    
+        # self.setLayout(layout)
         # addObjWindow.show()
-        
-        
-
-
