@@ -60,6 +60,8 @@ class MainWindow(QWidget):
         zoomOut.setText("zoom out")
         layoutFunctions.addWidget(zoomIn, 3, 0, Qt.Alignment())
         layoutFunctions.addWidget(zoomOut, 3, 2, Qt.Alignment())
+        zoomIn.clicked.connect(lambda: self.viewport.zoom_out())
+        zoomOut.clicked.connect(lambda: self.viewport.zoom_in())
 
         layout.addLayout(layoutObj)
         layout.addLayout(layoutFunctions)

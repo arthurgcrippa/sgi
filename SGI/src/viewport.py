@@ -113,3 +113,29 @@ class Viewport(QLabel):
             self.xMin = self.xMin + diff
             self.xMax = self.xMax + diff
         self.redraw()
+
+    def zoom_out(self):
+        zoomVar = 0.05
+
+        zoomX = self.vpCoord[0] * zoomVar
+        zoomY = self.vpCoord[1] * zoomVar
+
+        self.xMax = self.xMax - zoomX  
+        self.xMin = self.xMin + zoomX
+        self.yMax = self.yMax - zoomY
+        self.yMin = self.yMin + zoomY
+
+        self.redraw()
+
+    def zoom_in(self):
+        zoomVar = -0.05
+
+        zoomX = self.vpCoord[0] * zoomVar
+        zoomY = self.vpCoord[1] * zoomVar
+
+        self.xMax = self.xMax - zoomX  
+        self.xMin = self.xMin + zoomX
+        self.yMax = self.yMax - zoomY
+        self.yMin = self.yMin + zoomY
+
+        self.redraw()
