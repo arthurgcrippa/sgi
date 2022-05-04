@@ -7,9 +7,6 @@ from form import Form
 class Viewport(QLabel):
     def __init__(self, viewPortHeight:int, viewPortWidth:int) -> None:
         super().__init__()
-
-        #self.viewPortHeight = viewPortHeight
-        #self.viewPortWidth = viewPortWidth
         self.vpCoord = (int(viewPortWidth), int(viewPortHeight))
         self.objectList: List[Form] = list()
         self.pen_width = 3
@@ -37,7 +34,6 @@ class Viewport(QLabel):
         pen.setColor(QColor('black'))
         painter.setPen(pen)
 
-        #xMin, yMin, xMax, yMax = self.tamWindow(self.vpCoord[0], self.vpCoord[1])
         xMin = self.xMin
         yMin = self.yMin
         xMax = self.xMax
@@ -74,14 +70,12 @@ class Viewport(QLabel):
             self.draw(obj)
 
     def draw_axes(self, form: Form):
-        # print("chegou aq")
         painter = QPainter(self.board)
         pen = QPen()
         pen.setWidthF(1)
         pen.setColor(QColor('black'))
         painter.setPen(pen)
 
-        #xMin, yMin, xMax, yMax = self.tamWindow(self.vpCoord[0], self.vpCoord[1])
         xMin = self.xMin
         yMin = self.yMin
         xMax = self.xMax

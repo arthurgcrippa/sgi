@@ -1,13 +1,14 @@
 from typing import List, Tuple
-from functools import cmp_to_key
-from PyQt5.QtGui import QPainter
+#from functools import cmp_to_key
+#from PyQt5.QtGui import QPainter
 
 t_coordinate = Tuple[float, float]
 
 class Form():
-    def __init__(self, name: str, coordinates: List[t_coordinate]) -> None:
+    def __init__(self, name: str, coordinates: List[t_coordinate], id: int) -> None:
         self.name = name
         self.coordinates = coordinates
+        self.id = id
 
     def add_cord(self, coordinate: t_coordinate):
         self.coordinates.append(coordinate)
