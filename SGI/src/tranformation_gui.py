@@ -7,6 +7,9 @@ from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxL
 from form import Form
 from transformation_control import Transformation_control
 from viewport import Viewport
+from typing import Tuple
+
+t_coordinate = Tuple[float, float]
 
 class Trasformation(QDialog):
     def __init__(self, viewport: Viewport, mainWindow) -> None:
@@ -40,46 +43,32 @@ class Trasformation(QDialog):
     def add_tabs(self) -> QTabWidget:
         tabs = QTabWidget()
 
-        self.tab1 = QWidget()
+        # self.tab1 = QWidget()
         self.tab2 = QWidget()
-        self.tab3 = QWidget()
+        # self.tab3 = QWidget()
 
-        tabs.addTab(self.tab1, "Translação")
+        # tabs.addTab(self.tab1, "Translação")
         tabs.addTab(self.tab2, "Rotação")   
-        tabs.addTab(self.tab3, "Escalonamento")
+        # tabs.addTab(self.tab3, "Escalonamento")
 
-        self.tab1.setLayout(self.add_translaction())
+        # self.tab1.setLayout(self.add_translaction())
         self.tab2.setLayout(self.add_rotation())
-        self.tab3.setLayout(self.add_escalonamento())
+        # self.tab3.setLayout(self.add_escalonamento())
 
         return(tabs)
 
-    def add_translaction(self) -> QFormLayout:
-        layout = QFormLayout()
+    # def add_translaction(self) -> QFormLayout:
+    #     layout = QFormLayout()
 
-        originButton = QRadioButton('Transladar sobre a origem')
-        pointButton = QRadioButton('Transladar sobre o ponto')
-        objCenterButton = QRadioButton('Transladar sobre o centro do objeto')
-        addButton = QPushButton("Adicionar")
-        degreeLine = QLineEdit()
+    #     addButton = QPushButton("Adicionar")
+    #     pointLine = QLineEdit()
 
-        # axis = self.get_axis(originButton, pointButton, objCenterButton)
-        # # degree = float(degreeLine.text())
-        # degree = self.get_degree(degreeLine.text())
-        # object = self.mainWindow.objList.currentItem()
-
-        addButton.clicked.connect(lambda: self.add_transform(1,self.get_axis(originButton, pointButton, objCenterButton),\
-                                     self.get_degree(degreeLine.text()), self.viewport.objectList[(int(self.mainWindow.objList.currentItem().text().split(": ")[1]))]))
-
-        layout.addWidget(QLabel('Opções de Translação'))
-        layout.addWidget(originButton)
-        layout.addWidget(pointButton)
-        layout.addWidget(objCenterButton)
-        layout.addWidget(QLabel('Ângulo de Translação'))
-        layout.addWidget(degreeLine)
-        layout.addWidget(addButton)
+    #     addButton.clicked.connect(lambda: self.create_translaction(1, self.coordinate_setup(pointLine.text()), self.viewport.objectList[(int(self.mainWindow.objList.currentItem().text().split(": ")[1]))]))
+    #     layout.addWidget(QLabel('Ângulo de Translação'))
+    #     layout.addWidget(pointLine)
+    #     layout.addWidget(addButton)
         
-        return(layout)
+    #     return(layout)
 
     def add_rotation(self) -> QFormLayout:
         layout = QFormLayout()
@@ -89,62 +78,55 @@ class Trasformation(QDialog):
         objCenterButton = QRadioButton('Rotacionar sobre o centro do objeto')
         addButton = QPushButton("Adicionar")
         degreeLine = QLineEdit()
+        pointLine = QLineEdit()
 
-        # axis = self.get_axis(originButton, pointButton, objCenterButton)
-        # degree = float(degreeLine.text())
-        # degree = self.get_degree(degreeLine.text())
-        # object = self.mainWindow.objList.currentItem()
-
-        addButton.clicked.connect(lambda: self.add_transform(2,self.get_axis(originButton, pointButton, objCenterButton),\
-                                     self.get_degree(degreeLine.text()), self.mainWindow.objList.currentItem()))
-
+        addButton.clicked.connect(lambda: self.create_rotation(2, self.get_axis(originButton, pointButton, objCenterButton), self.get_degree(degreeLine.text()), self.mainWindow.objList.currentItem()), pointLine.text())
         layout.addWidget(QLabel('Opções de Rotação'))
         layout.addWidget(originButton)
         layout.addWidget(pointButton)
         layout.addWidget(objCenterButton)
         layout.addWidget(QLabel('Ângulo de Rotação'))
         layout.addWidget(degreeLine)
+        layout.addWidget(QLabel('Ponto de Rotação'))
+        layout.addWidget(pointLine)
         layout.addWidget(addButton)
 
         return(layout)
         
-    def add_escalonamento(self) -> QFormLayout:
-        layout = QFormLayout()
+    # def add_escalonamento(self) -> QFormLayout:
+    #     layout = QFormLayout()
 
-        originButton = QRadioButton('Escalonar sobre a origem')
-        pointButton = QRadioButton('Escalonar sobre o ponto')
-        objCenterButton = QRadioButton('Escalonar sobre o centro do objeto')
-        addButton = QPushButton("Adicionar")
-        degreeLine = QLineEdit()
+    #     addButton = QPushButton("Adicionar")
+    #     escaleLine = QLineEdit()
 
-        # axis = self.get_axis(originButton, pointButton, objCenterButton)
-        # #degree = float(degreeLine.text())
-        # degree = self.get_degree(degreeLine.text())
-        # object = self.mainWindow.objList.currentItem()
+    #     addButton.clicked.connect(lambda: self.create_escaling(3, self.get_escale(escaleLine.text()), self.mainWindow.objList.currentItem()))
+    #     layout.addWidget(QLabel('Magnitude de Escalonamento'))
+    #     layout.addWidget(escaleLine)
+    #     layout.addWidget(addButton)
 
-        addButton.clicked.connect(lambda: self.add_transform(3,self.get_axis(originButton, pointButton, objCenterButton),\
-                                     self.get_degree(degreeLine.text()), self.mainWindow.objList.currentItem()))
-
-        layout.addWidget(QLabel('Opções de escalonamento'))
-        layout.addWidget(originButton)
-        layout.addWidget(pointButton)
-        layout.addWidget(objCenterButton)
-        layout.addWidget(QLabel('Ângulo de Escalonamento'))
-        layout.addWidget(degreeLine)
-        layout.addWidget(addButton)
-
-        return(layout)
+    #     return(layout)
 
     def confirm_button(self):
         self.transformation_control.confirm_button()
 
-    def add_transform(self, type: int, axis: int, degree: float, object: Form):
-        self.transformation_control.add_transform(type, axis, degree, object)
+    # def create_translaction(self, type: int, point_diff: t_coordinate, object: Form):
+    #     self.transformation_control.add_transform_translaction(type, point_diff, object)
+
+    def create_rotation(self, type: int, axis: int, degree: float, object: Form, point: str):
+        self.transformation_control.add_transform_rotation(type, axis, degree, object, self.coordinate_setup(point))
+
+    # def create_escaling(self, type: int, escale: int, object: Form):
+    #     self.transformation_control.add_transform_escaling(type, escale, object)
 
     def get_degree(self, text: str) -> float:
         if text != "":
             return float(text)
         return 1 #TODO
+    
+    # def get_escale(self, text: str) -> int:
+    #     if text != "":
+    #         return int(text)
+    #     return 1 #TODO
 
     def get_axis(self, originButton: QRadioButton, pointButton: QRadioButton, objCenterButton: QRadioButton) -> int:
         if originButton.isChecked():
@@ -155,6 +137,42 @@ class Trasformation(QDialog):
             return 3
         return 0
 
+    def coordinate_setup(self, coordenate: str) -> t_coordinate:
+        if coordenate != "":
+            plaintext = coordenate
+            if (self.check(plaintext)):
+                coordinates = plaintext.split(';')
+                for coordinate in coordinates:
+                    coordinate = coordinate.replace("(", "")
+                    coordinate = coordinate.replace(")", "")
+                    xy = coordinate.split(',')
+                    x = int(xy[0])
+                    y = int(xy[1])
+                return (x, y)
+            return (0,0)
+
+    def check(self, plaintext):
+        stack = []
+        prev = ''
+        for char in plaintext:
+            if len(stack) > 0:
+               prev = stack.pop()
+            if not (self.isOperator(char) or char.isnumeric()):
+                return False
+            stack.append(char)
+            if prev == '(' and ((not char.isnumeric()) and char != '-'):
+                print(2)
+                return False
+            if prev == ')' and char != ';':
+                return False
+            if prev == '-' and (char == '(' or char == ')'):
+                return False
+        return True
+
+    def isOperator(self, char):
+        if (char == '(' or char == ')' or char == ',' or char == ';' or char == '-'):
+            return True
+        return False
     
 
         

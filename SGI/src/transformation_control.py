@@ -7,6 +7,9 @@ from typing import List
 from form import Form
 from viewport import Viewport
 from transformation import Transformation
+from typing import Tuple
+
+t_coordinate = Tuple[float, float]
 # from gui import MainWindow
 
 class Transformation_control(QDialog):
@@ -24,10 +27,22 @@ class Transformation_control(QDialog):
         self.transformation_gui.transformList.clear()
 
 
-    def add_transform(self, type: int, axis: int, degree: float, object: Form):
-        transformation = Transformation(type, axis, degree, object , len(self.transList))
+    def add_transform_rotation(self, type: int, axis: int, degree: float, object: Form, point: t_coordinate):
+        transformation = Transformation(type, axis, degree, object, len(self.transList), point)
         self.transList.append(transformation)
         print(object.id)
         self.transformation_gui.transformList.addItem(str(transformation.id))
-        
+
+    # def add_transform_translaction(self, type: int, point_diff: t_coordinate, object: Form):
+    #     transformation = Transformation(type, point_diff, object , len(self.transList))
+    #     self.transList.append(transformation)
+    #     print(object.id)
+    #     self.transformation_gui.transformList.addItem(str(transformation.id))
+
+    # def add_transform_escaling(self, type: int, escale: int, object: Form):
+    #     transformation = Transformation(type, escale, object , len(self.transList))
+    #     self.transList.append(transformation)
+    #     print(object.id)
+    #     self.transformation_gui.transformList.addItem(str(transformation.id))
+
 
