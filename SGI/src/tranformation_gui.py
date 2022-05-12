@@ -43,32 +43,30 @@ class Trasformation(QDialog):
     def add_tabs(self) -> QTabWidget:
         tabs = QTabWidget()
 
-        # self.tab1 = QWidget()
+        self.tab1 = QWidget()
         self.tab2 = QWidget()
-        # self.tab3 = QWidget()
+        self.tab3 = QWidget()
 
-        # tabs.addTab(self.tab1, "Translação")
+        tabs.addTab(self.tab1, "Translação")
         tabs.addTab(self.tab2, "Rotação")   
-        # tabs.addTab(self.tab3, "Escalonamento")
+        tabs.addTab(self.tab3, "Escalonamento")
 
-        # self.tab1.setLayout(self.add_translaction())
+        self.tab1.setLayout(self.add_translaction())
         self.tab2.setLayout(self.add_rotation())
-        # self.tab3.setLayout(self.add_escalonamento())
+        self.tab3.setLayout(self.add_escalonamento())
 
         return(tabs)
 
-    # def add_translaction(self) -> QFormLayout:
-    #     layout = QFormLayout()
-
-    #     addButton = QPushButton("Adicionar")
-    #     pointLine = QLineEdit()
-
-    #     addButton.clicked.connect(lambda: self.create_translaction(1, self.coordinate_setup(pointLine.text()), self.viewport.objectList[(int(self.mainWindow.objList.currentItem().text().split(": ")[1]))]))
-    #     layout.addWidget(QLabel('Ângulo de Translação'))
-    #     layout.addWidget(pointLine)
-    #     layout.addWidget(addButton)
+    def add_translaction(self) -> QFormLayout:
+        layout = QFormLayout()
+        addButton = QPushButton("Adicionar")
+        diffLine = QLineEdit()
+        addButton.clicked.connect(lambda: self.create_translaction(1, self.get_coordinate(diffLine.text()), self.get_object()))
+        layout.addWidget(QLabel('Ponto de Translação'))
+        layout.addWidget(diffLine)
+        layout.addWidget(addButton)
         
-    #     return(layout)
+        return(layout)
 
     def add_rotation(self) -> QFormLayout:
         layout = QFormLayout()
@@ -76,11 +74,13 @@ class Trasformation(QDialog):
         originButton = QRadioButton('Rotacionar sobre a origem')
         pointButton = QRadioButton('Rotacionar sobre o ponto')
         objCenterButton = QRadioButton('Rotacionar sobre o centro do objeto')
+        self.originButton = originButton
+        self.pointButton = pointButton
+        self.objCenterButton = objCenterButton
         addButton = QPushButton("Adicionar")
-        degreeLine = QLineEdit()
-        pointLine = QLineEdit()
-
-        addButton.clicked.connect(lambda: self.create_rotation(2, self.get_axis(originButton, pointButton, objCenterButton), self.get_degree(degreeLine.text()), self.mainWindow.objList.currentItem()), pointLine.text())
+        degreeLine = QLineEdit("")
+        pointLine = QLineEdit("")
+        addButton.clicked.connect(lambda: self.create_rotation(2,self.get_degree(degreeLine.text()), self.get_rotation_point(pointLine.text(), self.get_object()), self.get_object()))
         layout.addWidget(QLabel('Opções de Rotação'))
         layout.addWidget(originButton)
         layout.addWidget(pointButton)
@@ -93,86 +93,76 @@ class Trasformation(QDialog):
 
         return(layout)
         
-    # def add_escalonamento(self) -> QFormLayout:
-    #     layout = QFormLayout()
+    def add_escalonamento(self) -> QFormLayout:
+        layout = QFormLayout()
 
-    #     addButton = QPushButton("Adicionar")
-    #     escaleLine = QLineEdit()
+        addButton = QPushButton("Adicionar")
+        scaleLine = QLineEdit()
+        addButton.clicked.connect(lambda: self.create_scaling(3, self.get_scale(scaleLine.text()), self.get_object()))
+        layout.addWidget(QLabel('Magnitude de Escalonamento'))
+        layout.addWidget(scaleLine)
+        layout.addWidget(addButton)
 
-    #     addButton.clicked.connect(lambda: self.create_escaling(3, self.get_escale(escaleLine.text()), self.mainWindow.objList.currentItem()))
-    #     layout.addWidget(QLabel('Magnitude de Escalonamento'))
-    #     layout.addWidget(escaleLine)
-    #     layout.addWidget(addButton)
-
-    #     return(layout)
+        return(layout)
 
     def confirm_button(self):
         self.transformation_control.confirm_button()
 
-    # def create_translaction(self, type: int, point_diff: t_coordinate, object: Form):
-    #     self.transformation_control.add_transform_translaction(type, point_diff, object)
+    def create_translaction(self, type: int, point: t_coordinate, object: Form):
+        self.transformation_control.add_translaction(type, point, object)
 
-    def create_rotation(self, type: int, axis: int, degree: float, object: Form, point: str):
-        self.transformation_control.add_transform_rotation(type, axis, degree, object, self.coordinate_setup(point))
+    def create_rotation(self, type: int, degree: float, point: t_coordinate, object: Form):
+        self.transformation_control.add_rotation(type, degree, point, object)
 
-    # def create_escaling(self, type: int, escale: int, object: Form):
-    #     self.transformation_control.add_transform_escaling(type, escale, object)
+    def create_scaling(self, type: int, scale: int, object: Form):
+        self.transformation_control.add_scaling(type, scale, object)
 
-    def get_degree(self, text: str) -> float:
-        if text != "":
-            return float(text)
-        return 1 #TODO
-    
-    # def get_escale(self, text: str) -> int:
-    #     if text != "":
-    #         return int(text)
-    #     return 1 #TODO
+    def get_object(self) -> Form:
+        return self.viewport.objectList[(int(self.mainWindow.objList.currentItem().text().split(": ")[1]))]
 
-    def get_axis(self, originButton: QRadioButton, pointButton: QRadioButton, objCenterButton: QRadioButton) -> int:
-        if originButton.isChecked():
+    def get_axis(self) -> int:
+        if self.originButton.isChecked():
             return 1
-        elif pointButton.isChecked():
+        elif self.pointButton.isChecked():
             return 2
-        elif objCenterButton.isChecked():
+        elif self.objCenterButton.isChecked():
             return 3
         return 0
 
-    def coordinate_setup(self, coordenate: str) -> t_coordinate:
-        if coordenate != "":
-            plaintext = coordenate
-            if (self.check(plaintext)):
-                coordinates = plaintext.split(';')
-                for coordinate in coordinates:
-                    coordinate = coordinate.replace("(", "")
-                    coordinate = coordinate.replace(")", "")
-                    xy = coordinate.split(',')
-                    x = int(xy[0])
-                    y = int(xy[1])
-                return (x, y)
+    def get_coordinate(self, plaintext: str) -> t_coordinate:
+        if plaintext == "":
             return (0,0)
+        plaintext = plaintext.replace("(", "")
+        plaintext = plaintext.replace(")", "")
+        coordinate = plaintext.split(",")
+        return (float(coordinate[0]), float(coordinate[1]))
 
-    def check(self, plaintext):
-        stack = []
-        prev = ''
-        for char in plaintext:
-            if len(stack) > 0:
-               prev = stack.pop()
-            if not (self.isOperator(char) or char.isnumeric()):
-                return False
-            stack.append(char)
-            if prev == '(' and ((not char.isnumeric()) and char != '-'):
-                print(2)
-                return False
-            if prev == ')' and char != ';':
-                return False
-            if prev == '-' and (char == '(' or char == ')'):
-                return False
-        return True
+    def get_rotation_point(self, plaintext: str, object: Form) -> t_coordinate:
+        axis = self.get_axis()
+        if plaintext == "" and axis == 1:
+            return (0,0)
+        if plaintext == "" and axis == 2:
+            return (0,0) #TODO
+        if plaintext == "" and axis == 3:
+            return object.get_center()
+        return self.get_coordinate(plaintext)
 
-    def isOperator(self, char):
-        if (char == '(' or char == ')' or char == ',' or char == ';' or char == '-'):
-            return True
-        return False
+    def get_scale(self, plaintext: str) -> t_coordinate:
+        if plaintext == "":
+            return (1,1)
+        plaintext = plaintext.replace("(", "")
+        plaintext = plaintext.replace(")", "")
+        coordinate = plaintext.split(",")
+        return (float(coordinate[0]), float(coordinate[1]))
+
+    def get_degree(self, text: str) -> float:
+        if text != "":
+            try:
+                return float(text)
+            except ValueError:
+                return 0
+        return 0
+
     
 
         

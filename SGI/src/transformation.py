@@ -1,48 +1,99 @@
 from form import Form
 from viewport import Viewport
-from typing import Tuple
+from typing import Tuple, List
+import numpy as np
+import math
 
 t_coordinate = Tuple[float, float]
 
 class Transformation():
-    # ROTAÇÃO
-    def __init__(self, type: int, axis: int, degree: float, object: Form, id: int, point: t_coordinate) -> None:
+
+    def __init__(self, type: int, degree: float, point: t_coordinate, object: Form, id: int) -> None:
         self.type = type
-        self.axis = axis
         self.degree = degree
-        self.object = object
-        self.id = id
         self.point = point
-
-    # TRANSLAÇÃO
-    def __init__(self, type: int, point_diff: t_coordinate, object: Form, id: int) -> None:
-        self.type = type
-        self.point_diff = point_diff
         self.object = object
         self.id = id
+        self.create_matrix()
 
-    # ESCALONAMENTO
-    def __init__(self, type: int, escale: int, object: Form, id: int) -> None:
-        self.type = type
-        self.object = object
-        self.id = id
-        self.escale = escale
-
-    def transform(self):
+    def create_matrix(self):
         if self.type == 1:
             self.translation()
         elif self.type == 2:
             self.rotation()
         elif self.type == 3:
-            self.escalonamento()
-        
+            self.scaling()
 
     def translation(self):
-        return 0
+        x, y = self.point[0], self.point[1]
+        self.matrix = [[1,0,0],
+                       [0,1,0],
+                       [x,y,1]]
 
     def rotation(self):
-        return 0
+        tetha = math.radians(self.degree)
+        sin, cos = np.sin(tetha), np.cos(tetha)
+        x, y = self.point[0], self.point[1]
+        matrix_rotation = [[cos,-1*sin, 0],
+                           [sin,   cos, 0],
+                           [ 0,     0,  1]]
 
-    def escalonamento(self):
-        return 0
+        matrix_translation = [[   1,    0, 0],
+                              [   0,    1, 0],
+                              [-1*x, -1*y, 1]]
+
+        matrix_reverse_translation = [[1,0,0],
+                                      [0,1,0],
+                                      [x,y,1]]
+
+        self.matrix = np.dot(np.dot(matrix_translation, matrix_rotation), matrix_reverse_translation)
+
+    def scaling(self):
+        dx, dy = self.point[0], self.point[1]
+        x, y = self.object.get_center()
+
+        matrix_scaling = [[dy,0,0],
+                          [0,dy,0],
+                          [0,0,1]]
+
+        matrix_translation = [[   1,    0, 0],
+                              [   0,    1, 0],
+                              [-1*x, -1*y, 1]]
+
+        matrix_reverse_translation = [[1,0,0],
+                                      [0,1,0],
+                                      [x,y,1]]
+
+        self.matrix = np.dot(np.dot(matrix_translation, matrix_scaling), matrix_reverse_translation)
+
+    def apply(self):
+        self.object.setMatrix(np.dot(self.object.matrix, self.matrix))
+        self.object.reform()
+
+
+    # def translation(self):
+    #     coordinates: List[t_coordinate] = list()
+    #     for point in self.object.coordinates:
+    #         x = point[0] + self.point[0]
+    #         y = point[1] + self.point[1]
+    #         coordinates.append((x,y))
+    #     self.object.setCoordinates(coordinates)
+
+
+    # def rotation(self):
+    #     coordinates: List[t_coordinate] = list()
+    #     tetha = math.radians(self.degree)
+    #     for point in self.object.coordinates:
+    #         x = point[0]*np.cos(tetha) - point[1]*np.sin(tetha)
+    #         y = point[0]*np.sin(tetha) + point[1]*np.cos(tetha)
+    #         coordinates.append((x,y))
+    #     self.object.setCoordinates(coordinates)
+
+    # def escalonamento(self):
+    #     coordinates: List[t_coordinate] = list()
+    #     for point in self.object.coordinates:
+    #         x = point[0]*self.point[0]
+    #         y = point[1]*self.point[1]
+    #         coordinates.append((x,y))
+    #     self.object.setCoordinates(coordinates)
 

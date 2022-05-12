@@ -9,15 +9,48 @@ class Form():
         self.name = name
         self.coordinates = coordinates
         self.id = id
+        self.matrix = self.getMatrix()
+        #self.getMatrix()
 
     def add_cord(self, coordinate: t_coordinate):
         self.coordinates.append(coordinate)
+        self.matrix = self.getMatrix()
 
     def len(self)->int:
         return len(self.coordinates)
+
+    def get_center(self) -> t_coordinate:
+        x, y = (0,0)
+        for coordinate in self.coordinates:
+            x = x + coordinate[0]
+            y = y + coordinate[1]
+        x = x/self.len()
+        y = y/self.len()
+        return (x,y)
 
     # transformada de viewport
     def vp_trans(self, wCoord: t_coordinate, wMin: t_coordinate, wMax: t_coordinate, vpCoordinate: t_coordinate) -> t_coordinate:
         vp_x = ((wCoord[0] - wMin[0])/(wMax[0]-wMin[0]))*vpCoordinate[0]
         vp_y = (1-((wCoord[1]-wMin[1])/(wMax[1]-wMin[1])))*vpCoordinate[1]
-        return (vp_x, vp_y)
+        return (int(vp_x), int(vp_y))
+
+    def setCoordinates(self, coordinates: List[t_coordinate]):
+        self.coordinates = coordinates
+
+    def getMatrix(self) -> []:
+        matrix = []
+        for coordinate in self.coordinates:
+            x, y = coordinate[0], coordinate[1]
+            matrix.append([x,y,1])
+        return matrix
+
+    def setMatrix(self, matrix: []):
+        self.matrix = matrix
+
+    def reform(self):
+        self.coordinates.clear()
+        for line in self.matrix:
+            x, y = line[0], line[1]
+            self.coordinates.append([x,y])
+
+
