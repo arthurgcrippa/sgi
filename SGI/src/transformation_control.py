@@ -30,7 +30,7 @@ class Transformation_control(QDialog):
         transformation = Transformation(type, None, point, object, len(self.transList))
         self.transList.append(transformation)
         # print(object.id)
-        self.transformation_gui.transformList.addItem(str(transformation.id))
+        self.transformation_gui.transformList.addItem("Translada Objeto: " + str(object.id))
 
     # def add_rotation(self, type: int, axis: int, degree: float, point: t_coordinate, object: Form):
     #     x,y = (0,0)
@@ -56,12 +56,12 @@ class Transformation_control(QDialog):
         transformation = Transformation(type, degree, point, object, len(self.transList))
         self.transList.append(transformation)
         # print(object.id)
-        self.transformation_gui.transformList.addItem(str(transformation.id))
+        self.transformation_gui.transformList.addItem("Rotaciona Objeto: " + str(object.id) + " em "+ str(degree) +" graus")
 
     def add_scaling(self, type: int, point: t_coordinate, object: Form):
         transformation = Transformation(type, None, point, object, len(self.transList))
         self.transList.append(transformation)
         # print(object.id)
-        self.transformation_gui.transformList.addItem(str(transformation.id))       
+        self.transformation_gui.transformList.addItem("Altera Magnitude do Objeto: "+str(object.id))       
 
 

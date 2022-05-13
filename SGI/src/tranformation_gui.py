@@ -60,7 +60,7 @@ class Trasformation(QDialog):
     def add_translaction(self) -> QFormLayout:
         layout = QFormLayout()
         addButton = QPushButton("Adicionar")
-        diffLine = QLineEdit()
+        diffLine = QLineEdit("(10,10)")
         addButton.clicked.connect(lambda: self.create_translaction(1, self.get_coordinate(diffLine.text()), self.get_object()))
         layout.addWidget(QLabel('Ponto de Translação'))
         layout.addWidget(diffLine)
@@ -78,7 +78,7 @@ class Trasformation(QDialog):
         self.pointButton = pointButton
         self.objCenterButton = objCenterButton
         addButton = QPushButton("Adicionar")
-        degreeLine = QLineEdit("")
+        degreeLine = QLineEdit("30")
         pointLine = QLineEdit("")
         addButton.clicked.connect(lambda: self.create_rotation(2,self.get_degree(degreeLine.text()), self.get_rotation_point(pointLine.text(), self.get_object()), self.get_object()))
         layout.addWidget(QLabel('Opções de Rotação'))
@@ -97,7 +97,7 @@ class Trasformation(QDialog):
         layout = QFormLayout()
 
         addButton = QPushButton("Adicionar")
-        scaleLine = QLineEdit()
+        scaleLine = QLineEdit("(2,2)")
         addButton.clicked.connect(lambda: self.create_scaling(3, self.get_scale(scaleLine.text()), self.get_object()))
         layout.addWidget(QLabel('Magnitude de Escalonamento'))
         layout.addWidget(scaleLine)
