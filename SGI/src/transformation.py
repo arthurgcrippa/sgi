@@ -69,31 +69,3 @@ class Transformation():
     def apply(self):
         self.object.setMatrix(np.dot(self.object.matrix, self.matrix))
         self.object.reform()
-
-
-    # def translation(self):
-    #     coordinates: List[t_coordinate] = list()
-    #     for point in self.object.coordinates:
-    #         x = point[0] + self.point[0]
-    #         y = point[1] + self.point[1]
-    #         coordinates.append((x,y))
-    #     self.object.setCoordinates(coordinates)
-
-
-    # def rotation(self):
-    #     coordinates: List[t_coordinate] = list()
-    #     tetha = math.radians(self.degree)
-    #     for point in self.object.coordinates:
-    #         x = point[0]*np.cos(tetha) - point[1]*np.sin(tetha)
-    #         y = point[0]*np.sin(tetha) + point[1]*np.cos(tetha)
-    #         coordinates.append((x,y))
-    #     self.object.setCoordinates(coordinates)
-
-    # def escalonamento(self):
-    #     coordinates: List[t_coordinate] = list()
-    #     for point in self.object.coordinates:
-    #         x = point[0]*self.point[0]
-    #         y = point[1]*self.point[1]
-    #         coordinates.append((x,y))
-    #     self.object.setCoordinates(coordinates)
-

@@ -21,15 +21,13 @@ class ObjectWindow(QDialog):
         self.resize(300,300)
         self.setWindowTitle("Adicionar Objetos")
         layout = QVBoxLayout()
-        layout.addLayout(self.add_tabs())
+        layout.addWidget(self.add_tabs())
         self.setLayout(layout)
 
-    def add_tabs(self) -> QVBoxLayout:
-        layout = QVBoxLayout()
-        self.setLayout(layout)
+    def add_tabs(self) -> QTabWidget:
         tabs = QTabWidget()
         tabs.addTab(self.object_tab(), "Objeto")
-        layout.addWidget(tabs)
+        return tabs
 
     def object_tab(self) -> QWidget:
         generalTab = QWidget()
