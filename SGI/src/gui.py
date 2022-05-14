@@ -1,8 +1,9 @@
 from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
-from objectWindow import ObjectWindow
+from object_gui import ObjectWindow
 from viewport import Viewport
+from tranformation_gui import Trasformation
 
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QListWidget, QLayout, QGridLayout, QToolButton
@@ -19,6 +20,7 @@ class MainWindow(QWidget):
         layout.addLayout(self.menu_setup())
         layout.addLayout(self.vp_setup())
         self.objWindow = ObjectWindow(self.viewport, self)
+        self.transformation = Trasformation(self.viewport, self)
         self.setLayout(layout)
         self.show()
 
@@ -29,10 +31,14 @@ class MainWindow(QWidget):
         addObjButton = QPushButton("Adicionar Objeto")
         addObjButton.clicked.connect(self.menu_add_objects)
 
+        transformObjButton = QPushButton("Transformar Objeto")
+        transformObjButton.clicked.connect(self.menu_tranformations)
+
         self.objList = QListWidget()
 
         layoutObj.addWidget(QLabel('Objetos'))
         layoutObj.addWidget(addObjButton)
+        layoutObj.addWidget(transformObjButton)
         layoutObj.addWidget(self.objList)
 
         layoutFunctions = QGridLayout()
@@ -74,14 +80,9 @@ class MainWindow(QWidget):
         layout.addWidget(self.viewport)
         return layout
 
-
     def menu_add_objects(self):
         self.objWindow.exec()
 
-        # addObjWindow = QApplication([])
-        # addObjWindow.resize(100, 100)
-        # addObjWindow.setWindowTitle("Adicionar Objetos")
-        # layout = QHBoxLayout()
-        # layout.addLayout(self.menu_setup())
-        # self.setLayout(layout)
-        # addObjWindow.show()
+    def menu_tranformations(self):
+        self.transformation.exec()
+
