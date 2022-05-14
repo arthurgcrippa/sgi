@@ -3,7 +3,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from gui.object_gui import ObjectWindow
 from model.viewport import Viewport
-from gui.tranformation_gui import Trasformation
+from gui.transformation_gui import Trasformation
 
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QListWidget, QLayout, QGridLayout, QToolButton, QMessageBox

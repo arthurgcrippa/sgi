@@ -3,22 +3,24 @@ from PyQt5.QtGui import QPainter, QPixmap, QPen, QColor
 
 from typing import List
 from model.form import Form
+from model.window import Window
 
 class Viewport(QLabel):
     def __init__(self, viewPortHeight:int, viewPortWidth:int) -> None:
         super().__init__()
         self.vpCoord = (int(viewPortWidth), int(viewPortHeight))
         self.objectList: List[Form] = list()
-        self.pen_width = 3
-        self.tamWindow(viewPortHeight, viewPortWidth)
+        # self.pen_width = 5
+        self.window = Window(viewPortHeight, viewPortWidth)
+        # self.tamWindow(viewPortHeight, viewPortWidth)
         self.vp_init()
         self.draw_axes(Form)
 
-    def tamWindow(self, viewPortHeight: int, viewPortWidth: int):
-        self.xMin = - float(viewPortWidth/2)
-        self.yMin = - float(viewPortHeight/2)
-        self.xMax = float(viewPortWidth/2)
-        self.yMax = float(viewPortHeight/2)
+    # def tamWindow(self, viewPortHeight: int, viewPortWidth: int):
+    #     self.window.xMin = self.window.xMin 
+    #     self.window.yMin = self.window.yMin
+    #     self.window.xMax = self.window.xMax
+    #     self.window.yMax = self.window.yMax
 
     def vp_init(self):
         board = QPixmap(self.vpCoord[0], self.vpCoord[1])
@@ -30,14 +32,14 @@ class Viewport(QLabel):
     def draw(self, form: Form):
         painter = QPainter(self.board)
         pen = QPen()
-        pen.setWidthF(2)
+        pen.setWidthF(4)
         pen.setColor(QColor('black'))
         painter.setPen(pen)
 
-        xMin = self.xMin
-        yMin = self.yMin
-        xMax = self.xMax
-        yMax = self.yMax
+        xMin = self.window.xMin
+        yMin = self.window.yMin
+        xMax = self.window.xMax
+        yMax = self.window.yMax
 
         if (form.len() == 1):
             (x,y) = form.vp_trans(form.coordinates[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
@@ -76,10 +78,10 @@ class Viewport(QLabel):
         pen.setColor(QColor('black'))
         painter.setPen(pen)
 
-        xMin = self.xMin
-        yMin = self.yMin
-        xMax = self.xMax
-        yMax = self.yMax
+        xMin = self.window.xMin
+        yMin = self.window.yMin
+        xMax = self.window.xMax
+        yMax = self.window.yMax
 
         (p1_x, p1_y) = form.vp_trans(self, (0, 10000), (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         (p2_x, p2_y) = form.vp_trans(self, (0, -10000), (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
@@ -95,17 +97,17 @@ class Viewport(QLabel):
     def move(self, index: int):
         diff = 50
         if index == 1:
-            self.yMin = self.yMin + diff
-            self.yMax = self.yMax + diff
+            self.window.yMin = self.window.yMin + diff
+            self.window.yMax = self.window.yMax + diff
         elif index == 2:
-            self.yMin = self.yMin - diff
-            self.yMax = self.yMax - diff
+            self.window.yMin = self.window.yMin - diff
+            self.window.yMax = self.window.yMax - diff
         elif index == 3:
-            self.xMin = self.xMin - diff
-            self.xMax = self.xMax - diff
+            self.window.xMin = self.window.xMin - diff
+            self.window.xMax = self.window.xMax - diff
         elif index == 4:
-            self.xMin = self.xMin + diff
-            self.xMax = self.xMax + diff
+            self.window.xMin = self.window.xMin + diff
+            self.window.xMax = self.window.xMax + diff
         self.redraw()
 
     def zoom_out(self):
@@ -114,10 +116,10 @@ class Viewport(QLabel):
         zoomX = self.vpCoord[0] * zoomVar
         zoomY = self.vpCoord[1] * zoomVar
 
-        self.xMax = self.xMax - zoomX  
-        self.xMin = self.xMin + zoomX
-        self.yMax = self.yMax - zoomY
-        self.yMin = self.yMin + zoomY
+        self.window.xMax = self.window.xMax - zoomX  
+        self.window.xMin = self.window.xMin + zoomX
+        self.window.yMax = self.window.yMax - zoomY
+        self.window.yMin = self.window.yMin + zoomY
 
         self.redraw()
 
@@ -127,9 +129,9 @@ class Viewport(QLabel):
         zoomX = self.vpCoord[0] * zoomVar
         zoomY = self.vpCoord[1] * zoomVar
 
-        self.xMax = self.xMax - zoomX  
-        self.xMin = self.xMin + zoomX
-        self.yMax = self.yMax - zoomY
-        self.yMin = self.yMin + zoomY
+        self.window.xMax = self.window.xMax - zoomX  
+        self.window.xMin = self.window.xMin + zoomX
+        self.window.yMax = self.window.yMax - zoomY
+        self.window.yMin = self.window.yMin + zoomY
 
         self.redraw()
