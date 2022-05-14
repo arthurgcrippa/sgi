@@ -6,7 +6,7 @@ from viewport import Viewport
 from tranformation_gui import Trasformation
 
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
-    QListWidget, QLayout, QGridLayout, QToolButton
+    QListWidget, QLayout, QGridLayout, QToolButton, QMessageBox
 
 class MainWindow(QWidget):
     def __init__(self) -> None:
@@ -69,6 +69,16 @@ class MainWindow(QWidget):
         zoomIn.clicked.connect(lambda: self.viewport.zoom_out())
         zoomOut.clicked.connect(lambda: self.viewport.zoom_in())
 
+        right_rotation = QToolButton()
+        left_rotation = QToolButton()
+        right_rotation.setText("right rotation")
+        left_rotation.setText("left rotation")
+        layoutFunctions.addWidget(right_rotation, 0, 2, Qt.Alignment())
+        layoutFunctions.addWidget(left_rotation, 0, 0, Qt.Alignment())
+        right_rotation.clicked.connect(lambda: self.viewport.zoom_out())
+        left_rotation.clicked.connect(lambda: self.viewport.zoom_in())
+
+
         layout.addLayout(layoutObj)
         layout.addLayout(layoutFunctions)
         return layout
@@ -83,6 +93,15 @@ class MainWindow(QWidget):
     def menu_add_objects(self):
         self.objWindow.exec()
 
-    def menu_tranformations(self):
-        self.transformation.exec()
+    def show_error_message(self, error: str):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setText(error)
+        msg.setWindowTitle("Error")
+        msg.exec_()
 
+    def menu_tranformations(self):
+        if(self.objList.currentItem() == None):
+            self.show_error_message("Você nao selecionou nenhum objeto da lista")
+        else:
+            self.transformation.exec()
