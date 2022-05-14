@@ -6,7 +6,7 @@ from model.viewport import Viewport
 from gui.transformation_gui import Trasformation
 
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
-    QListWidget, QLayout, QGridLayout, QToolButton, QMessageBox
+    QListWidget, QLayout, QGridLayout, QToolButton, QMessageBox, QSpinBox
 
 class MainWindow(QWidget):
     def __init__(self) -> None:
@@ -71,13 +71,17 @@ class MainWindow(QWidget):
 
         right_rotation = QToolButton()
         left_rotation = QToolButton()
+        self.teste = QSpinBox()
+        self.teste.setRange(10, 180)
+        self.teste.setSingleStep(10)
         right_rotation.setText("right rotation")
         left_rotation.setText("left rotation")
-        layoutFunctions.addWidget(right_rotation, 0, 2, Qt.Alignment())
-        layoutFunctions.addWidget(left_rotation, 0, 0, Qt.Alignment())
-        right_rotation.clicked.connect(lambda: self.viewport.zoom_out())
-        left_rotation.clicked.connect(lambda: self.viewport.zoom_in())
+        layoutFunctions.addWidget(self.teste, 4, 1, Qt.Alignment())
 
+        layoutFunctions.addWidget(right_rotation, 4, 2, Qt.Alignment())
+        layoutFunctions.addWidget(left_rotation, 4, 0, Qt.Alignment())
+        right_rotation.clicked.connect(lambda: self.transformation.rotate_window(self.teste.value(), 1))
+        left_rotation.clicked.connect(lambda: self.transformation.rotate_window(self.teste.value(), 0))
 
         layout.addLayout(layoutObj)
         layout.addLayout(layoutFunctions)

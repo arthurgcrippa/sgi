@@ -69,6 +69,8 @@ class Viewport(QLabel):
         self.vp_init()
         self.draw_axes(Form)
         for obj in self.objectList:
+            # if self.window.theta != 0:
+            #     self.update_normal_coord(obj) // redraw deveria estar em uma classe de controle
             self.draw(obj)
 
     def draw_axes(self, form: Form):
@@ -109,6 +111,8 @@ class Viewport(QLabel):
             self.window.xMin = self.window.xMin + diff
             self.window.xMax = self.window.xMax + diff
         self.redraw()
+
+   
 
     def zoom_out(self):
         zoomVar = 0.05

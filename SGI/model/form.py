@@ -8,10 +8,17 @@ class Form():
     def __init__(self, name: str, coordinates: List[t_coordinate], id: int) -> None:
         self.name = name
         self.coordinates = coordinates
+        self.normalized_coord_list = list()
         self.id = id
         self.matrix = self.getMatrix()
-        #self.getMatrix()
+        # self.getMatrix()
 
+    # def update_normalized_coordinates(self, norm_coord):
+    #     normalized = list()
+    #         for coord in norm_coord:
+    #             normalized.append((coord[0], coord[1]))
+    #     self.normalized_coord_list = normalized
+    
     def add_cord(self, coordinate: t_coordinate):
         self.coordinates.append(coordinate)
         self.matrix = self.getMatrix()

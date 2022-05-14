@@ -1,3 +1,4 @@
+from gettext import translation
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
@@ -29,7 +30,6 @@ class Transformation_control(QDialog):
     def add_translaction(self, type: int, point: t_coordinate, object: Form):
         transformation = Transformation(type, None, point, object, len(self.transList))
         self.transList.append(transformation)
-        # print(object.id)
         self.transformation_gui.transformList.addItem("Translada Objeto: " + str(object.id))
 
     # def add_rotation(self, type: int, axis: int, degree: float, point: t_coordinate, object: Form):
@@ -65,3 +65,26 @@ class Transformation_control(QDialog):
         self.transformation_gui.transformList.addItem("Altera Magnitude do Objeto: "+str(object.id))       
 
 
+    def rotate_window(self, degrees: int, orientation: int):
+        if not(orientation):
+            degrees = degrees * -1
+        self.window.theta += degrees
+        self.viewport.redraw()
+
+    def update_normal_coord(self, form: Form) -> None:
+        degree = self.window.theta
+
+        x_cw = (self.window.xMax - self.window.xMin) / 2
+        y_cw = (self.window.yMax - self.window.yMin) / 2
+
+        window_center = [x_cw, y_cw]
+
+        window_translaction = Transformation(1, degree, window_center, None, None)
+
+        # op_mtx = self.__translation_mtx(-self.window.center[0], -self.window.center[-1])
+        # op_mtx = op_mtx @ self.__rotation_mtx(-degrees)
+        # op_mtx = op_mtx @ self.__scale_mtx(1/w_dx, 1/w_dy)
+
+        # res_mtx = obj.homogenous_coordinates() @ op_mtx
+
+        # obj.update_normal_coord(res_mtx)
