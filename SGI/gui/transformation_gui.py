@@ -14,7 +14,7 @@ t_coordinate = Tuple[float, float]
 class Trasformation(QDialog):
     def __init__(self, viewport: Viewport, mainWindow) -> None:
         super().__init__()
-        self.transformation_control = Transformation_control(viewport, self)     
+        self.transformation_control = Transformation_control(viewport, self)
         self.viewport = viewport
         self.mainWindow = mainWindow
         self.add_transform_window()
@@ -23,7 +23,7 @@ class Trasformation(QDialog):
         self.resize(400,400)
         self.setWindowTitle("Transformações")
         layout = QVBoxLayout()
-        
+
         self.confirmButton = QPushButton('Confirm', self)
         cancelButton = QPushButton('Cancel')
         self.confirmButton.clicked.connect(self.confirm_button)
@@ -48,7 +48,7 @@ class Trasformation(QDialog):
         self.tab3 = QWidget()
 
         tabs.addTab(self.tab1, "Translação")
-        tabs.addTab(self.tab2, "Rotação")   
+        tabs.addTab(self.tab2, "Rotação")
         tabs.addTab(self.tab3, "Escalonamento")
 
         self.tab1.setLayout(self.add_translaction())
@@ -65,7 +65,7 @@ class Trasformation(QDialog):
         layout.addWidget(QLabel('Ponto de Translação'))
         layout.addWidget(diffLine)
         layout.addWidget(addButton)
-        
+
         return(layout)
 
     def add_rotation(self) -> QFormLayout:
@@ -92,7 +92,7 @@ class Trasformation(QDialog):
         layout.addWidget(addButton)
 
         return(layout)
-        
+
     def add_escalonamento(self) -> QFormLayout:
         layout = QFormLayout()
 
@@ -144,7 +144,7 @@ class Trasformation(QDialog):
         if plaintext == "" and axis == 2:
             return (0,0) #TODO
         if plaintext == "" and axis == 3:
-            return object.get_center()
+            return object.get_center(True)
         return self.get_coordinate(plaintext)
 
     def get_scale(self, plaintext: str) -> t_coordinate:
@@ -162,8 +162,3 @@ class Trasformation(QDialog):
             except ValueError:
                 return 0
         return 0
-
-    
-
-        
-

@@ -9,9 +9,9 @@ class Form():
         self.name = name
         self.coordinates = coordinates
         self.id = id
-        self.matrix = self.getMatrix()
-        self.normalized_coord_list = coordinates
-        self.norm_matrix = self.get_norm_matrix()
+        self.matrix = self.getMatrix(False)
+        self.normalized = self.coordinates.copy()
+        self.norm_matrix = self.getMatrix(False)
         # self.getMatrix()
 
     def add_cord(self, coordinate: t_coordinate):
@@ -21,9 +21,12 @@ class Form():
     def len(self)->int:
         return len(self.coordinates)
 
-    def get_center(self) -> t_coordinate:
+    def get_center(self, norm: bool) -> t_coordinate:
+        coordinates = self.coordinates
+        if norm:
+            coordinates = self.normalized
         x, y = (0,0)
-        for coordinate in self.coordinates:
+        for coordinate in coordinates:
             x = x + coordinate[0]
             y = y + coordinate[1]
         x = x/self.len()
@@ -36,38 +39,40 @@ class Form():
         vp_y = (1-((wCoord[1]-wMin[1])/(wMax[1]-wMin[1])))*vpCoordinate[1]
         return (int(vp_x), int(vp_y))
 
-    def setCoordinates(self, coordinates: List[t_coordinate]):
-        self.coordinates = coordinates
+    def setCoordinates(self, coordinates: List[t_coordinate], norm: bool):
+        if norm:
+            self.normalized = coordinates
+        else:
+            self.coordinates = coordinates
 
-    def getMatrix(self) -> []:
+    def getMatrix(self, norm: bool) -> []:
+        coordinates = self.coordinates
+        if (norm):
+            coordinates = self.normalized
         matrix = []
-        for coordinate in self.coordinates:
+        for coordinate in coordinates:
             x, y = coordinate[0], coordinate[1]
             matrix.append([x,y,1])
         return matrix
 
-    def setMatrix(self, matrix: []):
-        self.matrix = matrix
+    def setMatrix(self, matrix: [], norm: bool):
+        if norm:
+            self.norm_matrix = matrix
+        else:
+            self.matrix = matrix
 
-    def reform(self):
-        self.coordinates.clear()
-        for line in self.matrix:
+    def reform(self, norm: bool):
+        matrix = self.matrix
+        coordinates = list()
+        if norm:
+            self.normalized.clear()
+            matrix = self.norm_matrix
+        else:
+            self.coordinates.clear()
+        for line in matrix:
             x, y = line[0], line[1]
-            self.coordinates.append([x,y])
-
-    def get_norm_matrix(self) -> []:
-        matrix = []
-        for coordinate in self.normalized_coord_list:
-            x, y = coordinate[0], coordinate[1]
-            matrix.append([x,y,1])
-        return matrix
-
-    def set_norm_matrix(self, matrix: []):
-        self.norm_matrix = matrix
-
-    def reform_normalized(self):
-        self.normalized_coord_list.clear()
-        for line in self.norm_matrix:
-            x, y = line[0], line[1]
-            self.normalized_coord_list.append([x,y])
-
+            coordinates.append([x,y])
+        if norm:
+            self.setCoordinates(coordinates, True)
+        else:
+            self.setCoordinates(coordinates, False)
