@@ -1,5 +1,4 @@
 from model.form import Form
-from model.viewport import Viewport
 from typing import Tuple, List
 import numpy as np
 import math
@@ -69,3 +68,8 @@ class Transformation():
     def apply(self):
         self.object.setMatrix(np.dot(self.object.matrix, self.matrix))
         self.object.reform()
+
+    def apply_norm(self):
+        self.object.set_norm_matrix(np.dot(self.object.matrix, self.matrix))
+        self.object.reform_normalized()
+

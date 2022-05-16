@@ -8,17 +8,12 @@ class Form():
     def __init__(self, name: str, coordinates: List[t_coordinate], id: int) -> None:
         self.name = name
         self.coordinates = coordinates
-        self.normalized_coord_list = list()
         self.id = id
         self.matrix = self.getMatrix()
+        self.normalized_coord_list = coordinates
+        self.norm_matrix = self.get_norm_matrix()
         # self.getMatrix()
 
-    # def update_normalized_coordinates(self, norm_coord):
-    #     normalized = list()
-    #         for coord in norm_coord:
-    #             normalized.append((coord[0], coord[1]))
-    #     self.normalized_coord_list = normalized
-    
     def add_cord(self, coordinate: t_coordinate):
         self.coordinates.append(coordinate)
         self.matrix = self.getMatrix()
@@ -60,4 +55,19 @@ class Form():
             x, y = line[0], line[1]
             self.coordinates.append([x,y])
 
+    def get_norm_matrix(self) -> []:
+        matrix = []
+        for coordinate in self.normalized_coord_list:
+            x, y = coordinate[0], coordinate[1]
+            matrix.append([x,y,1])
+        return matrix
+
+    def set_norm_matrix(self, matrix: []):
+        self.norm_matrix = matrix
+
+    def reform_normalized(self):
+        self.normalized_coord_list.clear()
+        for line in self.norm_matrix:
+            x, y = line[0], line[1]
+            self.normalized_coord_list.append([x,y])
 

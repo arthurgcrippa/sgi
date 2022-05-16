@@ -80,8 +80,8 @@ class MainWindow(QWidget):
 
         layoutFunctions.addWidget(right_rotation, 4, 2, Qt.Alignment())
         layoutFunctions.addWidget(left_rotation, 4, 0, Qt.Alignment())
-        right_rotation.clicked.connect(lambda: self.transformation.rotate_window(self.teste.value(), 1))
-        left_rotation.clicked.connect(lambda: self.transformation.rotate_window(self.teste.value(), 0))
+        right_rotation.clicked.connect(lambda: self.viewport.rotate_window(self.teste.value(), 1))
+        left_rotation.clicked.connect(lambda: self.viewport.rotate_window(self.teste.value(), 0))
 
         layout.addLayout(layoutObj)
         layout.addLayout(layoutFunctions)

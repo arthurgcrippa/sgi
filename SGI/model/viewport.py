@@ -4,6 +4,7 @@ from PyQt5.QtGui import QPainter, QPixmap, QPen, QColor
 from typing import List
 from model.form import Form
 from model.window import Window
+from model.transformation import Transformation
 
 class Viewport(QLabel):
     def __init__(self, viewPortHeight:int, viewPortWidth:int) -> None:
@@ -45,9 +46,10 @@ class Viewport(QLabel):
             (x,y) = form.vp_trans(form.coordinates[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
             painter.drawPoint(x,y)
         elif (len(form.coordinates) > 1):
-            pontos = form.coordinates
+            pontos = form.normalized_coord_list
             stack = []
             for p in pontos:
+                print(p)
                 if len(stack) == 0:
                     stack.append(p)
                     continue
@@ -69,9 +71,32 @@ class Viewport(QLabel):
         self.vp_init()
         self.draw_axes(Form)
         for obj in self.objectList:
-            # if self.window.theta != 0:
-            #     self.update_normal_coord(obj) // redraw deveria estar em uma classe de controle
+            if self.window.theta != 0:
+                self.update_normal_coord(obj)
             self.draw(obj)
+
+    def rotate_window(self, degrees: int, orientation: int):
+        if not(orientation):
+            degrees = degrees * -1
+        self.window.theta += degrees
+        self.redraw()
+
+    def update_normal_coord(self, form: Form) -> None:
+        degree = self.window.theta
+
+        x_cw = (self.window.xMax - self.window.xMin) / 2
+        y_cw = (self.window.yMax - self.window.yMin) / 2
+
+        window_center = [-x_cw, -y_cw]
+        window_scale = [1/x_cw, 1/y_cw]
+
+
+        translada_norm = Transformation(1, None, window_center, form, None) # translado para origem
+        translada_norm.apply_norm()
+        rotation_norm = Transformation(2, degree, (0,0), form, None) # rotacio os graus
+        rotation_norm.apply_norm()
+        escale_norm = Transformation(3, None, window_scale , form, None) # escala
+        escale_norm.apply_norm()
 
     def draw_axes(self, form: Form):
         painter = QPainter(self.board)
@@ -111,8 +136,6 @@ class Viewport(QLabel):
             self.window.xMin = self.window.xMin + diff
             self.window.xMax = self.window.xMax + diff
         self.redraw()
-
-   
 
     def zoom_out(self):
         zoomVar = 0.05
