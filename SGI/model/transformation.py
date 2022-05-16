@@ -49,7 +49,7 @@ class Transformation():
 
     def scaling(self):
         dx, dy = self.point[0], self.point[1]
-        x, y = self.object.get_center(False)
+        x, y = self.object.get_center()
 
         matrix_scaling = [[dy,0,0],
                           [0,dy,0],
@@ -66,9 +66,13 @@ class Transformation():
         self.matrix = np.dot(np.dot(matrix_translation, matrix_scaling), matrix_reverse_translation)
 
 
-    def apply(self, norm: bool):
-        if norm:
-                self.object.setMatrix(np.dot(self.object.norm_matrix, self.matrix), norm)
-        else:
-            self.object.setMatrix(np.dot(self.object.matrix, self.matrix), norm)
-        self.object.reform(norm)
+    def apply(self):
+        self.object.setMatrix(np.dot(self.object.matrix, self.matrix))
+        self.object.reform()
+
+    def normalize(self):
+        matrix = np.dot(self.object.matrix, self.matrix)
+        self.object.normalized.clear()
+        for line in matrix:
+            x, y = line[0], line[1]
+            self.object.normalized.append([x,y])

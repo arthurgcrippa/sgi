@@ -44,16 +44,13 @@ class Viewport(QLabel):
         yMin = self.window.yMin
         xMax = self.window.xMax
         yMax = self.window.yMax
-        print("Lenght: "+str(form.len()))
         if (form.len() == 1):
             (x,y) = form.vp_trans(form.normalized[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
             painter.drawPoint(x,y)
         elif (len(form.coordinates) > 1):
             pontos = form.normalized
             stack = []
-            print("Chega Aqui")
             for p in pontos:
-                print("Ponto: "+str(p))
                 if len(stack) == 0:
                     stack.append(p)
                     continue
@@ -74,33 +71,20 @@ class Viewport(QLabel):
     def redraw(self):
         self.vp_init()
         self.draw_axises(Form)
-        print("Redraw:")
         for obj in self.objectList:
-            print("Iterate Obj:")
             self.normalize(obj)
-            print("Normal Coord: "+str(obj.normalized))
             self.draw(obj)
 
     def rotate_window(self, degree: int, orientation: int):
         if orientation:
             degree *= -1
         self.window.theta += degree
-        self.window.last_degree = degree
-        print("Tetha: "+str(self.window.theta))
         self.redraw()
-        self.window.last_degree = 0
 
     def normalize(self, form: Form) -> None:
-        degree = self.window.last_degree
-
-        x_cw = (self.window.xMax - self.window.xMin) / 2
-        y_cw = (self.window.yMax - self.window.yMin) / 2
-
-        window_center = [-x_cw, -y_cw]
-        window_scale = [1/x_cw, 1/y_cw]
-
-        rotation_norm = Transformation(2, -degree, (0,0), form, None) # rotacio os graus
-        rotation_norm.apply(True)
+        degree = self.window.theta
+        rotation_norm = Transformation(2, -degree, (0,0), form, None)
+        rotation_norm.normalize()
 
     def draw_axises(self, form: Form):
         painter = QPainter(self.board)

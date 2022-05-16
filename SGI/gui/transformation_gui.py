@@ -144,7 +144,7 @@ class Trasformation(QDialog):
         if plaintext == "" and axis == 2:
             return (0,0) #TODO
         if plaintext == "" and axis == 3:
-            return object.get_center(True)
+            return object.get_center()
         return self.get_coordinate(plaintext)
 
     def get_scale(self, plaintext: str) -> t_coordinate:

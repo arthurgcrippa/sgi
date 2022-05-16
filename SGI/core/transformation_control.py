@@ -22,8 +22,7 @@ class Transformation_control(QDialog):
     def confirm_button(self):
 
         for transformation in self.transList:
-            transformation.apply(True)
-            transformation.apply(False)
+            transformation.apply()
         self.viewport.redraw()
         self.transList.clear()
         self.transformation_gui.transformList.clear()
@@ -37,7 +36,7 @@ class Transformation_control(QDialog):
         transformation = Transformation(type, degree, point, object, len(self.transList))
         self.transList.append(transformation)
         # print(object.id)
-        self.transformation_gui.transformList.addItem("Rotaciona Objeto: " + str(object.id) + " em "+ str(degree) +" graus")
+        self.transformation_gui.transformList.addItem("Rotaciona Objeto: " + str(object.id) + " em %.1f graus"%degree)
 
     def add_scaling(self, type: int, point: t_coordinate, object: Form):
         transformation = Transformation(type, None, point, object, len(self.transList))

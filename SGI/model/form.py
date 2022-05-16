@@ -9,9 +9,8 @@ class Form():
         self.name = name
         self.coordinates = coordinates
         self.id = id
-        self.matrix = self.getMatrix(False)
+        self.matrix = self.getMatrix()
         self.normalized = self.coordinates.copy()
-        self.norm_matrix = self.getMatrix(False)
         # self.getMatrix()
 
     def add_cord(self, coordinate: t_coordinate):
@@ -21,10 +20,8 @@ class Form():
     def len(self)->int:
         return len(self.coordinates)
 
-    def get_center(self, norm: bool) -> t_coordinate:
+    def get_center(self) -> t_coordinate:
         coordinates = self.coordinates
-        if norm:
-            coordinates = self.normalized
         x, y = (0,0)
         for coordinate in coordinates:
             x = x + coordinate[0]
@@ -39,40 +36,23 @@ class Form():
         vp_y = (1-((wCoord[1]-wMin[1])/(wMax[1]-wMin[1])))*vpCoordinate[1]
         return (int(vp_x), int(vp_y))
 
-    def setCoordinates(self, coordinates: List[t_coordinate], norm: bool):
-        if norm:
-            self.normalized = coordinates
-        else:
-            self.coordinates = coordinates
+    def setCoordinates(self, coordinates: List[t_coordinate]):
+        self.coordinates = coordinates
 
-    def getMatrix(self, norm: bool) -> []:
+    def getMatrix(self) -> []:
         coordinates = self.coordinates
-        if (norm):
-            coordinates = self.normalized
         matrix = []
         for coordinate in coordinates:
             x, y = coordinate[0], coordinate[1]
             matrix.append([x,y,1])
         return matrix
 
-    def setMatrix(self, matrix: [], norm: bool):
-        if norm:
-            self.norm_matrix = matrix
-        else:
-            self.matrix = matrix
+    def setMatrix(self, matrix: []):
+        self.matrix = matrix
 
-    def reform(self, norm: bool):
+    def reform(self):
         matrix = self.matrix
-        coordinates = list()
-        if norm:
-            self.normalized.clear()
-            matrix = self.norm_matrix
-        else:
-            self.coordinates.clear()
+        self.coordinates.clear()
         for line in matrix:
             x, y = line[0], line[1]
-            coordinates.append([x,y])
-        if norm:
-            self.setCoordinates(coordinates, True)
-        else:
-            self.setCoordinates(coordinates, False)
+            self.coordinates.append([x,y])
