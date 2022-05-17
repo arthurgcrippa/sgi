@@ -36,6 +36,8 @@ class Viewport(QLabel):
         pen.setColor(QColor(r,g,b))
         painter.setPen(pen)
 
+        self.normalize(form)
+
         xMin = self.window.xMin
         yMin = self.window.yMin
         xMax = self.window.xMax
