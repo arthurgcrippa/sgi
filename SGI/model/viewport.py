@@ -20,12 +20,6 @@ class Viewport(QLabel):
         self.vp_init()
         self.draw_axises(Form)
 
-    # def tamWindow(self, viewPortHeight: int, viewPortWidth: int):
-    #     self.window.xMin = self.window.xMin
-    #     self.window.yMin = self.window.yMin
-    #     self.window.xMax = self.window.xMax
-    #     self.window.yMax = self.window.yMax
-
     def vp_init(self):
         board = QPixmap(self.vpCoord[0], self.vpCoord[1])
         board.fill(QColor('white'))
@@ -39,6 +33,8 @@ class Viewport(QLabel):
         pen.setWidthF(4)
         pen.setColor(QColor('black'))
         painter.setPen(pen)
+
+        self.normalize(form)
 
         xMin = self.window.xMin
         yMin = self.window.yMin
@@ -72,7 +68,6 @@ class Viewport(QLabel):
         self.vp_init()
         self.draw_axises(Form)
         for obj in self.objectList:
-            self.normalize(obj)
             self.draw(obj)
 
     def rotate_window(self, degree: int, orientation: int):

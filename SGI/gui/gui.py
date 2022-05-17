@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from gui.object_gui import ObjectWindow
 from model.viewport import Viewport
 from gui.transformation_gui import Trasformation
+from core.obj_descriptor import Descriptor
 
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QListWidget, QLayout, QGridLayout, QToolButton, QMessageBox, QSpinBox
@@ -95,6 +96,7 @@ class MainWindow(QWidget):
         return layout
 
     def menu_add_objects(self):
+        Descriptor(self.viewport)
         self.objWindow.exec()
 
     def show_error_message(self, error: str):
