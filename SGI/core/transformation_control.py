@@ -41,4 +41,4 @@ class Transformation_control(QDialog):
     def add_scaling(self, type: int, point: t_coordinate, object: Form):
         transformation = Transformation(type, None, point, object, len(self.transList))
         self.transList.append(transformation)
-        self.transformation_gui.transformList.addItem("Altera Magnitude do Objeto: "+str(object.id))
+        self.transformation_gui.transformList.addItem("Altera Magnitude do Objeto: "+ str(object.id))

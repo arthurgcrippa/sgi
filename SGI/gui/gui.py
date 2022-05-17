@@ -6,7 +6,9 @@ from model.viewport import Viewport
 from gui.transformation_gui import Trasformation
 
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
-    QListWidget, QLayout, QGridLayout, QToolButton, QMessageBox, QSpinBox
+    QListWidget, QLayout, QGridLayout, QToolButton, QMessageBox, QSpinBox, QLineEdit
+
+from core import wavefront
 
 class MainWindow(QWidget):
     def __init__(self) -> None:
@@ -34,11 +36,20 @@ class MainWindow(QWidget):
         transformObjButton = QPushButton("Transformar Objeto")
         transformObjButton.clicked.connect(self.menu_tranformations)
 
+        openObjButton = QPushButton("Abrir Objeto")
+        saveObjButton = QPushButton("Salvar Objeto")
+        fileText = QLineEdit("example.obj")
+        openObjButton.clicked.connect(lambda: self.open(fileText.text()))
+        saveObjButton.clicked.connect(lambda: self.save(fileText.text()))
+
         self.objList = QListWidget()
 
         layoutObj.addWidget(QLabel('Objetos'))
         layoutObj.addWidget(addObjButton)
         layoutObj.addWidget(transformObjButton)
+        layoutObj.addWidget(openObjButton)
+        layoutObj.addWidget(saveObjButton)
+        layoutObj.addWidget(fileText)
         layoutObj.addWidget(self.objList)
 
         layoutFunctions = QGridLayout()
@@ -109,3 +120,13 @@ class MainWindow(QWidget):
             self.show_error_message("Você nao selecionou nenhum objeto da lista")
         else:
             self.transformation.exec()
+
+    def save(self, file_name: str) -> None:
+        wavefront.write(file_name, self.viewport.objectList)
+
+    def open(self, file_path: str) -> None:
+        new_objects = wavefront.read(file_path)
+        for obj in new_objects:
+            self.viewport.objectList.append(obj)
+            self.objList.addItem(obj.name + ': ' + str(obj.id))
+            self.viewport.redraw()

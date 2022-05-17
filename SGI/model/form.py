@@ -11,7 +11,10 @@ class Form():
         self.id = id
         self.matrix = self.getMatrix()
         self.normalized = self.coordinates.copy()
-        # self.getMatrix()
+        self.color = [0,0,0]
+
+    def set_color(self, color):
+        self.color = color
 
     def add_cord(self, coordinate: t_coordinate):
         self.coordinates.append(coordinate)
