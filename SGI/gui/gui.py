@@ -4,7 +4,6 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from gui.object_gui import ObjectWindow
 from model.viewport import Viewport
 from gui.transformation_gui import Trasformation
-from core.obj_descriptor import Descriptor
 
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QListWidget, QLayout, QGridLayout, QToolButton, QMessageBox, QSpinBox, QLineEdit
