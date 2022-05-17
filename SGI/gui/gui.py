@@ -106,7 +106,7 @@ class MainWindow(QWidget):
         return layout
 
     def menu_add_objects(self):
-        Descriptor(self.viewport)
+        # Descriptor(self.viewport)
         self.objWindow.exec()
 
     def show_error_message(self, error: str):
@@ -126,6 +126,9 @@ class MainWindow(QWidget):
         wavefront.write(file_name, self.viewport.objectList)
 
     def open(self, file_path: str) -> None:
+        self.objList.clear()
+        self.viewport.objectList.clear()
+        self.viewport.redraw()
         new_objects = wavefront.read(file_path)
         for obj in new_objects:
             self.viewport.objectList.append(obj)
