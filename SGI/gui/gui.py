@@ -1,12 +1,13 @@
 from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets
+from PyQt5 import QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from gui.object_gui import ObjectWindow
 from model.viewport import Viewport
 from gui.transformation_gui import Trasformation
 
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
-    QListWidget, QLayout, QGridLayout, QToolButton, QMessageBox, QSpinBox, QLineEdit
+    QListWidget, QLayout, QGridLayout,  QToolButton, QMessageBox, QSpinBox, QLineEdit
 
 from core import wavefront
 
@@ -16,7 +17,7 @@ class MainWindow(QWidget):
         self.window()
 
     def window(self) -> None:
-        self.resize(700, 600)
+        self.resize(1000, 900)
         self.setWindowTitle("SGI 1.1: Arthur Milanez e Tiago Possenti")
         layout = QHBoxLayout()
         layout.addLayout(self.menu_setup())
@@ -44,13 +45,23 @@ class MainWindow(QWidget):
 
         self.objList = QListWidget()
 
-        layoutObj.addWidget(QLabel('Objetos'))
-        layoutObj.addWidget(addObjButton)
-        layoutObj.addWidget(transformObjButton)
+        label_arquivos = QLabel('Manipulação de Arquivos')
+        label_arquivos.setAlignment(Qt.AlignCenter)
+        layoutObj.addWidget(label_arquivos)
         layoutObj.addWidget(openObjButton)
         layoutObj.addWidget(saveObjButton)
         layoutObj.addWidget(fileText)
+        layoutObj.addWidget(QLabel(''))
+        label_objetos = QLabel('Objetos')
+        label_objetos.setAlignment(Qt.AlignCenter)
+        layoutObj.addWidget(label_objetos)
+        layoutObj.addWidget(addObjButton)
+        layoutObj.addWidget(transformObjButton)
         layoutObj.addWidget(self.objList)
+        layoutObj.addWidget(QLabel(''))
+        label_movimento = QLabel('Movimentações')
+        label_movimento.setAlignment(Qt.AlignCenter)
+        layoutObj.addWidget(label_movimento)
 
         layoutFunctions = QGridLayout()
 
@@ -58,12 +69,16 @@ class MainWindow(QWidget):
         down = QToolButton()
         left = QToolButton()
         right = QToolButton()
-        up.setText(" up  ")
-        down.setText("down ")
-        left.setText("left ")
-        right.setText("right")
+        up.setFixedSize(100,25)
+        down.setFixedSize(100,25)
+        left.setFixedSize(100,25)
+        right.setFixedSize(100,25)
+        up.setIcon(QtGui.QIcon("images/cima.png"))
+        down.setIcon(QtGui.QIcon("images/baixo.png"))
+        right.setIcon(QtGui.QIcon("images/drt.png"))
+        left.setIcon(QtGui.QIcon("images/sqrd.png"))
         layoutFunctions.addWidget(up, 0, 1, Qt.Alignment())
-        layoutFunctions.addWidget(down, 2, 1, Qt.Alignment())
+        layoutFunctions.addWidget(down, 1, 1, Qt.Alignment())
         layoutFunctions.addWidget(left, 1, 0, Qt.Alignment())
         layoutFunctions.addWidget(right, 1, 2, Qt.Alignment())
         up.clicked.connect(lambda: self.viewport.move(1))
@@ -73,10 +88,12 @@ class MainWindow(QWidget):
 
         zoomIn = QToolButton()
         zoomOut = QToolButton()
-        zoomIn.setText("zoom in")
-        zoomOut.setText("zoom out")
-        layoutFunctions.addWidget(zoomIn, 3, 0, Qt.Alignment())
-        layoutFunctions.addWidget(zoomOut, 3, 2, Qt.Alignment())
+        zoomIn.setIcon(QtGui.QIcon("images/mais.png"))
+        zoomOut.setIcon(QtGui.QIcon("images/menos.png"))
+        zoomIn.setFixedSize(100,25)
+        zoomOut.setFixedSize(100,25)
+        layoutFunctions.addWidget(zoomIn, 0, 0, Qt.Alignment())
+        layoutFunctions.addWidget(zoomOut, 0, 2, Qt.Alignment())
         zoomIn.clicked.connect(lambda: self.viewport.zoom_out())
         zoomOut.clicked.connect(lambda: self.viewport.zoom_in())
 
@@ -85,12 +102,13 @@ class MainWindow(QWidget):
         self.teste = QSpinBox()
         self.teste.setRange(10, 180)
         self.teste.setSingleStep(10)
-        right_rotation.setText("right rotation")
-        left_rotation.setText("left rotation")
-        layoutFunctions.addWidget(self.teste, 4, 1, Qt.Alignment())
-
-        layoutFunctions.addWidget(right_rotation, 4, 2, Qt.Alignment())
-        layoutFunctions.addWidget(left_rotation, 4, 0, Qt.Alignment())
+        right_rotation.setIcon(QtGui.QIcon("images/direita.png"))
+        left_rotation.setIcon(QtGui.QIcon("images/esquerda.png"))
+        right_rotation.setFixedSize(100,25)
+        left_rotation.setFixedSize(100,25)
+        layoutFunctions.addWidget(self.teste, 3, 1, Qt.Alignment())
+        layoutFunctions.addWidget(right_rotation, 3, 2, Qt.Alignment())
+        layoutFunctions.addWidget(left_rotation, 3, 0, Qt.Alignment())
         right_rotation.clicked.connect(lambda: self.viewport.rotate_window(self.teste.value(), 1))
         left_rotation.clicked.connect(lambda: self.viewport.rotate_window(self.teste.value(), 0))
 
@@ -101,7 +119,7 @@ class MainWindow(QWidget):
     def vp_setup(self) -> QLayout:
         layout = QVBoxLayout()
         layout.addWidget(QLabel('Viewport'))
-        self.viewport = Viewport(500, 500)
+        self.viewport = Viewport(900, 900)
         layout.addWidget(self.viewport)
         return layout
 
