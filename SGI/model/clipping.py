@@ -36,7 +36,7 @@ class Clipper():
         elif (y > top):
             region_code = region_code | 8 #1000
 
-        return int_to_bin(region_code)
+        return self.int_to_bin(region_code)
 
     def clip(self, object: Form):
         points = object.coordinates
@@ -68,10 +68,10 @@ class Clipper():
             if scope == 1:
                 object.set_visible(0)
             else:
-                self.intersection(p1,p2,scope)
+                (p1, p2) = self.intersection(p1,p2,scope)
         else:
             object.set_visible(1)
-
+        return (p1, p2)
 
     def point_visible(self, point: t_coordinate):
         rc = self.region_code(point)
@@ -99,25 +99,37 @@ class Clipper():
 
         m = self.ang_coef(p1,p2)
         if scope == 2:
-            inter_shed(p2, m)
+            intersections = self.inter_shed(p2, m)
+            for inter in intersections:
+                if inter != p1:
+                    p2 = inter
         if scope == 3:
-            inter_shed(p1, m)
+            intersections = self.inter_shed(p1, m)
+            for inter in intersections:
+                if inter != p2:
+                    p1 = inter
         if scope == 4:
-            inter_shed(p1, m)
-            inter_shed(p2, m)
-        return 0
+            intersections = self.inter_shed(p1, m)
+            for inter in intersections:
+                if inter != p2:
+                    p1 = inter
+            intersections = self.inter_shed(p2, m)
+            for inter in intersections:
+                if inter != p1:
+                    p2 = inter
+        return (p1,p2)
 
-    def inter_shed(self, point: t_coordinate, m). -> List[t_coordinate]:
+    def inter_shed(self, point: t_coordinate, m) -> List[t_coordinate]:
         quarter = self.region_code(point)
         intersections = []
         if quarter[0] == '1':
-            intersections.append(self.top_inter(point))
+            intersections.append(self.top_inter(point, m))
         if quarter[1] == '1':
-            intersections.append(self.top_inter(point))
+            intersections.append(self.bottom_inter(point, m))
         if quarter[2] == '1':
-            intersections.append(self.top_inter(point))
+            intersections.append(self.right_inter(point, m))
         if quarter[3] == '1':
-            intersections.append(self.top_inter(point))
+            intersections.append(self.left_inter(point, m))
 
     def left_inter(self, p: t_coordinate, m:int):
         left, bottom, right, top = self.get_wc()
