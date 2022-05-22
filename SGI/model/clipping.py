@@ -40,6 +40,7 @@ class Clipper():
 
     def clip(self, object: Form):
         points = object.normalized
+        print("Length: "+str(len(points)))
         new_coordinates = []
         if object.len() == 1:
             self.point_clip(points[0], object)
@@ -108,6 +109,9 @@ class Clipper():
     def intersection(self, p1: t_coordinate, p2: t_coordinate, scope: int):
 
         m = self.ang_coef(p1,p2)
+        print("Coeficiente Angular: "+str(m))
+        print("Intersection P1:"+str(p1))
+        print("Intersection P2:"+str(p2))
         if scope == 2:
             intersections = self.inter_shed(p2, m)
             for inter in intersections:
@@ -131,6 +135,7 @@ class Clipper():
 
     def inter_shed(self, point: t_coordinate, m) -> List[t_coordinate]:
         quarter = self.region_code(point)
+        print("Quarter: "+str(quarter))
         intersections = []
         if quarter[0] == '1':
             intersections.append(self.top_inter(point, m))
@@ -140,6 +145,7 @@ class Clipper():
             intersections.append(self.right_inter(point, m))
         if quarter[3] == '1':
             intersections.append(self.left_inter(point, m))
+        return intersections
 
     def left_inter(self, p: t_coordinate, m:int):
         left, bottom, right, top = self.get_wc()
@@ -154,6 +160,7 @@ class Clipper():
         left, bottom, right, top = self.get_wc()
         new_point = (p[0] + 1/m) * (bottom - p[1])
         new_coord = (new_point, bottom)
+        print("New Coordinate: "+str(new_coord))
         if new_point >= left and new_point <= right:
             return new_coord
         else:
@@ -187,4 +194,4 @@ class Clipper():
         return (a & b)
 
     def ang_coef(self, p1: t_coordinate, p2:t_coordinate) -> int:
-        return abs(p2[1] - p1[1])/(p2[0] - p1[0])
+        return (p2[1] - p1[1])/(p2[0] - p1[0])
