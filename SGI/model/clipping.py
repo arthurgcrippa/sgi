@@ -39,8 +39,8 @@ class Clipper():
         return self.int_to_bin(region_code)
 
     def clip(self, object: Form):
-        points = object.coordinates
-
+        points = object.normalized
+        new_coordinates = []
         if object.len() == 1:
             self.point_clip(points[0], object)
         elif object.len() > 1:
@@ -51,13 +51,14 @@ class Clipper():
                     continue
                 p1 = stack.pop()
                 p2 = p
-                self.line_clip(p1,p2, object)
+                new_coordinates.append(self.line_clip(p1,p2, object))
                 stack.append(p2)
             p1 = points[0]
             p2 = points[len(points)-1]
-            self.line_clip(p1,p2, object)
+            new_coordinates.append(self.line_clip(p1,p2, object))
         else:
             print("Object is Empty")
+        return new_coordinates
 
     def point_clip(self, point: t_coordinate, object: Form):
         object.set_visible(self.point_visible(point))
@@ -80,9 +81,9 @@ class Clipper():
         return 0 #visible
 
     def line_visible(self, p1: t_coordinate, p2: t_coordinate):
-        rc1 = self.bin_to_int(self.region_code(p1))
-        rc2 = self.bin_to_int(self.region_code(p2))
-        rc = self.bin_to_int(self.and_logico(rc1, rc2))
+        rc1 = self.region_code(p1)
+        rc2 = self.region_code(p2)
+        rc = self.and_logico(rc1, rc2)
         if rc1 != 0 or rc2 != 0:
             if rc == 0:
                 if rc1 == 0:
@@ -167,16 +168,16 @@ class Clipper():
         else:
             return p
 
-    def int_to_bin(code: int):
+    def int_to_bin(self, code: int):
         return '{0:04b}'.format(code)
 
-    def bin_to_int(code: str):
+    def bin_to_int(self, code: str):
         return int(code, 2)
 
     def and_logico(self, a: str, b: str):
         a_code = self.bin_to_int(a)
         b_code = self.bin_to_int(b)
-        return self.int_to_bin((a_code & b_code))
+        return (a_code & b_code)
 
-    def ang_coef(self, p1: t_coordinate, p2:t_coordinate) -> Int:
+    def ang_coef(self, p1: t_coordinate, p2:t_coordinate) -> int:
         return abs(p2[1] - p1[1])/(p2[0] - p1[0])

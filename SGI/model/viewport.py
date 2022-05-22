@@ -5,6 +5,7 @@ from typing import List
 from model.form import Form
 from model.window import Window
 from model.transformation import Transformation
+from model.clipping import Clipper
 
 import math
 import numpy as np
@@ -17,6 +18,7 @@ class Viewport(QLabel):
         self.window = Window(viewPortHeight, viewPortWidth)
         self.vp_init()
         self.draw_axises(Form)
+        self.clipper = Clipper(self.window)
 
     def vp_init(self):
         board = QPixmap(self.vpCoord[0]+20, self.vpCoord[1]+20)
@@ -47,7 +49,7 @@ class Viewport(QLabel):
             (x,y) = form.vp_trans(form.normalized[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
             painter.drawPoint(x,y)
         elif (len(form.coordinates) > 1):
-            pontos = form.normalized
+            pontos = self.clipper.clip(form)
             stack = []
             for p in pontos:
                 if len(stack) == 0:
