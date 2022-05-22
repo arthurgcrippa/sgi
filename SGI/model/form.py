@@ -1,6 +1,4 @@
 from typing import List, Tuple
-#from functools import cmp_to_key
-#from PyQt5.QtGui import QPainter
 
 t_coordinate = Tuple[float, float]
 
