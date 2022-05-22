@@ -23,20 +23,20 @@ class Clipper():
         return left, bottom, right, top
 
     def region_code(self, point: t_coordinate):
-        region_code = "0000"
+        region_code = 0 #0000
         x, y = point[0], point[1]
         left, bottom, right, top = self.get_wc()
 
         if (x < left):
-            region_code = "0001"
+            region_code = 1 #0001
         elif (x > right):
-            region_code = "0010"
+            region_code = 2 #0010
         if (y < bottom):
-            region_code = "0100"
+            region_code = region_code | 4 #0100
         elif (y > top):
-            region_code = "1000"
+            region_code = region_code | 8 #1000
 
-        return region_code
+        return int_to_bin(region_code)
 
     def clip(self, object: Form):
         points = object.coordinates
@@ -96,55 +96,64 @@ class Clipper():
         return 0 #visible
 
     def intersection(self, p1: t_coordinate, p2: t_coordinate, scope: int):
+
         m = self.ang_coef(p1,p2)
-        regiao = []
         if scope == 2:
-            regiao[0] = self.region_code(p2)
-            
+            inter_shed(p2, m)
         if scope == 3:
-            regiao[0] = self.region_code(p1)
-
+            inter_shed(p1, m)
         if scope == 4:
-            regiao[0] = self.region_code(p1)
-            regiao[1] = self.region_code(p2)
+            inter_shed(p1, m)
+            inter_shed(p2, m)
+        return 0
 
-        return 0    
-        
+    def inter_shed(self, point: t_coordinate, m). -> List[t_coordinate]:
+        quarter = self.region_code(point)
+        intersections = []
+        if quarter[0] == '1':
+            intersections.append(self.top_inter(point))
+        if quarter[1] == '1':
+            intersections.append(self.top_inter(point))
+        if quarter[2] == '1':
+            intersections.append(self.top_inter(point))
+        if quarter[3] == '1':
+            intersections.append(self.top_inter(point))
+
     def left_inter(self, p: t_coordinate, m:int):
         left, bottom, right, top = self.get_wc()
         new_point = m*(left - p[0])+p[1]
         new_coord = (left, new_point)
         if new_point >= left & new_point <= right:
-            return new_coord, True
+            return new_coord
         else:
-            return new_coord, False 
+            return p
 
     def bottom_inter(self, p: t_coordinate, m:int):
         left, bottom, right, top = self.get_wc()
         new_point = (p[0] + 1/m) * (bottom - p[1])
         new_coord = (new_point, bottom)
         if new_point >= left & new_point <= right:
-            return new_coord, True
+            return new_coord
         else:
-            return new_coord, False 
+            return p
 
     def right_inter(self, p: t_coordinate, m:int):
         left, bottom, right, top = self.get_wc()
         new_point = m*(right - p[0])+p[1]
         new_coord = (right, new_point)
         if new_point >= left & new_point <= right:
-            return new_coord, True
+            return new_coord
         else:
-            return new_coord, False 
+            return p
 
     def top_inter(self, p: t_coordinate, m:int):
         left, bottom, right, top = self.get_wc()
         new_point = (p[0] + 1/m) * (top - p[1])
         new_coord = (new_point, top)
         if new_point >= left & new_point <= right:
-            return new_coord, True
+            return new_coord
         else:
-            return new_coord, False 
+            return p
 
     def int_to_bin(code: int):
         return '{0:04b}'.format(code)
@@ -157,5 +166,5 @@ class Clipper():
         b_code = self.bin_to_int(b)
         return self.int_to_bin((a_code & b_code))
 
-    def ang_coef(self, p1: t_coordinate, p2:t_coordinate):
+    def ang_coef(self, p1: t_coordinate, p2:t_coordinate) -> Int:
         return abs(p2[1] - p1[1])/(p2[0] - p1[0])
