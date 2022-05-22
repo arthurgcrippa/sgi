@@ -113,38 +113,38 @@ class Clipper():
     def left_inter(self, p: t_coordinate, m:int):
         left, bottom, right, top = self.get_wc()
         new_point = m*(left - p[0])+p[1]
+        new_coord = (left, new_point)
         if new_point >= left & new_point <= right:
-            new_coord = (left, new_point)
-            return True
+            return new_coord, True
         else:
-            return False 
+            return new_coord, False 
 
     def bottom_inter(self, p: t_coordinate, m:int):
         left, bottom, right, top = self.get_wc()
         new_point = (p[0] + 1/m) * (bottom - p[1])
-        if new_point >= top & new_point <= bottom:
-            new_coord = (new_point, bottom)
-            return True
+        new_coord = (new_point, bottom)
+        if new_point >= left & new_point <= right:
+            return new_coord, True
         else:
-            return False 
+            return new_coord, False 
 
     def right_inter(self, p: t_coordinate, m:int):
         left, bottom, right, top = self.get_wc()
         new_point = m*(right - p[0])+p[1]
+        new_coord = (right, new_point)
         if new_point >= left & new_point <= right:
-            new_coord = (right, new_point)
-            return True
+            return new_coord, True
         else:
-            return False
+            return new_coord, False 
 
     def top_inter(self, p: t_coordinate, m:int):
         left, bottom, right, top = self.get_wc()
         new_point = (p[0] + 1/m) * (top - p[1])
-        if new_point >= top & new_point <= bottom:
-            new_coord = (new_point, top)
-            return True
+        new_coord = (new_point, top)
+        if new_point >= left & new_point <= right:
+            return new_coord, True
         else:
-            return False
+            return new_coord, False 
 
     def int_to_bin(code: int):
         return '{0:04b}'.format(code)
