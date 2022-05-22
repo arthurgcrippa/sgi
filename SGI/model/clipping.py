@@ -51,11 +51,15 @@ class Clipper():
                     continue
                 p1 = stack.pop()
                 p2 = p
-                new_coordinates.append(self.line_clip(p1,p2, object))
+                new_p1, new_p2 = self.line_clip(p1,p2, object)
+                new_coordinates.append(new_p1)
+                new_coordinates.append(new_p2)
                 stack.append(p2)
             p1 = points[0]
             p2 = points[len(points)-1]
-            new_coordinates.append(self.line_clip(p1,p2, object))
+            new_p1, new_p2 = self.line_clip(p1,p2, object)
+            new_coordinates.append(new_p1)
+            new_coordinates.append(new_p2)
         else:
             print("Object is Empty")
         return new_coordinates
@@ -81,9 +85,14 @@ class Clipper():
         return 0 #visible
 
     def line_visible(self, p1: t_coordinate, p2: t_coordinate):
-        rc1 = self.region_code(p1)
-        rc2 = self.region_code(p2)
+        rc1 = self.bin_to_int(self.region_code(p1))
+        rc2 = self.bin_to_int(self.region_code(p2))
         rc = self.and_logico(rc1, rc2)
+        print("Coordenada 1: "+str(p1))
+        print("Coordenada 2: "+str(p2))
+        print("Region Code 1: "+ self.int_to_bin(rc1))
+        print("Region Code 2: "+ self.int_to_bin(rc2))
+        print("Region Code &: "+ str(rc))
         if rc1 != 0 or rc2 != 0:
             if rc == 0:
                 if rc1 == 0:
@@ -136,7 +145,7 @@ class Clipper():
         left, bottom, right, top = self.get_wc()
         new_point = m*(left - p[0])+p[1]
         new_coord = (left, new_point)
-        if new_point >= left & new_point <= right:
+        if new_point >= left and new_point <= right:
             return new_coord
         else:
             return p
@@ -145,7 +154,7 @@ class Clipper():
         left, bottom, right, top = self.get_wc()
         new_point = (p[0] + 1/m) * (bottom - p[1])
         new_coord = (new_point, bottom)
-        if new_point >= left & new_point <= right:
+        if new_point >= left and new_point <= right:
             return new_coord
         else:
             return p
@@ -154,7 +163,7 @@ class Clipper():
         left, bottom, right, top = self.get_wc()
         new_point = m*(right - p[0])+p[1]
         new_coord = (right, new_point)
-        if new_point >= left & new_point <= right:
+        if new_point >= left and new_point <= right:
             return new_coord
         else:
             return p
@@ -163,7 +172,7 @@ class Clipper():
         left, bottom, right, top = self.get_wc()
         new_point = (p[0] + 1/m) * (top - p[1])
         new_coord = (new_point, top)
-        if new_point >= left & new_point <= right:
+        if new_point >= left and new_point <= right:
             return new_coord
         else:
             return p
@@ -174,10 +183,8 @@ class Clipper():
     def bin_to_int(self, code: str):
         return int(code, 2)
 
-    def and_logico(self, a: str, b: str):
-        a_code = self.bin_to_int(a)
-        b_code = self.bin_to_int(b)
-        return (a_code & b_code)
+    def and_logico(self, a: int, b: int):
+        return (a & b)
 
     def ang_coef(self, p1: t_coordinate, p2:t_coordinate) -> int:
         return abs(p2[1] - p1[1])/(p2[0] - p1[0])
