@@ -19,10 +19,11 @@ class Viewport(QLabel):
         self.draw_axises(Form)
 
     def vp_init(self):
-        board = QPixmap(self.vpCoord[0], self.vpCoord[1])
+        board = QPixmap(self.vpCoord[0]+20, self.vpCoord[1]+20)
         board.fill(QColor('white'))
         self.setPixmap(board)
         self.board = self.pixmap()
+        self.resize(self.vpCoord[0]+10, self.vpCoord[1]+10)
         self.board.fill(QColor('white'))
 
     def draw(self, form: Form):
@@ -98,23 +99,22 @@ class Viewport(QLabel):
         theta = -math.radians(self.window.theta)
         sin = np.sin(theta)
         cos = np.cos(theta)
-
-        x1 = (0, 1000)
-        x2 = (0, -1000)
-        y1 = (1000, 0)
-        y2 = (-1000, 0)
+        vp_x, vp_y = self.vpCoord[0]/2, self.vpCoord[1]/2
+        x1 = (0, vp_y)
+        x2 = (0, -vp_y)
+        y1 = (vp_x, 0)
+        y2 = (-vp_x, 0)
 
         if (self.window.theta != 0):
-            x1 = (1000*sin, 1000*cos)
-            x2 = (-1000*sin, -1000*cos)
-            y1 = (1000*cos, -1000*sin)
-            y2 = (-1000*cos, 1000*sin)
+            x1 = (vp_x*sin, vp_y*cos)
+            x2 = (-vp_x*sin, -vp_y*cos)
+            y1 = (vp_x*cos, -vp_y*sin)
+            y2 = (-vp_x*cos, vp_y*sin)
 
 
         (p1_x, p1_y) = form.vp_trans(self, x1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         (p2_x, p2_y) = form.vp_trans(self, x2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         painter.drawLine(p1_x, p1_y, p2_x, p2_y)
-
         (p1_x, p1_y) = form.vp_trans(self, y1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         (p2_x, p2_y) = form.vp_trans(self, y2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         painter.drawLine(p1_x, p1_y, p2_x, p2_y)

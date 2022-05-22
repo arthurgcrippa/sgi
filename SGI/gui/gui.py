@@ -17,7 +17,7 @@ class MainWindow(QWidget):
         self.window()
 
     def window(self) -> None:
-        self.resize(1000, 900)
+        self.resize(700, 600)
         self.setWindowTitle("SGI 1.1: Arthur Milanez e Tiago Possenti")
         layout = QHBoxLayout()
         layout.addLayout(self.menu_setup())
@@ -119,7 +119,7 @@ class MainWindow(QWidget):
     def vp_setup(self) -> QLayout:
         layout = QVBoxLayout()
         layout.addWidget(QLabel('Viewport'))
-        self.viewport = Viewport(900, 900)
+        self.viewport = Viewport(600, 600)
         layout.addWidget(self.viewport)
         return layout
 

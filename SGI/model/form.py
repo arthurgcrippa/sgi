@@ -12,9 +12,13 @@ class Form():
         self.matrix = self.getMatrix()
         self.normalized = self.coordinates.copy()
         self.color = [0,0,0]
+        self.visible = 0
 
     def set_color(self, color):
         self.color = color
+
+    def set_visible(self, visible):
+        self.visible = visible
 
     def add_cord(self, coordinate: t_coordinate):
         self.coordinates.append(coordinate)
