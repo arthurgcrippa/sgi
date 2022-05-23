@@ -49,6 +49,7 @@ class LB_Clipper():
             new_p1 = (p1[0]+z1*p[1], p1[1]+z1*p[3])
             new_p2 = (p1[0]+z2*p[1], p1[1]+z2*p[3])
             visible = True
+            print(new_p1, new_p2)
             return ((new_p1,new_p2), visible)
         else:
             visible = False
