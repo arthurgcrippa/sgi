@@ -16,7 +16,7 @@ class Viewport(QLabel):
         self.vpCoord = (int(viewPortWidth), int(viewPortHeight))
         self.objectList: List[Form] = list()
         self.window = Window(viewPortHeight, viewPortWidth)
-        self.clipper = Clipper(self.window)
+        self.clipper = Clipper(self.window, 1)
         self.vp_init()
         self.draw_axises(Form)
 
