@@ -35,6 +35,23 @@ class Form():
         y = y/self.len()
         return (x,y)
 
+    def get_lines(self):
+        object_lines = []
+        stack = []
+        points = self.normalized
+        for p in points:
+            if len(stack) == 0:
+                stack.append(p)
+                continue
+            p1 = stack.pop()
+            p2 = p
+            object_lines.append((p1,p2))
+            stack.append(p2)
+        p1 = points[0]
+        p2 = points[len(points)-1]
+        object_lines.append((p1,p2))
+        return object_lines
+
     # transformada de viewport
     def vp_trans(self, wCoord: t_coordinate, wMin: t_coordinate, wMax: t_coordinate, vpCoordinate: t_coordinate) -> t_coordinate:
         vp_x = ((wCoord[0] - wMin[0])/(wMax[0]-wMin[0]))*vpCoordinate[0]

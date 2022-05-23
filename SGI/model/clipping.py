@@ -39,51 +39,40 @@ class Clipper():
         return self.int_to_bin(region_code)
 
     def clip(self, object: Form):
+        print("START CLIP")
         points = object.normalized
         print("Length: "+str(len(points)))
-        new_coordinates = []
         if object.len() == 1:
-            self.point_clip(points[0], object)
+            return self.point_clip(points[0])
         elif object.len() > 1:
-            stack = []
-            for p in points:
-                if len(stack) == 0:
-                    stack.append(p)
-                    continue
-                p1 = stack.pop()
-                p2 = p
-                new_p1, new_p2 = self.line_clip(p1,p2, object)
-                new_coordinates.append(new_p1)
-                new_coordinates.append(new_p2)
-                stack.append(p2)
-            p1 = points[0]
-            p2 = points[len(points)-1]
-            new_p1, new_p2 = self.line_clip(p1,p2, object)
-            new_coordinates.append(new_p1)
-            new_coordinates.append(new_p2)
+            possible_lines = []
+            object_lines = object.get_lines()
+            for line in object_lines:
+                possible_line = self.line_clip(line[0], line[1])
+                possible_lines.append(possible_line)
+            return possible_lines
+            self.line_clip(points[0], points[1])
         else:
             print("Object is Empty")
-        return new_coordinates
+        return None
 
-    def point_clip(self, point: t_coordinate, object: Form):
-        object.set_visible(self.point_visible(point))
-
-    def line_clip(self, p1: t_coordinate, p2: t_coordinate, object: Form):
-        scope = self.line_visible(p1, p2)
-        if scope != 0:
-            if scope == 1:
-                object.set_visible(0)
-            else:
-                (p1, p2) = self.intersection(p1,p2,scope)
-        else:
-            object.set_visible(1)
-        return (p1, p2)
+    def point_clip(self, point: t_coordinate):
+        return self.point_visible(point)
 
     def point_visible(self, point: t_coordinate):
         rc = self.region_code(point)
         if self.bin_to_int(rc) != 0:
-            return 1 #not visble
-        return 0 #visible
+            return False #not visble
+        return True #visible
+
+    def line_clip(self, p1: t_coordinate, p2: t_coordinate):
+        scope = self.line_visible(p1, p2)
+        if scope != 0:
+            if scope == 1:
+                return ((p1,p2), False)
+            else:
+                return self.intersection(p1,p2,scope)
+        return ((p1,p2), True)
 
     def line_visible(self, p1: t_coordinate, p2: t_coordinate):
         rc1 = self.bin_to_int(self.region_code(p1))
@@ -109,29 +98,35 @@ class Clipper():
     def intersection(self, p1: t_coordinate, p2: t_coordinate, scope: int):
 
         m = self.ang_coef(p1,p2)
+        print("Scope: "+str(scope))
         print("Coeficiente Angular: "+str(m))
-        print("Intersection P1:"+str(p1))
-        print("Intersection P2:"+str(p2))
+        print("Intersection Input P1:"+str(p1))
+        print("Intersection Input P2:"+str(p2))
         if scope == 2:
-            intersections = self.inter_shed(p2, m)
-            for inter in intersections:
-                if inter != p1:
-                    p2 = inter
+            possible_intersections = self.inter_shed(p2, m)
+            for inter_point in possible_intersections:
+                if inter_point != p1:
+                    p2 = inter_point
+                    return ((p1,p2),True)
         if scope == 3:
-            intersections = self.inter_shed(p1, m)
-            for inter in intersections:
-                if inter != p2:
-                    p1 = inter
+            possible_intersections = self.inter_shed(p1, m)
+            for inter_point in possible_intersections:
+                if inter_point != p2:
+                    p1 = inter_point
+                    return ((p1,p2),True)
         if scope == 4:
-            intersections = self.inter_shed(p1, m)
-            for inter in intersections:
-                if inter != p2:
-                    p1 = inter
-            intersections = self.inter_shed(p2, m)
-            for inter in intersections:
-                if inter != p1:
-                    p2 = inter
-        return (p1,p2)
+            possible_intersections_p1 = self.inter_shed(p1, m)
+            for inter_point_p1 in possible_intersections_p1:
+                if inter_point_p1 != p2:
+                    p1_new = inter_point_p1
+                    possible_intersections_p2 = self.inter_shed(p2, m)
+                    for inter_point_p2 in possible_intersections_p2:
+                        if inter_point_p2 != p1:
+                            p2_new = inter_point_p2
+                            print("Intersection Output P1:"+str(p1))
+                            print("Intersection Output P2:"+str(p2))
+                            return ((p1_new, p2_new), True)
+        return ((p1,p2), False)
 
     def inter_shed(self, point: t_coordinate, m) -> List[t_coordinate]:
         quarter = self.region_code(point)
@@ -151,9 +146,10 @@ class Clipper():
         left, bottom, right, top = self.get_wc()
         new_point = m*(left - p[0])+p[1]
         new_coord = (left, new_point)
-        if new_point >= left and new_point <= right:
+        if new_point >= bottom and new_point <= top:
             return new_coord
         else:
+            print("OLD COORDINATE")
             return p
 
     def bottom_inter(self, p: t_coordinate, m:int):
@@ -164,15 +160,18 @@ class Clipper():
         if new_point >= left and new_point <= right:
             return new_coord
         else:
+            print("OLD COORDINATE")
             return p
 
     def right_inter(self, p: t_coordinate, m:int):
         left, bottom, right, top = self.get_wc()
         new_point = m*(right - p[0])+p[1]
         new_coord = (right, new_point)
-        if new_point >= left and new_point <= right:
+        print("NEW COORDINATE: "+str(new_coord))
+        if new_point >= bottom and new_point <= top:
             return new_coord
         else:
+            print("OLD COORDINATE")
             return p
 
     def top_inter(self, p: t_coordinate, m:int):
@@ -182,6 +181,7 @@ class Clipper():
         if new_point >= left and new_point <= right:
             return new_coord
         else:
+            print("OLD COORDINATE")
             return p
 
     def int_to_bin(self, code: int):
@@ -194,4 +194,6 @@ class Clipper():
         return (a & b)
 
     def ang_coef(self, p1: t_coordinate, p2:t_coordinate) -> int:
+        if (p1[0] == p2[0]):
+            return float('inf')
         return (p2[1] - p1[1])/(p2[0] - p1[0])
