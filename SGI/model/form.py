@@ -10,6 +10,7 @@ class Form():
         self.matrix = self.getMatrix()
         self.normalized = self.coordinates.copy()
         self.color = [0,0,0]
+        self.fill = 1
 
     def set_color(self, color):
         self.color = color
@@ -46,10 +47,22 @@ class Form():
             p2 = p
             object_lines.append((p1,p2))
             stack.append(p2)
-        p1 = points[0]
-        p2 = points[len(points)-1]
+        p2 = points[0]
+        p1 = points[len(points)-1]
         object_lines.append((p1,p2))
         return object_lines
+
+    def get_points(self, possible_lines):
+        points = []
+        for line, visible in possible_lines:
+            if visible:
+                if line[0] not in points:
+                    points.append(line[0])
+                if line[1] not in points:
+                    points.append(line[1])
+        if len(points) > 0:
+            points.append(points[0])
+        return points
 
     # transformada de viewport
     def vp_trans(self, wCoord: t_coordinate, wMin: t_coordinate, wMax: t_coordinate, vpCoordinate: t_coordinate) -> t_coordinate:

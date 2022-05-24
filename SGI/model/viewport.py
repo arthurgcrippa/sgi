@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QLabel
-from PyQt5.QtGui import QPainter, QPixmap, QPen, QColor
+from PyQt5.QtGui import QPainter, QPixmap, QPen, QColor, QPolygonF, QBrush
+from PyQt5.QtCore import *
 
 from typing import List
 from model.form import Form
@@ -37,6 +38,7 @@ class Viewport(QLabel):
     def get_painter(self, object: Form):
         painter = QPainter(self.board)
         pen = QPen()
+        brush = QBrush()
         if object == None:
             pen.setWidthF(1)
             pen.setColor(QColor('black'))
@@ -46,7 +48,10 @@ class Viewport(QLabel):
             b = object.color[2]
             pen.setWidthF(4)
             pen.setColor(QColor(r,g,b))
+            brush.setColor(QColor(r,g,b))
+            brush.setStyle(Qt.SolidPattern)
         painter.setPen(pen)
+        painter.setBrush(brush)
         return painter
 
 
@@ -62,13 +67,23 @@ class Viewport(QLabel):
             if visible == 1:
                 painter.drawPoint(x,y)
         elif (object.len() > 1):
-            possile_lines = self.clipper.clip(object)
-            for possible_line in possile_lines:
-                (p1, p2), visible = possible_line
-                (p1_x, p1_y) = object.vp_trans(p1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-                (p2_x, p2_y) = object.vp_trans(p2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-                if visible:
-                    painter.drawLine(p1_x, p1_y, p2_x, p2_y)
+            possible_lines = self.clipper.clip(object)
+            if object.fill and object.len() > 2:
+                points = object.get_points(possible_lines)
+                points_vp = []
+                for point in points:
+                    point_vp = object.vp_trans(point, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+                    points_vp.append(QPointF(point_vp[0], point_vp[1]))
+                polygon = QPolygonF(points_vp)
+                painter.drawPolygon(polygon)
+                print(polygon.isClosed())
+            else:
+                for possible_line in possible_lines:
+                    (p1, p2), visible = possible_line
+                    (p1_x, p1_y) = object.vp_trans(p1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+                    (p2_x, p2_y) = object.vp_trans(p2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+                    if visible:
+                        painter.drawLine(p1_x, p1_y, p2_x, p2_y)
         self.update()
         painter.end()
 
