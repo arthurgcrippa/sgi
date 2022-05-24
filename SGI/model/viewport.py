@@ -16,7 +16,7 @@ class Viewport(QLabel):
         self.vpCoord = (int(viewPortWidth), int(viewPortHeight))
         self.objectList: List[Form] = list()
         self.window = Window(viewPortHeight, viewPortWidth)
-        self.clipper = Clipper(self.window, 1)
+        self.clipper = Clipper(self.window, 0)
         self.vp_init()
         self.draw_axises(Form)
 
@@ -107,22 +107,24 @@ class Viewport(QLabel):
             y1 = (vp_x*cos, -vp_y*sin)
             y2 = (-vp_x*cos, vp_y*sin)
 
-        (x1, x2), visible = self.clipper.line_clip(x1, x2)
-        (y1, y2), visible = self.clipper.line_clip(y1, y2)
+        (x1, x2), visible_x = self.clipper.line_clip(x1, x2)
+        (y1, y2), visible_y = self.clipper.line_clip(y1, y2)
 
 
         (p1_x, p1_y) = form.vp_trans(self, x1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         (p2_x, p2_y) = form.vp_trans(self, x2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-        painter.drawLine(p1_x, p1_y, p2_x, p2_y)
+        if visible_x:
+            painter.drawLine(p1_x, p1_y, p2_x, p2_y)
         (p1_x, p1_y) = form.vp_trans(self, y1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         (p2_x, p2_y) = form.vp_trans(self, y2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-        painter.drawLine(p1_x, p1_y, p2_x, p2_y)
+        if visible_y:
+            painter.drawLine(p1_x, p1_y, p2_x, p2_y)
 
         self.update()
         painter.end()
 
     def move(self, index: int):
-        diff = 50
+        diff = 30
         if index == 1:
             self.window.yMin = self.window.yMin + diff
             self.window.yMax = self.window.yMax + diff

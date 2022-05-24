@@ -78,27 +78,28 @@ class CS_Clipper():
         if scope == 2:
             possible_intersections = self.inter_shed(p2, m)
             for inter_point in possible_intersections:
-                if inter_point != p1:
+                if inter_point != p1 and inter_point != p2:
                     p2 = inter_point
                     return ((p1,p2),True)
         if scope == 3:
             possible_intersections = self.inter_shed(p1, m)
             for inter_point in possible_intersections:
-                if inter_point != p2:
+                if inter_point != p2 and inter_point != p1:
                     p1 = inter_point
                     return ((p1,p2),True)
         if scope == 4:
             possible_intersections_p1 = self.inter_shed(p1, m)
             for inter_point_p1 in possible_intersections_p1:
-                if inter_point_p1 != p2:
+                if inter_point_p1 != p2 and inter_point_p1 != p1:
                     p1_new = inter_point_p1
                     possible_intersections_p2 = self.inter_shed(p2, m)
                     for inter_point_p2 in possible_intersections_p2:
-                        if inter_point_p2 != p1:
+                        if inter_point_p2 != p1 and inter_point_p2 != p2:
                             p2_new = inter_point_p2
                             print("Intersection Output P1:"+str(p1))
                             print("Intersection Output P2:"+str(p2))
                             return ((p1_new, p2_new), True)
+        print("Retornando False")
         return ((p1,p2), False)
 
     def inter_shed(self, point: t_coordinate, m) -> List[t_coordinate]:
@@ -127,34 +128,52 @@ class CS_Clipper():
 
     def bottom_inter(self, p: t_coordinate, m:int):
         left, bottom, right, top = self.get_wc()
-        new_point = (p[0] + 1/m) * (bottom - p[1])
+        print("ANTES DO CALCULO bottom")
+        print("==================================")
+        print("p0 : " + str(p[0]))
+        print("p1 : " + str(p[1]))
+        print("m : " + str(m))
+        print("bottom : " + str(bottom))
+        if(m != float("inf")):
+            new_point = p[0] + 1/m * (bottom - p[1])
+        else:
+            new_point = p[0]
         new_coord = (new_point, bottom)
         print("New Coordinate: "+str(new_coord))
         if new_point >= left and new_point <= right:
             return new_coord
         else:
-            print("OLD COORDINATE")
+            print("OLD COORDINATE: " + str(p))
             return p
 
     def right_inter(self, p: t_coordinate, m:int):
         left, bottom, right, top = self.get_wc()
+        print("ANTES DO CALCULO right")
+        print("==================================")
+        print("p0 : " + str(p[0]))
+        print("p1 : " + str(p[1]))
+        print("m : " + str(m))
+        print("right : " + str(right))
         new_point = m*(right - p[0])+p[1]
         new_coord = (right, new_point)
         print("NEW COORDINATE: "+str(new_coord))
+        print("bottom + top :" + str(bottom) + ", "+str(top))
         if new_point >= bottom and new_point <= top:
             return new_coord
         else:
-            print("OLD COORDINATE")
+            print("OLD COORDINATE: " + str(p))
             return p
 
     def top_inter(self, p: t_coordinate, m:int):
         left, bottom, right, top = self.get_wc()
-        new_point = (p[0] + 1/m) * (top - p[1])
+        if(m != float("inf")):
+            new_point = p[0] + 1/m * (top - p[1])
+        else:
+            new_point = p[0]
         new_coord = (new_point, top)
         if new_point >= left and new_point <= right:
             return new_coord
         else:
-            print("OLD COORDINATE")
             return p
 
     def int_to_bin(self, code: int):
