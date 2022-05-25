@@ -69,14 +69,13 @@ class Viewport(QLabel):
         elif (object.len() > 1):
             possible_lines = self.clipper.clip(object)
             if object.fill and object.len() > 2:
-                points = object.get_points(possible_lines)
+                points = self.clipper.get_points(possible_lines)
                 points_vp = []
                 for point in points:
                     point_vp = object.vp_trans(point, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
                     points_vp.append(QPointF(point_vp[0], point_vp[1]))
                 polygon = QPolygonF(points_vp)
                 painter.drawPolygon(polygon)
-                print(polygon.isClosed())
             else:
                 for possible_line in possible_lines:
                     (p1, p2), visible = possible_line
