@@ -12,6 +12,7 @@ import math
 import numpy as np
 
 t_coordinate = Tuple[float, float]
+float_error = 0.01
 
 class Clipper():
     def __init__(self, window: Window, algorythm: int) -> None:
@@ -86,10 +87,10 @@ class Clipper():
         return points
 
     def get_wc(self):
-        left = self.window.xMin
-        bottom = self.window.yMin
-        right = self.window.xMax
-        top = self.window.yMax
+        left = self.window.xMin - float_error
+        bottom = self.window.yMin - float_error
+        right = self.window.xMax + float_error
+        top = self.window.yMax + float_error
         return left, bottom, right, top
 
     def get_border(self):

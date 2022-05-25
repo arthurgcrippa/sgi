@@ -13,3 +13,5 @@ Kd 0.474510 0.784314 0.000000
 newmtl triangle_mtl
 Kd 0.474510 0.392157 1.000000
 
+newmtl quadrado_cheio
+Kd 0.0 0.0 0.0

@@ -39,8 +39,13 @@ def pointsToString(obj, objMap):
     line = ""
     if obj.len() == 1:
         line += "p "
-    elif obj.len() > 1:
+    elif obj.len() == 2:
         line += "l "
+    elif obj.len() > 2:
+        if obj.fill:
+            line+= "f "
+        else:
+            line+= "l "
     else:
         print("Objeto Vazio")
 
@@ -125,6 +130,7 @@ def parse_object(line, f, watercolour):
         obj["type"] = "Ponto"
         obj["color"] = color
         obj["vertices"] = vertex
+        obj["fill"] = False
 
     elif line[0] == 'l':
         line.pop(0)
@@ -135,6 +141,18 @@ def parse_object(line, f, watercolour):
         obj["type"] = "Linha" if len(vertices) == 2 else "Poligono"
         obj["color"] = color
         obj["vertices"] = vertices
+        obj["fill"] = False
+
+    elif line[0] == 'f':
+        line.pop(0)
+        vertices = []
+        while line:
+            vertices.append(int(line.pop()))
+        obj["name"] = name
+        obj["type"] = "Linha" if len(vertices) == 2 else "Poligono"
+        obj["color"] = color
+        obj["vertices"] = vertices
+        obj["fill"] = True
 
     return obj
 
@@ -148,6 +166,7 @@ def create_forms(vertices, objMapList):
             pointSet3D.append(vertices[v - 1])
         obj = Form(objMap["name"], parse_3Dto2D(pointSet3D), id)
         obj.set_color(objMap["color"])
+        obj.set_fill(objMap["fill"])
         id += 1
         objList.append(obj)
 

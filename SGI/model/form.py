@@ -10,10 +10,13 @@ class Form():
         self.matrix = self.getMatrix()
         self.normalized = self.coordinates.copy()
         self.color = [0,0,0]
-        self.fill = 1
+        self.fill = True
 
     def set_color(self, color):
         self.color = color
+
+    def set_fill(self, fill):
+        self.fill = fill
 
     def set_visible(self, visible):
         self.visible = visible
