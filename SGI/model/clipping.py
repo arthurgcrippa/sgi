@@ -97,3 +97,9 @@ class Clipper():
         left, bottom, right, top = self.get_wc()
         p1, p2, p3, p4 = (left, top), (right, top), (right, bottom), (left, bottom)
         return [p1, p2, p3, p4]
+
+    def set_algorithm(self, algorithm: int):
+        if algorithm == 1:
+            self.clipper = CS_Clipper(self.window)
+        else:
+            self.clipper = LB_Clipper(self.window)

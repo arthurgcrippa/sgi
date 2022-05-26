@@ -34,6 +34,7 @@ class ObjectWindow(QDialog):
         layout = QVBoxLayout()
         self.name = QLineEdit("Nome do Objeto")
         self.coordinates_tab = QLineEdit("(-50,1);(1,1);(1,50);(-50,50)")
+        self.fill_poligon = QCheckBox("Fill object")
         self.confirmButton = QPushButton('Confirm', self)
         cancelButton = QPushButton('Cancel')
         self.confirmButton.clicked.connect(self.confirm_button)
@@ -44,6 +45,7 @@ class ObjectWindow(QDialog):
 
         layout.addWidget(self.name)
         layout.addWidget(self.coordinates_tab)
+        layout.addWidget(self.fill_poligon)
         layout.addWidget(dialogBox)
         generalTab.setLayout(layout)
         return generalTab
@@ -67,6 +69,7 @@ class ObjectWindow(QDialog):
                 y = int(xy[1])
                 coordinatesList.append((x,y))
             form = Form(self.name.text(), coordinatesList, len(self.viewport.objectList))
+            form.set_fill(self.check_fill())
             return form
 
     def check(self, plaintext):
@@ -91,3 +94,9 @@ class ObjectWindow(QDialog):
         if (char == '(' or char == ')' or char == ',' or char == ';' or char == '-'):
             return True
         return False
+
+    def check_fill(self):
+        if self.fill_poligon.isChecked():
+            return True
+        else:
+            return False

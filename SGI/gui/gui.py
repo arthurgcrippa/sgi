@@ -7,7 +7,7 @@ from model.viewport import Viewport
 from gui.transformation_gui import Trasformation
 
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
-    QListWidget, QLayout, QGridLayout,  QToolButton, QMessageBox, QSpinBox, QLineEdit
+    QListWidget, QLayout, QGridLayout,  QToolButton, QMessageBox, QSpinBox, QLineEdit, QRadioButton
 
 from core import wavefront
 
@@ -43,6 +43,12 @@ class MainWindow(QWidget):
         openObjButton.clicked.connect(lambda: self.open(fileText.text()))
         saveObjButton.clicked.connect(lambda: self.save(fileText.text()))
 
+        self.cs_algorithm = QRadioButton("Coher Sutherland")
+        self.lb_algorithm = QRadioButton("Liang Barsky")
+        self.cs_algorithm.setChecked(True)
+        change_algorithm = QPushButton("Alterar Algoritmo")
+        change_algorithm.clicked.connect(lambda: self.change_algorithm())
+
         self.objList = QListWidget()
 
         label_arquivos = QLabel('Manipulação de Arquivos')
@@ -51,6 +57,13 @@ class MainWindow(QWidget):
         layoutObj.addWidget(openObjButton)
         layoutObj.addWidget(saveObjButton)
         layoutObj.addWidget(fileText)
+        layoutObj.addWidget(QLabel(''))
+        label_algorithm = QLabel('Algoritmo de clipping')
+        label_algorithm.setAlignment(Qt.AlignCenter)
+        layoutObj.addWidget(label_algorithm)
+        layoutObj.addWidget(self.cs_algorithm)
+        layoutObj.addWidget(self.lb_algorithm)
+        layoutObj.addWidget(change_algorithm)
         layoutObj.addWidget(QLabel(''))
         label_objetos = QLabel('Objetos')
         label_objetos.setAlignment(Qt.AlignCenter)
@@ -152,3 +165,14 @@ class MainWindow(QWidget):
             self.viewport.objectList.append(obj)
             self.objList.addItem(obj.name + ': ' + str(obj.id))
             self.viewport.redraw()
+
+    def get_algorithm(self):
+        if self.cs_algorithm.isChecked():
+            print("Voce esta usando coher suterland")
+            return 1
+        else:
+            print("Voce esta usando Linag Barsk")
+            return 0
+    
+    def change_algorithm(self):
+        self.viewport.clipper.set_algorithm(self.get_algorithm())
