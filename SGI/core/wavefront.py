@@ -165,7 +165,7 @@ def create_forms(vertices, objMapList):
         for v in objMap["vertices"]:
             pointSet3D.append(vertices[v - 1])
         obj = Form(objMap["name"], parse_3Dto2D(pointSet3D), id)
-        obj.set_color(objMap["color"])
+        obj.set_color(objMap["color"], 1)
         obj.set_fill(objMap["fill"])
         id += 1
         objList.append(obj)

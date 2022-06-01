@@ -173,6 +173,6 @@ class MainWindow(QWidget):
         else:
             print("Voce esta usando Linag Barsk")
             return 0
-    
+
     def change_algorithm(self):
         self.viewport.clipper.set_algorithm(self.get_algorithm())

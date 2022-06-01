@@ -3,7 +3,7 @@
 #from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
-from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
+from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, QRadioButton, \
     QListWidget, QLayout, QGridLayout, QToolButton, QDialog, QTabWidget, QFormLayout, QLineEdit,QCheckBox, QDialogButtonBox
 
 from model.form import Form
@@ -27,6 +27,7 @@ class ObjectWindow(QDialog):
     def add_tabs(self) -> QTabWidget:
         tabs = QTabWidget()
         tabs.addTab(self.object_tab(), "Objeto")
+        tabs.addTab(self.curve_tab(), "Curva")
         return tabs
 
     def object_tab(self) -> QWidget:
@@ -34,10 +35,11 @@ class ObjectWindow(QDialog):
         layout = QVBoxLayout()
         self.name = QLineEdit("Nome do Objeto")
         self.coordinates_tab = QLineEdit("(-50,1);(1,1);(1,50);(-50,50)")
+        self.object_color = QLineEdit("#000000")
         self.fill_poligon = QCheckBox("Fill object")
         self.confirmButton = QPushButton('Confirm', self)
         cancelButton = QPushButton('Cancel')
-        self.confirmButton.clicked.connect(self.confirm_button)
+        self.confirmButton.clicked.connect(self.confirm_object)
         dialogBox = QDialogButtonBox()
         dialogBox.rejected.connect(self.reject)
         dialogBox.addButton(self.confirmButton, QDialogButtonBox.AcceptRole)
@@ -45,20 +47,58 @@ class ObjectWindow(QDialog):
 
         layout.addWidget(self.name)
         layout.addWidget(self.coordinates_tab)
+        layout.addWidget(self.object_color)
         layout.addWidget(self.fill_poligon)
         layout.addWidget(dialogBox)
         generalTab.setLayout(layout)
         return generalTab
 
-    def confirm_button(self):
+    def curve_tab(self) -> QWidget:
+        generalTab = QWidget()
+        layout = QVBoxLayout()
+        self.curve_name = QLineEdit("Nome da Curva")
+        self.curve_coordinates = QLineEdit("(-100,-100);(-50,-150);(-50,150);(1,1);(50,50);(50,100);(100,100)")
+        self.curve_color = QLineEdit("#000000")
+        self.bezierButton = QRadioButton('Bezier')
+        self.hermiteButton = QRadioButton('Hermite')
+        confirmButton = QPushButton('Confirm', self)
+        cancelButton = QPushButton('Cancel')
+        confirmButton.clicked.connect(self.confirm_curve)
+        dialogBox = QDialogButtonBox()
+        dialogBox.rejected.connect(self.reject)
+        dialogBox.addButton(confirmButton, QDialogButtonBox.AcceptRole)
+        dialogBox.addButton(cancelButton, QDialogButtonBox.RejectRole)
+
+        layout.addWidget(self.curve_name)
+        layout.addWidget(self.curve_coordinates)
+        layout.addWidget(self.curve_color)
+        layout.addWidget(self.bezierButton)
+        layout.addWidget(self.hermiteButton)
+        layout.addWidget(dialogBox)
+        generalTab.setLayout(layout)
+        return generalTab
+
+
+    def confirm_object(self):
         form = self.form_setup()
+        form.set_color(self.object_color.text(), 0)
         self.viewport.objectList.append(form)
         self.viewport.draw(form)
         self.mainWindow.objList.addItem(form.name + ': ' + str(form.id))
 
-    def form_setup(self) -> Form:
+    def confirm_curve(self):
+        form = self.form_setup(self.curve_name.text(), self.curve_coordinates.text())
+        form.set_curvy(True)
+        form.set_color(self.curve_color.text(), 0)
+        if self.hermiteButton.isChecked():
+            form.set_curve_type(1)
+        self.viewport.objectList.append(form)
+        self.viewport.draw(form)
+        self.mainWindow.objList.addItem(form.name + ': ' + str(form.id))
+
+    def form_setup(self, name, coordinates_text) -> Form:
         coordinatesList = list()
-        plaintext = self.coordinates_tab.text()
+        plaintext = coordinates_text
         if (self.check(plaintext)):
             coordinates = plaintext.split(';')
             for coordinate in coordinates:
@@ -68,7 +108,7 @@ class ObjectWindow(QDialog):
                 x = int(xy[0])
                 y = int(xy[1])
                 coordinatesList.append((x,y))
-            form = Form(self.name.text(), coordinatesList, len(self.viewport.objectList))
+            form = Form(name, coordinatesList, len(self.viewport.objectList))
             form.set_fill(self.check_fill())
             return form
 
