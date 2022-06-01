@@ -33,8 +33,8 @@ class ObjectWindow(QDialog):
     def object_tab(self) -> QWidget:
         generalTab = QWidget()
         layout = QVBoxLayout()
-        self.name = QLineEdit("Nome do Objeto")
-        self.coordinates_tab = QLineEdit("(-50,1);(1,1);(1,50);(-50,50)")
+        self.object_name = QLineEdit("Nome do Objeto")
+        self.object_coordinates = QLineEdit("(-50,1);(1,1);(1,50);(-50,50)")
         self.object_color = QLineEdit("#000000")
         self.fill_poligon = QCheckBox("Fill object")
         self.confirmButton = QPushButton('Confirm', self)
@@ -45,8 +45,8 @@ class ObjectWindow(QDialog):
         dialogBox.addButton(self.confirmButton, QDialogButtonBox.AcceptRole)
         dialogBox.addButton(cancelButton, QDialogButtonBox.RejectRole)
 
-        layout.addWidget(self.name)
-        layout.addWidget(self.coordinates_tab)
+        layout.addWidget(self.object_name)
+        layout.addWidget(self.object_coordinates)
         layout.addWidget(self.object_color)
         layout.addWidget(self.fill_poligon)
         layout.addWidget(dialogBox)
@@ -80,8 +80,9 @@ class ObjectWindow(QDialog):
 
 
     def confirm_object(self):
-        form = self.form_setup()
+        form = self.form_setup(self.object_name.text(), self.object_coordinates.text())
         form.set_color(self.object_color.text(), 0)
+        form.set_fill(self.check_fill())
         self.viewport.objectList.append(form)
         self.viewport.draw(form)
         self.mainWindow.objList.addItem(form.name + ': ' + str(form.id))
@@ -109,7 +110,6 @@ class ObjectWindow(QDialog):
                 y = int(xy[1])
                 coordinatesList.append((x,y))
             form = Form(name, coordinatesList, len(self.viewport.objectList))
-            form.set_fill(self.check_fill())
             return form
 
     def check(self, plaintext):
