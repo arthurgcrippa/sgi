@@ -112,14 +112,14 @@ class Viewport(QLabel):
         cos = np.cos(theta)
         vp_x, vp_y = self.vpCoord[0]/2, self.vpCoord[1]/2
 
-        (x1, x2) = (0, vp_y), (0, -vp_y)
-        (y1, y2) = (vp_x, 0), (-vp_x, 0)
+        (x1, x2) = (0, 1000), (0, -1000)
+        (y1, y2) = (1000, 0), (-1000, 0)
 
         if (self.window.theta != 0):
-            x1 = (vp_x*sin, vp_y*cos)
-            x2 = (-vp_x*sin, -vp_y*cos)
-            y1 = (vp_x*cos, -vp_y*sin)
-            y2 = (-vp_x*cos, vp_y*sin)
+            x1 = (1000*sin, 1000*cos)
+            x2 = (-1000*sin, -1000*cos)
+            y1 = (1000*cos, -1000*sin)
+            y2 = (-1000*cos, 1000*sin)
 
         (x1, x2), visible_x = self.clipper.line_clip(x1, x2)
         (y1, y2), visible_y = self.clipper.line_clip(y1, y2)
