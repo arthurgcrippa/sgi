@@ -61,6 +61,7 @@ class ObjectWindow(QDialog):
         self.curve_color = QLineEdit("#000000")
         self.bezierButton = QRadioButton('Bezier')
         self.hermiteButton = QRadioButton('Hermite')
+        self.bsplineButton = QRadioButton('B-Spline')
         confirmButton = QPushButton('Confirm', self)
         cancelButton = QPushButton('Cancel')
         confirmButton.clicked.connect(self.confirm_curve)
@@ -74,6 +75,7 @@ class ObjectWindow(QDialog):
         layout.addWidget(self.curve_color)
         layout.addWidget(self.bezierButton)
         layout.addWidget(self.hermiteButton)
+        layout.addWidget(self.bsplineButton)
         layout.addWidget(dialogBox)
         generalTab.setLayout(layout)
         return generalTab
@@ -93,6 +95,8 @@ class ObjectWindow(QDialog):
         form.set_color(self.curve_color.text(), 0)
         if self.hermiteButton.isChecked():
             form.set_curve_type(1)
+        if self.bezierButton.isChecked():
+            form.set_curve_type(2)
         self.viewport.objectList.append(form)
         self.viewport.draw(form)
         self.mainWindow.objList.addItem(form.name + ': ' + str(form.id))

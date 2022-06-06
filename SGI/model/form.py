@@ -12,8 +12,11 @@ class Form():
         self.color = [0,0,0]
         self.fill = False
         self.curve_type = 0
-        self.steps = 1000
+        self.curve_algo = 1
+        self.steps = 10
+        self.delta = self.get_delta()
         self.is_curvy = False
+        self.polynomial_test()
 
     def set_color(self, color, format):
         if format:
@@ -36,22 +39,19 @@ class Form():
     def set_visible(self, visible):
         self.visible = visible
 
-    def add_cord(self, coordinate: t_coordinate):
-        self.coordinates.append(coordinate)
-        self.matrix = self.getMatrix()
+    def setCoordinates(self, coordinates: List[t_coordinate]):
+        self.coordinates = coordinates
 
-    def len(self)->int:
-        return len(self.coordinates)
+    def setMatrix(self, matrix: []):
+        self.matrix = matrix
 
-    def get_center(self) -> t_coordinate:
+    def getMatrix(self) -> []:
         coordinates = self.coordinates
-        x, y = (0,0)
+        matrix = []
         for coordinate in coordinates:
-            x = x + coordinate[0]
-            y = y + coordinate[1]
-        x = x/self.len()
-        y = y/self.len()
-        return (x,y)
+            x, y = coordinate[0], coordinate[1]
+            matrix.append([x,y,1])
+        return matrix
 
     def get_lines(self):
         if self.is_curvy:
@@ -72,25 +72,28 @@ class Form():
         object_lines.append((p1,p2))
         return object_lines
 
+    def add_cord(self, coordinate: t_coordinate):
+        self.coordinates.append(coordinate)
+        self.matrix = self.getMatrix()
+
+    def get_center(self) -> t_coordinate:
+        coordinates = self.coordinates
+        x, y = (0,0)
+        for coordinate in coordinates:
+            x = x + coordinate[0]
+            y = y + coordinate[1]
+        x = x/self.len()
+        y = y/self.len()
+        return (x,y)
+
+    def len(self)->int:
+        return len(self.coordinates)
+
     # transformada de viewport
     def vp_trans(self, wCoord: t_coordinate, wMin: t_coordinate, wMax: t_coordinate, vpCoordinate: t_coordinate) -> t_coordinate:
         vp_x = ((wCoord[0] - wMin[0])/(wMax[0]-wMin[0]))*vpCoordinate[0]
         vp_y = (1-((wCoord[1]-wMin[1])/(wMax[1]-wMin[1])))*vpCoordinate[1]
         return (int(vp_x), int(vp_y))
-
-    def setCoordinates(self, coordinates: List[t_coordinate]):
-        self.coordinates = coordinates
-
-    def getMatrix(self) -> []:
-        coordinates = self.coordinates
-        matrix = []
-        for coordinate in coordinates:
-            x, y = coordinate[0], coordinate[1]
-            matrix.append([x,y,1])
-        return matrix
-
-    def setMatrix(self, matrix: []):
-        self.matrix = matrix
 
     def reform(self):
         matrix = self.matrix
@@ -101,6 +104,14 @@ class Form():
 
     def curve(self):
         lines = []
+        if self.curve_type:
+            lines = self.blending_curve()
+        else:
+            lines = self.b_spline_curve()
+        return lines
+
+    def blending_curve(self):
+        lines = []
         if (self.len()-1) % 3 != 0:
             print("Problemas! Não há como formar p1, p2, ")
             print(self.len())
@@ -109,7 +120,7 @@ class Form():
             for i in range(1, self.len()):
                 if i % 3 == 0:
                     p2 = self.normalized[i]
-                    partial_lines = self.partial_curve(p1,p2,r1,r2)
+                    partial_lines = self.curve_segment(p1,r1,r2,p2)
                     p1 = p2
                     for line in partial_lines:
                         lines.append(line)
@@ -119,27 +130,133 @@ class Form():
                     r2 = self.normalized[i]
         return lines
 
-    def partial_curve(self, p1: t_coordinate, p4: t_coordinate, r1: t_coordinate, r4: t_coordinate):
+    def b_spline_curve(self):
         lines = []
-        x1, y1 = p1[0], p1[1]
-        for i in range(0, self.steps+1):
-            t = i/self.steps
-            x2, y2 = x1, y1
-            if self.curve_type:
-                x2, y2 = self.hermite(p1, r1, r4, p4, t)
-            else:
-                x2, y2 = self.bezier(p1, r1, r4, p4, t)
-            lines.append(((x1,y1), (x2,y2)))
-            x1, y1 = x2, y2
+        if self.len() < 4:
+            print("Problemas! Não há como formar p1, p2, ")
+            print(self.len())
+        else:
+            p0, p1, p2, p3 = self.normalized[0], self.normalized[1], self.normalized[2], self.normalized[3]
+            lines = self.curve_segment(p0,p1,p2,p3)
+            for i in range(self.len()-4):
+                p0 = p1
+                p1 = p2
+                p2 = p3
+                p3 = self.normalized[i+4]
+                segment_lines = self.curve_segment(p0, p1, p2, p3)
+                for line in segment_lines:
+                    #possible line repetition
+                    lines.append(line)
         return lines
+
+    def curve_segment(self, p1: t_coordinate, p2: t_coordinate, p3: t_coordinate, p4: t_coordinate):
+        lines = []
+        if self.curve_algo:
+            x1, y1 = p1[0], p1[1]
+            for i in range(0, self.steps+1):
+                t = i/self.steps
+                x2, y2 = self.polynomial_function(p1, p2, p3, p4, t)
+                lines.append(((x1,y1), (x2,y2)))
+                x1, y1 = x2, y2
+            return lines
+        else:
+            return self.forwarding_differences(p1, p2, p3, p4)
+
+    def polynomial_function(self, p1, p2, p3, p4, t):
+        t3, t2 = t**3, t**2
+        ax, bx, cx, dx = self.polynomial_coeficients(p1[0],p2[0],p3[0],p4[0])
+        ay, by, cy, dy = self.polynomial_coeficients(p1[1],p2[1],p3[1],p4[1])
+        x = ax*t3 + bx*t2 + cx*t + dx
+        y = ay*t2 + by*t2 + cy*t + dy
+        return x,y
 
     def bezier(self, p0, p1, p2, p3, t):
         s = 1-t
-        x = s**3 * p0[0] + 3 * s**2 * t * p1[0] + 3 * s * t**2 * p2[0] + t**3 * p3[0]
-        y = s**3 * p0[1] + 3 * s**2 * t * p1[1] + 3 * s * t**2 * p2[1] + t**3 * p3[1]
+        t3, t2 = t**3, t**2
+        s3, s2 = s**3, s**2
+        x = s3 * p0[0] + 3 * s2 * t * p1[0] + 3 * s * t2 * p2[0] + t3 * p3[0]
+        y = s3 * p0[1] + 3 * s2 * t * p1[1] + 3 * s * t2 * p2[1] + t3 * p3[1]
+        #x = (1-t)3 * p0[0] + 3 * (1-t)2 * t * p1[0] + 3 * (1-t) * t2 * p2[0] + t3 * p3[0]
         return x, y
 
     def hermite(self, p1, r1, r4, p4, t):
-        x = p1[0] * (2*t**3 - 3*t**2 + 1) + p4[0] * (-2*t**3 + 3*t**2) + r1[0] * (t**3 - 2*t**2 + t) + r4[0] * (t**3 - t**2)
-        y = p1[1] * (2*t**3 - 3*t**2 + 1) + p4[1] * (-2*t**3 + 3*t**2) + r1[1] * (t**3 - 2*t**2 + t) + r4[1] * (t**3 - t**2)
+        t3, t2 = t**3, t**2
+        x = p1[0] * (2*t3 - 3*t2 + 1) + p4[0] * (-2*t3 + 3*t2) + r1[0] * (t3 - 2*t2 + t) + r4[0] * (t3 - t2)
+        y = p1[1] * (2*t3 - 3*t2 + 1) + p4[1] * (-2*t3 + 3*t2) + r1[1] * (t3 - 2*t2 + t) + r4[1] * (t3 - t2)
         return x, y
+        #y = p1[1] * (2*t3 - 3*t2 + 1) + p2[1] * (t3 - 2*t2 + t) + p3[1] * (t3 - t2) + p4[1] * (-2*t3 + 3*t2)
+
+    def b_spline(self, p1, p2, p3, p4, t):
+        t2, t3 = t**2, t**3
+        x = (-t3+3*t2-3*t+1)*p1[0]/6 + (3*t3 -6*t2 + 3*t)*p2[0]/6 + (-3*t3 + 3*t)*p3[0]/6 + (t3 + 4*t2 + t)*p4[0]/6
+        y = (-t3+3*t2-3*t+1)*p1[1]/6 + (3*t3 -6*t2 + 3*t)*p2[1]/6 + (-3*t3 + 3*t)*p3[1]/6 + (t3 + 4*t2 + t)*p4[1]/6
+        return x, y
+
+    def forwarding_differences(self, p1, p2, p3, p4):
+
+        ax, bx, cx, dx = self.polynomial_coeficients(p1[0], p2[0], p3[0], p4[0])
+        ay, by, cy, dy = self.polynomial_coeficients(p1[1], p2[1], p3[1], p4[1])
+
+        _d, _d2, _d3 = self.delta[0], self.delta[1], self.delta[2]
+
+        x, y = dx, dy
+        dx, dy = ax*_d3 + bx*_d2 + cx*_d, ay*_d3 + by*_d2 + cy*_d
+        d2x, d2y = 6*ax*_d3 + 2*bx*_d2, 6*ay*_d3 + 2*by*_d2
+        d3x, d3y = 6*ax*_d3, 6*ay*_d3
+        lines = []
+        x1 = x
+        y1 = y
+        for i in range(self.steps):
+            print("x: "+str(x))
+            print("dx: "+str(dx))
+            print("d2x: "+str(d2x))
+            print("d3x: "+str(d3x))
+            print("y: "+str(y))
+            print("dy: "+str(dy))
+            print("d2y: "+str(d2y))
+            print("d3y: "+str(d3y))
+            x, dx, d2x = x + dx, dx + d2x, d2x + d3x
+            y, dy, d2y = y + dy, dy + d2y, d2y + d3y
+            x2,y2 = x,y
+            print((x1, y1))
+            lines.append(((x1,y1),(x2,y2)))
+            x1, y1 = x2, y2
+        return lines
+
+    def polynomial_coeficients(self, v1, v2, v3, v4):
+        if self.curve_type == 1:
+            a = (+2)*v1+(+1)*v2+(+1)*v3+(-2)*v4
+            b = (-3)*v1+(-2)*v2+(-1)*v3+(+3)*v4
+            c = (+0)*v1+(+1)*v2+(+0)*v3+(+0)*v4
+            d = (+1)*v1+(+0)*v2+(+0)*v3+(+0)*v4
+            return a, b, c, d
+        elif self.curve_type == 2:
+            a = (-1)*v1+(+3)*v2+(-3)*v3+(+1)*v4
+            b = (+3)*v1+(-6)*v2+(+3)*v3+(+0)*v4
+            c = (-3)*v1+(+3)*v2+(+0)*v3+(+0)*v4
+            d = (+1)*v1+(+0)*v2+(+0)*v3+(+0)*v4
+            return a, b, c, d
+        else:
+            a = (-1/6)*v1+(+3/6)*v2+(-3/6)*v3+(+1/6)*v4
+            b = (+3/6)*v1+(-6/6)*v2+(+0/6)*v3+(+4/6)*v4
+            c = (-3/6)*v1+(+3/6)*v2+(+3/6)*v3+(+1/6)*v4
+            d = (+1/6)*v1+(+0/6)*v2+(+0/6)*v3+(+0/6)*v4
+            return a, b, c, d
+
+    def get_delta(self):
+        _d = 1/self.steps
+        _d2, _d3 = _d**2, _d**2
+        return _d, _d2, _d3
+
+    def polynomial_test(self):
+        points = [(-100,-100),(-50,-150),(-50,150),(1,1),(50,50),(50,100),(100,100)]
+        p0, p1, p2, p3 = points[0], points[1], points[2], points[3]
+        x1, y1 = p0[0], p0[1]
+        for i in range(0, self.steps+1):
+            t = i/self.steps
+            xp, yp = self.polynomial_function(p0, p1, p2, p3, t)
+            xf, yf = self.bezier(p0, p1, p2, p3, t)
+            print("xp:"+str(xp))
+            print("yp:"+str(yp))
+            print("xf:"+str(xf))
+            print("xf:"+str(yf))
