@@ -12,11 +12,10 @@ class Form():
         self.color = [0,0,0]
         self.fill = False
         self.curve_type = 0
-        self.curve_algo = 1
-        self.steps = 10
+        self.curve_algo = 0
+        self.steps = 1000
         self.delta = self.get_delta()
         self.is_curvy = False
-        self.polynomial_test()
 
     def set_color(self, color, format):
         if format:
@@ -152,10 +151,17 @@ class Form():
     def curve_segment(self, p1: t_coordinate, p2: t_coordinate, p3: t_coordinate, p4: t_coordinate):
         lines = []
         if self.curve_algo:
-            x1, y1 = p1[0], p1[1]
-            for i in range(0, self.steps+1):
+            x1, y1 = self.polynomial_function(p1, p2, p3, p4, 0)
+            for i in range(1, self.steps+1):
                 t = i/self.steps
-                x2, y2 = self.polynomial_function(p1, p2, p3, p4, t)
+                x2, y2 = self.polynomial_function(p1, p2, p3, p4, t) 
+                # x2, y2 = x1, y1
+                # if self.curve_type == 1:
+                #     x2, y2 = self.hermite(p1, p2, p3, p4, t)
+                # elif self.curve_type == 2:
+                #     x2, y2 = self.bezier(p1, p2, p3, p4, t)
+                # else:
+                #     x2, y2 = self.b_spline(p1, p2, p3, p4, t)
                 lines.append(((x1,y1), (x2,y2)))
                 x1, y1 = x2, y2
             return lines
@@ -168,6 +174,8 @@ class Form():
         ay, by, cy, dy = self.polynomial_coeficients(p1[1],p2[1],p3[1],p4[1])
         x = ax*t3 + bx*t2 + cx*t + dx
         y = ay*t2 + by*t2 + cy*t + dy
+        print("x: "+str(x))
+        print("y: "+str(y))
         return x,y
 
     def bezier(self, p0, p1, p2, p3, t):
@@ -188,8 +196,8 @@ class Form():
 
     def b_spline(self, p1, p2, p3, p4, t):
         t2, t3 = t**2, t**3
-        x = (-t3+3*t2-3*t+1)*p1[0]/6 + (3*t3 -6*t2 + 3*t)*p2[0]/6 + (-3*t3 + 3*t)*p3[0]/6 + (t3 + 4*t2 + t)*p4[0]/6
-        y = (-t3+3*t2-3*t+1)*p1[1]/6 + (3*t3 -6*t2 + 3*t)*p2[1]/6 + (-3*t3 + 3*t)*p3[1]/6 + (t3 + 4*t2 + t)*p4[1]/6
+        x = (-t3+3*t2-3*t+1)*p1[0]/6 + (3*t3 -6*t2 + 4)*p2[0]/6 + (-3*t3 + 3*t2 + 3*t + 1)*p3[0]/6 + (t3)*p4[0]/6
+        y = (-t3+3*t2-3*t+1)*p1[1]/6 + (3*t3 -6*t2 + 4)*p2[1]/6 + (-3*t3 + 3*t2 + 3*t + 1)*p3[1]/6 + (t3)*p4[1]/6
         return x, y
 
     def forwarding_differences(self, p1, p2, p3, p4):
@@ -238,25 +246,13 @@ class Form():
             return a, b, c, d
         else:
             a = (-1/6)*v1+(+3/6)*v2+(-3/6)*v3+(+1/6)*v4
-            b = (+3/6)*v1+(-6/6)*v2+(+0/6)*v3+(+4/6)*v4
-            c = (-3/6)*v1+(+3/6)*v2+(+3/6)*v3+(+1/6)*v4
-            d = (+1/6)*v1+(+0/6)*v2+(+0/6)*v3+(+0/6)*v4
+            b = (+3/6)*v1+(-6/6)*v2+(+3/6)*v3+(0/6)*v4
+            c = (-3/6)*v1+(+0/6)*v2+(+3/6)*v3+(0/6)*v4
+            d = (+1/6)*v1+(+4/6)*v2+(+1/6)*v3+(+0/6)*v4
             return a, b, c, d
 
     def get_delta(self):
         _d = 1/self.steps
-        _d2, _d3 = _d**2, _d**2
+        _d2, _d3 = _d**2, _d**3
         return _d, _d2, _d3
 
-    def polynomial_test(self):
-        points = [(-100,-100),(-50,-150),(-50,150),(1,1),(50,50),(50,100),(100,100)]
-        p0, p1, p2, p3 = points[0], points[1], points[2], points[3]
-        x1, y1 = p0[0], p0[1]
-        for i in range(0, self.steps+1):
-            t = i/self.steps
-            xp, yp = self.polynomial_function(p0, p1, p2, p3, t)
-            xf, yf = self.bezier(p0, p1, p2, p3, t)
-            print("xp:"+str(xp))
-            print("yp:"+str(yp))
-            print("xf:"+str(xf))
-            print("xf:"+str(yf))
