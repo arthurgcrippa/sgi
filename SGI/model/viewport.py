@@ -84,9 +84,9 @@ class Viewport(QLabel):
                         FIRST = False
                         continue
                     object_path.lineTo(point[0], point[1])
-                    object_path.moveTo(point[0], point[1])
+                    # object_path.moveTo(point[0], point[1])
                 painter.fillPath(object_path, painter.brush())
-                painter.drawPath(object_path)
+                # painter.drawPath(object_path)
             else:
                 for possible_line in possible_lines:
                     (p1, p2), visible = possible_line
