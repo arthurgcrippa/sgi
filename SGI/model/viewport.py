@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QLabel
-from PyQt5.QtGui import QPainter, QPixmap, QPen, QColor, QPolygonF, QBrush
+from PyQt5.QtGui import QPainter, QPixmap, QPen, QColor, QPolygonF, QBrush, QPainterPath
 from PyQt5.QtCore import *
 
 from typing import List
@@ -54,13 +54,11 @@ class Viewport(QLabel):
         painter.setBrush(brush)
         return painter
 
-
     def draw(self, object: Form):
 
         self.normalize(object)
         painter = self.get_painter(object)
         xMin, yMin, xMax, yMax = self.get_wc()
-
         if (object.len() == 1):
             (x,y) = object.vp_trans(object.normalized[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
             visible = self.clipper.clip(object)
@@ -70,12 +68,25 @@ class Viewport(QLabel):
             possible_lines = self.clipper.clip(object)
             if object.fill and object.len() > 2:
                 points = self.clipper.get_points(possible_lines)
+                # points_vp = []
+                # for point in points:
+                #     point_vp = object.vp_trans(point, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+                #     points_vp.append(QPointF(point_vp[0], point_vp[1]))
+                #NEW ALGO!!
                 points_vp = []
+                first_point = object.vp_trans(points[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+                object_path = QPainterPath()
+                FIRST = True
                 for point in points:
-                    point_vp = object.vp_trans(point, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-                    points_vp.append(QPointF(point_vp[0], point_vp[1]))
-                polygon = QPolygonF(points_vp)
-                painter.drawPolygon(polygon)
+                    point = object.vp_trans(point, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+                    if FIRST:
+                        object_path.moveTo(point[0], point[1])
+                        FIRST = False
+                        continue
+                    object_path.lineTo(point[0], point[1])
+                    object_path.moveTo(point[0], point[1])
+                painter.fillPath(object_path, painter.brush())
+                painter.drawPath(object_path)
             else:
                 for possible_line in possible_lines:
                     (p1, p2), visible = possible_line
