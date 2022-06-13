@@ -126,7 +126,6 @@ class ObjectWindow(QDialog):
                 return False
             stack.append(char)
             if prev == '(' and ((not char.isnumeric()) and char != '-'):
-                print(2)
                 return False
             if prev == ')' and char != ';':
                 return False

@@ -174,8 +174,6 @@ class Form():
         ay, by, cy, dy = self.polynomial_coeficients(p1[1],p2[1],p3[1],p4[1])
         x = ax*t3 + bx*t2 + cx*t + dx
         y = ay*t2 + by*t2 + cy*t + dy
-        print("x: "+str(x))
-        print("y: "+str(y))
         return x,y
 
     def bezier(self, p0, p1, p2, p3, t):
@@ -215,18 +213,9 @@ class Form():
         x1 = x
         y1 = y
         for i in range(self.steps):
-            print("x: "+str(x))
-            print("dx: "+str(dx))
-            print("d2x: "+str(d2x))
-            print("d3x: "+str(d3x))
-            print("y: "+str(y))
-            print("dy: "+str(dy))
-            print("d2y: "+str(d2y))
-            print("d3y: "+str(d3y))
             x, dx, d2x = x + dx, dx + d2x, d2x + d3x
             y, dy, d2y = y + dy, dy + d2y, d2y + d3y
             x2,y2 = x,y
-            print((x1, y1))
             lines.append(((x1,y1),(x2,y2)))
             x1, y1 = x2, y2
         return lines
