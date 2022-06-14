@@ -68,11 +68,6 @@ class Viewport(QLabel):
             possible_lines = self.clipper.clip(object)
             if object.fill and object.len() > 2:
                 points = self.clipper.get_points(possible_lines)
-                # points_vp = []
-                # for point in points:
-                #     point_vp = object.vp_trans(point, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-                #     points_vp.append(QPointF(point_vp[0], point_vp[1]))
-                #NEW ALGO!!
                 points_vp = []
                 first_point = object.vp_trans(points[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
                 object_path = QPainterPath()
@@ -84,9 +79,7 @@ class Viewport(QLabel):
                         FIRST = False
                         continue
                     object_path.lineTo(point[0], point[1])
-                    # object_path.moveTo(point[0], point[1])
                 painter.fillPath(object_path, painter.brush())
-                # painter.drawPath(object_path)
             else:
                 for possible_line in possible_lines:
                     (p1, p2), visible = possible_line
@@ -111,7 +104,7 @@ class Viewport(QLabel):
 
     def normalize(self, form: Form) -> None:
         degree = self.window.theta
-        rotation_norm = Transformation(2, -degree, (0,0), form, None)
+        rotation_norm = Transformation(2, -degree, (0,0,0), [(-10,-10,-10),(10,10,10)], form, None)
         rotation_norm.normalize()
 
     def draw_axises(self, form: Form):
@@ -139,10 +132,18 @@ class Viewport(QLabel):
         (p1_x, p1_y) = form.vp_trans(self, x1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         (p2_x, p2_y) = form.vp_trans(self, x2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         if visible_x:
+            print("x1: "+str(p1_x))
+            print("y1: "+str(p1_y))
+            print("x2: "+str(p2_x))
+            print("y2: "+str(p2_y))
             painter.drawLine(p1_x, p1_y, p2_x, p2_y)
         (p1_x, p1_y) = form.vp_trans(self, y1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         (p2_x, p2_y) = form.vp_trans(self, y2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         if visible_y:
+            print("x1: "+str(p1_x))
+            print("y1: "+str(p1_y))
+            print("x2: "+str(p2_x))
+            print("y2: "+str(p2_y))
             painter.drawLine(p1_x, p1_y, p2_x, p2_y)
 
         self.update()

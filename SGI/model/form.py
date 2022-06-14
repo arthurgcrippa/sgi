@@ -1,6 +1,6 @@
 from typing import List, Tuple
 import numpy as np
-t_coordinate = Tuple[float, float]
+t_coordinate = Tuple[float, float, float]
 
 class Form():
     def __init__(self, name: str, coordinates: List[t_coordinate], id: int) -> None:
@@ -44,13 +44,35 @@ class Form():
     def setMatrix(self, matrix: []):
         self.matrix = matrix
 
+    def set_edges(self, edges: []):
+        self.edges = edges
+
     def getMatrix(self) -> []:
         coordinates = self.coordinates
         matrix = []
         for coordinate in coordinates:
-            x, y = coordinate[0], coordinate[1]
-            matrix.append([x,y,1])
+            x, y, z = coordinate[0], coordinate[1], coordinate[2]
+            matrix.append([x,y,z,1]) #ISSO PODE ESTAR ERRADO
         return matrix
+
+    # def get_lines(self):
+    #     if self.is_curvy:
+    #         return self.curve()
+    #     object_lines = []
+    #     stack = []
+    #     points = self.normalized
+    #     for p in points:
+    #         if len(stack) == 0:
+    #             stack.append(p)
+    #             continue
+    #         p1 = stack.pop()
+    #         p2 = p
+    #         object_lines.append((p1,p2))
+    #         stack.append(p2)
+    #     p2 = points[0]
+    #     p1 = points[len(points)-1]
+    #     object_lines.append((p1,p2))
+    #     return object_lines
 
     def get_lines(self):
         if self.is_curvy:
@@ -58,17 +80,8 @@ class Form():
         object_lines = []
         stack = []
         points = self.normalized
-        for p in points:
-            if len(stack) == 0:
-                stack.append(p)
-                continue
-            p1 = stack.pop()
-            p2 = p
-            object_lines.append((p1,p2))
-            stack.append(p2)
-        p2 = points[0]
-        p1 = points[len(points)-1]
-        object_lines.append((p1,p2))
+        for p in self.edges:
+            object_lines.append((points[p[0]-1], points[p[1]-1]))
         return object_lines
 
     def add_cord(self, coordinate: t_coordinate):
@@ -77,13 +90,15 @@ class Form():
 
     def get_center(self) -> t_coordinate:
         coordinates = self.coordinates
-        x, y = (0,0)
+        x, y, z = (0,0,0)
         for coordinate in coordinates:
             x = x + coordinate[0]
             y = y + coordinate[1]
+            z = z + coordinate[2]
         x = x/self.len()
         y = y/self.len()
-        return (x,y)
+        z = z/self.len()
+        return (x,y,z)
 
     def len(self)->int:
         return len(self.coordinates)
@@ -98,8 +113,8 @@ class Form():
         matrix = self.matrix
         self.coordinates.clear()
         for line in matrix:
-            x, y = line[0], line[1]
-            self.coordinates.append([x,y])
+            x, y, z = line[0], line[1], line[2]
+            self.coordinates.append([x,y,z])
 
     def curve(self):
         lines = []
@@ -154,14 +169,7 @@ class Form():
             x1, y1 = self.polynomial_function(p1, p2, p3, p4, 0)
             for i in range(1, self.steps+1):
                 t = i/self.steps
-                x2, y2 = self.polynomial_function(p1, p2, p3, p4, t) 
-                # x2, y2 = x1, y1
-                # if self.curve_type == 1:
-                #     x2, y2 = self.hermite(p1, p2, p3, p4, t)
-                # elif self.curve_type == 2:
-                #     x2, y2 = self.bezier(p1, p2, p3, p4, t)
-                # else:
-                #     x2, y2 = self.b_spline(p1, p2, p3, p4, t)
+                x2, y2 = self.polynomial_function(p1, p2, p3, p4, t)
                 lines.append(((x1,y1), (x2,y2)))
                 x1, y1 = x2, y2
             return lines
@@ -244,4 +252,3 @@ class Form():
         _d = 1/self.steps
         _d2, _d3 = _d**2, _d**3
         return _d, _d2, _d3
-

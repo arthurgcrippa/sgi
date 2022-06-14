@@ -34,7 +34,9 @@ class ObjectWindow(QDialog):
         generalTab = QWidget()
         layout = QVBoxLayout()
         self.object_name = QLineEdit("Nome do Objeto")
-        self.object_coordinates = QLineEdit("(-50,1);(1,1);(1,50);(-50,50)")
+        #self.object_coordinates = QLineEdit("(-50,1,10);(1,1,10);(1,50,10);(-50,50,10)")
+        self.object_coordinates = QLineEdit("(-50,0,-50);(-50,0,50);(50,0,50);(50,0,-50);(0,100,0)")
+        self.object_edges = QLineEdit("(1,2);(2,3);(3,4);(4,1);(1,5);(2,5);(3,5);(4,5)")
         self.object_color = QLineEdit("#000000")
         self.fill_poligon = QCheckBox("Fill object")
         self.confirmButton = QPushButton('Confirm', self)
@@ -47,6 +49,7 @@ class ObjectWindow(QDialog):
 
         layout.addWidget(self.object_name)
         layout.addWidget(self.object_coordinates)
+        layout.addWidget(self.object_edges)
         layout.addWidget(self.object_color)
         layout.addWidget(self.fill_poligon)
         layout.addWidget(dialogBox)
@@ -85,6 +88,7 @@ class ObjectWindow(QDialog):
         form = self.form_setup(self.object_name.text(), self.object_coordinates.text())
         form.set_color(self.object_color.text(), 0)
         form.set_fill(self.check_fill())
+        form.set_edges(self.check_edges())
         self.viewport.objectList.append(form)
         self.viewport.draw(form)
         self.mainWindow.objList.addItem(form.name + ': ' + str(form.id))
@@ -109,10 +113,11 @@ class ObjectWindow(QDialog):
             for coordinate in coordinates:
                 coordinate = coordinate.replace("(", "")
                 coordinate = coordinate.replace(")", "")
-                xy = coordinate.split(',')
-                x = int(xy[0])
-                y = int(xy[1])
-                coordinatesList.append((x,y))
+                xyz = coordinate.split(',')
+                x = int(xyz[0])
+                y = int(xyz[1])
+                z = int(xyz[2])
+                coordinatesList.append((x,y,z))
             form = Form(name, coordinatesList, len(self.viewport.objectList))
             return form
 
@@ -143,3 +148,14 @@ class ObjectWindow(QDialog):
             return True
         else:
             return False
+
+    def check_edges(self):
+        plaintext = self.object_edges.text()
+        coordinates = plaintext.split(";")
+        edges = list()
+        for coordinate in coordinates:
+            coordinate = coordinate.replace("(", "").replace(")", "")
+            coordinate_text = coordinate.split(",")
+            edge = (int(coordinate_text[0]), int(coordinate_text[1]))
+            edges.append(edge)
+        return edges
