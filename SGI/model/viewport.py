@@ -46,7 +46,7 @@ class Viewport(QLabel):
             r = object.color[0]
             g = object.color[1]
             b = object.color[2]
-            pen.setWidthF(4)
+            pen.setWidthF(1)
             pen.setColor(QColor(r,g,b))
             brush.setColor(QColor(r,g,b))
             brush.setStyle(Qt.SolidPattern)
@@ -63,6 +63,7 @@ class Viewport(QLabel):
             (x,y) = object.vp_trans(object.normalized[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
             visible = self.clipper.clip(object)
             if visible == 1:
+                print("Point: x = "+str(x)+" y = "+str(y))
                 painter.drawPoint(x,y)
         elif (object.len() > 1):
             possible_lines = self.clipper.clip(object)
@@ -104,7 +105,7 @@ class Viewport(QLabel):
 
     def normalize(self, form: Form) -> None:
         degree = self.window.theta
-        rotation_norm = Transformation(2, -degree, (0,0,0), [(-10,-10,-10),(10,10,10)], form, None)
+        rotation_norm = Transformation(4, -degree, (0,0,0), form, None)
         rotation_norm.normalize()
 
     def draw_axises(self, form: Form):
@@ -132,18 +133,18 @@ class Viewport(QLabel):
         (p1_x, p1_y) = form.vp_trans(self, x1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         (p2_x, p2_y) = form.vp_trans(self, x2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         if visible_x:
-            print("x1: "+str(p1_x))
-            print("y1: "+str(p1_y))
-            print("x2: "+str(p2_x))
-            print("y2: "+str(p2_y))
+            # print("x1: "+str(p1_x))
+            # print("y1: "+str(p1_y))
+            # print("x2: "+str(p2_x))
+            # print("y2: "+str(p2_y))
             painter.drawLine(p1_x, p1_y, p2_x, p2_y)
         (p1_x, p1_y) = form.vp_trans(self, y1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         (p2_x, p2_y) = form.vp_trans(self, y2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         if visible_y:
-            print("x1: "+str(p1_x))
-            print("y1: "+str(p1_y))
-            print("x2: "+str(p2_x))
-            print("y2: "+str(p2_y))
+            # print("x1: "+str(p1_x))
+            # print("y1: "+str(p1_y))
+            # print("x2: "+str(p2_x))
+            # print("y2: "+str(p2_y))
             painter.drawLine(p1_x, p1_y, p2_x, p2_y)
 
         self.update()

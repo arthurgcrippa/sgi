@@ -104,9 +104,11 @@ class Form():
         return len(self.coordinates)
 
     # transformada de viewport
-    def vp_trans(self, wCoord: t_coordinate, wMin: t_coordinate, wMax: t_coordinate, vpCoordinate: t_coordinate) -> t_coordinate:
+    def vp_trans(self, wCoord: t_coordinate, wMin: t_coordinate, wMax: t_coordinate, vpCoordinate: t_coordinate):
+        #print("Viewport Trans Input: x = "+str(wCoord[0])+" y = "+str(wCoord[1]))
         vp_x = ((wCoord[0] - wMin[0])/(wMax[0]-wMin[0]))*vpCoordinate[0]
         vp_y = (1-((wCoord[1]-wMin[1])/(wMax[1]-wMin[1])))*vpCoordinate[1]
+        #print("Viewport Trans Output: x = "+str(int(vp_x))+" y = "+str(int(vp_y)))
         return (int(vp_x), int(vp_y))
 
     def reform(self):

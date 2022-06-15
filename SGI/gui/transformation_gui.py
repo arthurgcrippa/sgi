@@ -79,9 +79,9 @@ class Trasformation(QDialog):
         self.objCenterButton = objCenterButton
         addButton = QPushButton("Adicionar")
         degreeLine = QLineEdit("30")
-        pointLine = QLineEdit("")
+        pointLine = QLineEdit("(100,100,0)")
         axisLine = QLineEdit("(100,10,10);(10,100,10)")
-        addButton.clicked.connect(lambda: self.create_rotation(2,self.get_degree(degreeLine.text()), self.get_rotation_point(pointLine.text(), self.get_object()), self.get_rotation_vector(axisLine.text()), self.get_object()))
+        addButton.clicked.connect(lambda: self.create_rotation(2,self.get_degree(degreeLine.text()), self.get_rotation_point(pointLine.text(), self.get_object()), self.get_object()))
         #addButton.clicked.connect(lambda: self.create_rotation(2,self.get_degree(degreeLine.text()), self.get_rotation_vector(axisLine.text()), self.get_object()))
         layout.addWidget(QLabel('Opções de Rotação'))
         layout.addWidget(originButton)
@@ -115,8 +115,8 @@ class Trasformation(QDialog):
     def create_translaction(self, type: int, point: t_coordinate, object: Form):
         self.transformation_control.add_translaction(type, point, object)
 
-    def create_rotation(self, type: int, degree: float, point: t_coordinate, vector: List[t_coordinate], object: Form):
-        self.transformation_control.add_rotation(type, degree, point, vector, object)
+    def create_rotation(self, type: int, degree: float, point: t_coordinate, object: Form):
+        self.transformation_control.add_rotation(type, degree, point, object)
 
     def create_scaling(self, type: int, scale: int, object: Form):
         self.transformation_control.add_scaling(type, scale, object)

@@ -37,6 +37,8 @@ class ObjectWindow(QDialog):
         #self.object_coordinates = QLineEdit("(-50,1,10);(1,1,10);(1,50,10);(-50,50,10)")
         self.object_coordinates = QLineEdit("(-50,0,-50);(-50,0,50);(50,0,50);(50,0,-50);(0,100,0)")
         self.object_edges = QLineEdit("(1,2);(2,3);(3,4);(4,1);(1,5);(2,5);(3,5);(4,5)")
+        #self.object_coordinates = QLineEdit("(10,10,10)")
+        #self.object_edges = QLineEdit("(1,1)")
         self.object_color = QLineEdit("#000000")
         self.fill_poligon = QCheckBox("Fill object")
         self.confirmButton = QPushButton('Confirm', self)
