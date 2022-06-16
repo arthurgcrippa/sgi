@@ -114,7 +114,7 @@ class Trasformation(QDialog):
     def create_translaction(self, type: int, pointstr: str, object: Form):
         error_message = []
         if parser.malformed_input(pointstr, error_message):
-            self.show_error_message(error_message)
+            self.show_error_message(error_message[0])
         else:
             point = self.get_coordinate(pointstr)
             self.transformation_control.add_translaction(type, point, object)
@@ -122,7 +122,7 @@ class Trasformation(QDialog):
     def create_rotation(self, type: int, degree: float, pointstr: str, object: Form):
         error_message = []
         if parser.malformed_input(pointstr, error_message):
-            self.show_error_message(error_message)
+            self.show_error_message(error_message[0])
         else:
             point = self.get_rotation_point(pointstr, object)
             self.transformation_control.add_rotation(type, degree, point, object)
@@ -130,7 +130,7 @@ class Trasformation(QDialog):
     def create_scaling(self, type: int, scalestr: str, object: Form):
         error_message = []
         if parser.malformed_input(pointstr, error_message):
-            self.show_error_message(error_message)
+            self.show_error_message(error_message[0])
         else:
             scale = self.get_scale(scalestr)
             self.transformation_control.add_scaling(type, scale, object)
