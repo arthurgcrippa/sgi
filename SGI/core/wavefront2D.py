@@ -2,7 +2,6 @@ from typing import Dict, List
 
 from model.form import Form
 from model.object2D import Object2D
-from model.object3D import Object3D
 from model.viewport import Viewport
 
 

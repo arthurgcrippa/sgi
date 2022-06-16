@@ -2,14 +2,15 @@ from cProfile import label
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
-    QListWidget, QLayout, QGridLayout, QToolButton, QDialog, QTabWidget, QFormLayout, QLineEdit, QCheckBox, QDialogButtonBox, QRadioButton
+    QListWidget, QLayout, QGridLayout, QToolButton, QDialog, QTabWidget, QFormLayout, QLineEdit, QCheckBox, \
+    QDialogButtonBox, QRadioButton, QMessageBox
 
 from model.form import Form
 from core.transformation_control import Transformation_control
 from model.viewport import Viewport
 from typing import List, Tuple
 
-from utils import utils
+from utils import parser
 
 t_coordinate = Tuple[float, float, float]
 
@@ -63,7 +64,7 @@ class Trasformation(QDialog):
         layout = QFormLayout()
         addButton = QPushButton("Adicionar")
         diffLine = QLineEdit("(10,10,10)")
-        addButton.clicked.connect(lambda: self.create_translaction(1, self.get_coordinate(diffLine.text()), self.get_object()))
+        addButton.clicked.connect(lambda: self.create_translaction(1, diffLine.text(), self.get_object()))
         layout.addWidget(QLabel('Ponto de Translação'))
         layout.addWidget(diffLine)
         layout.addWidget(addButton)
@@ -82,7 +83,7 @@ class Trasformation(QDialog):
         addButton = QPushButton("Adicionar")
         degreeLine = QLineEdit("30")
         pointLine = QLineEdit("(100,100,0)")
-        addButton.clicked.connect(lambda: self.create_rotation(2,self.get_degree(degreeLine.text()), self.get_rotation_point(pointLine.text(), self.get_object()), self.get_object()))
+        addButton.clicked.connect(lambda: self.create_rotation(2,self.get_degree(degreeLine.text()), pointLine.text(), self.get_object()))
         layout.addWidget(QLabel('Opções de Rotação'))
         layout.addWidget(originButton)
         layout.addWidget(pointButton)
@@ -100,7 +101,7 @@ class Trasformation(QDialog):
 
         addButton = QPushButton("Adicionar")
         scaleLine = QLineEdit("(2,2,2)")
-        addButton.clicked.connect(lambda: self.create_scaling(3, self.get_scale(scaleLine.text()), self.get_object()))
+        addButton.clicked.connect(lambda: self.create_scaling(3, scaleLine.text(), self.get_object()))
         layout.addWidget(QLabel('Magnitude de Escalonamento'))
         layout.addWidget(scaleLine)
         layout.addWidget(addButton)
@@ -110,14 +111,29 @@ class Trasformation(QDialog):
     def confirm_button(self):
         self.transformation_control.confirm_button()
 
-    def create_translaction(self, type: int, point: t_coordinate, object: Form):
-        self.transformation_control.add_translaction(type, point, object)
+    def create_translaction(self, type: int, pointstr: str, object: Form):
+        error_message = []
+        if parser.malformed_input(pointstr, error_message):
+            self.show_error_message(error_message)
+        else:
+            point = self.get_coordinate(pointstr)
+            self.transformation_control.add_translaction(type, point, object)
 
-    def create_rotation(self, type: int, degree: float, point: t_coordinate, object: Form):
-        self.transformation_control.add_rotation(type, degree, point, object)
+    def create_rotation(self, type: int, degree: float, pointstr: str, object: Form):
+        error_message = []
+        if parser.malformed_input(pointstr, error_message):
+            self.show_error_message(error_message)
+        else:
+            point = self.get_rotation_point(pointstr, object)
+            self.transformation_control.add_rotation(type, degree, point, object)
 
-    def create_scaling(self, type: int, scale: int, object: Form):
-        self.transformation_control.add_scaling(type, scale, object)
+    def create_scaling(self, type: int, scalestr: str, object: Form):
+        error_message = []
+        if parser.malformed_input(pointstr, error_message):
+            self.show_error_message(error_message)
+        else:
+            scale = self.get_scale(scalestr)
+            self.transformation_control.add_scaling(type, scale, object)
 
     def get_object(self) -> Form:
         return self.viewport.objectList[(int(self.mainWindow.objList.currentItem().text().split(": ")[1]))]
@@ -134,7 +150,7 @@ class Trasformation(QDialog):
     def get_coordinate(self, plaintext: str) -> t_coordinate:
         if plaintext == "":
             return (0,0)
-        return utils.parse_float(plaintext)[0]
+        return parser.parse_float(plaintext)[0]
 
     def get_rotation_point(self, plaintext: str, object: Form) -> t_coordinate:
         axis = self.get_axis()
@@ -144,12 +160,12 @@ class Trasformation(QDialog):
             return (0,0)
         if plaintext == "":
             return (0,0)
-        return utils.parse_float(plaintext)[0]
+        return parser.parse_float(plaintext)[0]
 
     def get_scale(self, plaintext: str) -> t_coordinate:
         if plaintext == "":
             return (1,1,1)
-        return utils.parse_float(plaintext)[0]
+        return parser.parse_float(plaintext)[0]
 
     def get_degree(self, text: str) -> float:
         if text != "":
@@ -158,3 +174,10 @@ class Trasformation(QDialog):
             except ValueError:
                 return 0
         return 0
+
+    def show_error_message(self, error: str):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setText(error)
+        msg.setWindowTitle("Error")
+        msg.exec_()

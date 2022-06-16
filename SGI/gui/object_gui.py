@@ -4,14 +4,15 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, QRadioButton, \
-    QListWidget, QLayout, QGridLayout, QToolButton, QDialog, QTabWidget, QFormLayout, QLineEdit,QCheckBox, QDialogButtonBox
+    QListWidget, QLayout, QGridLayout, QToolButton, QDialog, QTabWidget, QFormLayout, QLineEdit,QCheckBox, \
+    QDialogButtonBox, QMessageBox
 
 from model.form import Form
 from model.object2D import Object2D
 from model.object3D import Object3D
 from model.viewport import Viewport
 
-from utils import utils
+from utils import parser
 # from gui import MainWindow
 
 class ObjectWindow(QDialog):
@@ -90,7 +91,7 @@ class ObjectWindow(QDialog):
         generalTab = QWidget()
         layout = QVBoxLayout()
         self.curve_name = QLineEdit("Nome da Curva")
-        self.curve_coordinates = QLineEdit("(-100,-100);(-50,-150);(-50,150);(1,1);(50,50);(50,100);(100,100)")
+        self.curve_coordinates = QLineEdit("(-100,-100,-100);(-50,-150,-50);(-50,150,50);(1,1,1);(50,50,50);(50,100,50);(100,100,100)")
         self.curve_color = QLineEdit("#000000")
         self.bezier_button = QRadioButton('Bezier')
         self.hermite_button = QRadioButton('Hermite')
@@ -123,25 +124,37 @@ class ObjectWindow(QDialog):
         self.mainWindow.objList.addItem(object.name + ': ' + str(object.id))
 
     def confirm_object_2D(self):
-        object = self.form_setup_2D(self.object_name_2D.text(), self.object_coordinates_2D.text())
-        self.confirm_object(object, False)
+        error_message = []
+        if parser.malformed_input(self.object_coordinates_2D.text(), error_message):
+            self.show_error_message(error_message[0])
+        else:
+            object = self.form_setup_2D(self.object_name_2D.text(), self.object_coordinates_2D.text())
+            self.confirm_object(object, False)
 
     def confirm_object_3D(self):
-        object = self.form_setup_3D(self.object_name_3D.text(), self.object_coordinates_3D.text())
-        self.confirm_object(object, True)
+        error_message = []
+        if parser.malformed_input(self.object_coordinates_3D.text(), error_message):
+            self.show_error_message(error_message[0])
+        else:
+            object = self.form_setup_3D(self.object_name_3D.text(), self.object_coordinates_3D.text())
+            self.confirm_object(object, True)
 
 
     def confirm_curve(self):
-        object = self.form_setup_2D(self.curve_name.text(), self.curve_coordinates.text())
-        object.set_curvy(True)
-        if self.hermite_button.isChecked():
-            object.set_curve_type(1)
-        if self.bezier_button.isChecked():
-            object.set_curve_type(2)
-        self.confirm_object(object, False)
+        error_message = []
+        if parser.malformed_input(self.curve_coordinates.text(), error_message):
+            self.show_error_message(error_message[0])
+        else:
+            object = self.form_setup_3D(self.curve_name.text(), self.curve_coordinates.text())
+            object.set_curvy(True)
+            if self.hermite_button.isChecked():
+                object.set_curve_type(1)
+            if self.bezier_button.isChecked():
+                object.set_curve_type(2)
+            self.confirm_object(object, False)
 
     def form_setup(self, plaintext):
-        coordinates = utils.parse_float(plaintext)
+        coordinates = parser.parse_float(plaintext)
         return coordinates
 
     def form_setup_2D(self, name, plaintext) -> Form:
@@ -154,27 +167,12 @@ class ObjectWindow(QDialog):
         object = Object3D(name, coordinates, len(self.viewport.objectList))
         return object
 
-    def check(self, plaintext):
-        stack = []
-        prev = ''
-        for char in plaintext:
-            if len(stack) > 0:
-               prev = stack.pop()
-            if not (self.isOperator(char) or char.isnumeric()):
-                return False
-            stack.append(char)
-            if prev == '(' and ((not char.isnumeric()) and char != '-'):
-                return False
-            if prev == ')' and char != ';':
-                return False
-            if prev == '-' and (char == '(' or char == ')'):
-                return False
-        return True
-
-    def isOperator(self, char):
-        if (char == '(' or char == ')' or char == ',' or char == ';' or char == '-'):
-            return True
-        return False
+    def show_error_message(self, error: str):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setText(error)
+        msg.setWindowTitle("Error")
+        msg.exec_()
 
     def get_fill(self, object: Form):
         if object.tridimentional():
@@ -191,5 +189,5 @@ class ObjectWindow(QDialog):
 
     def get_edges(self):
         plaintext = self.object_edges.text()
-        edges = utils.parse_int(plaintext)
+        edges = parser.parse_int(plaintext)
         return edges

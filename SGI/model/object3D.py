@@ -1,5 +1,6 @@
 from typing import List, Tuple
 from model.form import Form
+from utils import curve
 import numpy as np
 t_coordinate = Tuple[float, float, float]
 
@@ -12,6 +13,8 @@ class Object3D(Form):
         self.normalized = self.coordinates.copy()
         self.color = [0,0,0]
         self.fill = False
+        self.curve_type = 0
+        self.is_curvy = False
 
     def set_color(self, color, format):
         if format:
@@ -24,6 +27,12 @@ class Object3D(Form):
 
     def set_fill(self, fill):
         self.fill = fill
+
+    def set_curvy(self, curvy):
+        self.is_curvy = curvy
+
+    def set_curve_type(self, curve_type):
+        self.curve_type = curve_type
 
     def set_visible(self, visible):
         self.visible = visible
@@ -46,6 +55,8 @@ class Object3D(Form):
         return matrix
 
     def get_lines(self):
+        if self.is_curvy:
+            return self.curve()
         object_lines = []
         stack = []
         points = self.normalized
@@ -81,3 +92,11 @@ class Object3D(Form):
         for line in matrix:
             x, y, z = line[0], line[1], line[2]
             self.coordinates.append([x,y,z])
+
+    def curve(self):
+        lines = []
+        if self.curve_type:
+            lines = curve.blending_curve(self.normalized, self.curve_type)
+        else:
+            lines = curve.b_spline_curve(self.normalized, self.curve_type)
+        return lines
