@@ -1,6 +1,8 @@
 from typing import Dict, List
 
 from model.form import Form
+from model.object2D import Object2D
+from model.object3D import Object3D
 from model.viewport import Viewport
 
 
@@ -164,7 +166,7 @@ def create_forms(vertices, objMapList):
         pointSet3D = list()
         for v in objMap["vertices"]:
             pointSet3D.append(vertices[v - 1])
-        obj = Form(objMap["name"], parse_3Dto2D(pointSet3D), id)
+        obj = Object2D(objMap["name"], parse_3Dto2D(pointSet3D), id)
         obj.set_color(objMap["color"], 1)
         obj.set_fill(objMap["fill"])
         id += 1

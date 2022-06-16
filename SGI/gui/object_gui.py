@@ -7,7 +7,11 @@ from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxL
     QListWidget, QLayout, QGridLayout, QToolButton, QDialog, QTabWidget, QFormLayout, QLineEdit,QCheckBox, QDialogButtonBox
 
 from model.form import Form
+from model.object2D import Object2D
+from model.object3D import Object3D
 from model.viewport import Viewport
+
+from utils import utils
 # from gui import MainWindow
 
 class ObjectWindow(QDialog):
@@ -26,34 +30,58 @@ class ObjectWindow(QDialog):
 
     def add_tabs(self) -> QTabWidget:
         tabs = QTabWidget()
-        tabs.addTab(self.object_tab(), "Objeto")
+        tabs.addTab(self.object_tab_2D(), "Objeto 2D")
+        tabs.addTab(self.object_tab_3D(), "Objeto 3D")
         tabs.addTab(self.curve_tab(), "Curva")
         return tabs
 
-    def object_tab(self) -> QWidget:
+    def object_tab_2D(self) -> QWidget:
         generalTab = QWidget()
         layout = QVBoxLayout()
-        self.object_name = QLineEdit("Nome do Objeto")
+        self.object_name_2D = QLineEdit("Nome do Objeto")
+        self.object_coordinates_2D = QLineEdit("(-50,1);(1,1);(1,50);(-50,50)")
+        self.object_color_2D = QLineEdit("#000000")
+        self.fill_poligon_2D = QCheckBox("Fill object")
+        self.confirm_button_2D = QPushButton('Confirm', self)
+        cancel_button = QPushButton('Cancel')
+        self.confirm_button_2D.clicked.connect(self.confirm_object_2D)
+        dialogBox = QDialogButtonBox()
+        dialogBox.rejected.connect(self.reject)
+        dialogBox.addButton(self.confirm_button_2D, QDialogButtonBox.AcceptRole)
+        dialogBox.addButton(cancel_button, QDialogButtonBox.RejectRole)
+
+        layout.addWidget(self.object_name_2D)
+        layout.addWidget(self.object_coordinates_2D)
+        layout.addWidget(self.object_color_2D)
+        layout.addWidget(self.fill_poligon_2D)
+        layout.addWidget(dialogBox)
+        generalTab.setLayout(layout)
+        return generalTab
+
+    def object_tab_3D(self) -> QWidget:
+        generalTab = QWidget()
+        layout = QVBoxLayout()
+        self.object_name_3D = QLineEdit("Nome do Objeto")
         #self.object_coordinates = QLineEdit("(-50,1,10);(1,1,10);(1,50,10);(-50,50,10)")
-        self.object_coordinates = QLineEdit("(-50,0,-50);(-50,0,50);(50,0,50);(50,0,-50);(0,100,0)")
+        self.object_coordinates_3D = QLineEdit("(-50,0,-50);(-50,0,50);(50,0,50);(50,0,-50);(0,100,0)")
         self.object_edges = QLineEdit("(1,2);(2,3);(3,4);(4,1);(1,5);(2,5);(3,5);(4,5)")
         #self.object_coordinates = QLineEdit("(10,10,10)")
         #self.object_edges = QLineEdit("(1,1)")
-        self.object_color = QLineEdit("#000000")
-        self.fill_poligon = QCheckBox("Fill object")
-        self.confirmButton = QPushButton('Confirm', self)
-        cancelButton = QPushButton('Cancel')
-        self.confirmButton.clicked.connect(self.confirm_object)
+        self.object_color_3D = QLineEdit("#000000")
+        self.fill_poligon_3D = QCheckBox("Fill object")
+        self.confirm_button_3D = QPushButton('Confirm', self)
+        cancel_button = QPushButton('Cancel')
+        self.confirm_button_3D.clicked.connect(self.confirm_object_3D)
         dialogBox = QDialogButtonBox()
         dialogBox.rejected.connect(self.reject)
-        dialogBox.addButton(self.confirmButton, QDialogButtonBox.AcceptRole)
-        dialogBox.addButton(cancelButton, QDialogButtonBox.RejectRole)
+        dialogBox.addButton(self.confirm_button_3D, QDialogButtonBox.AcceptRole)
+        dialogBox.addButton(cancel_button, QDialogButtonBox.RejectRole)
 
-        layout.addWidget(self.object_name)
-        layout.addWidget(self.object_coordinates)
+        layout.addWidget(self.object_name_3D)
+        layout.addWidget(self.object_coordinates_3D)
         layout.addWidget(self.object_edges)
-        layout.addWidget(self.object_color)
-        layout.addWidget(self.fill_poligon)
+        layout.addWidget(self.object_color_3D)
+        layout.addWidget(self.fill_poligon_3D)
         layout.addWidget(dialogBox)
         generalTab.setLayout(layout)
         return generalTab
@@ -64,64 +92,67 @@ class ObjectWindow(QDialog):
         self.curve_name = QLineEdit("Nome da Curva")
         self.curve_coordinates = QLineEdit("(-100,-100);(-50,-150);(-50,150);(1,1);(50,50);(50,100);(100,100)")
         self.curve_color = QLineEdit("#000000")
-        self.bezierButton = QRadioButton('Bezier')
-        self.hermiteButton = QRadioButton('Hermite')
-        self.bsplineButton = QRadioButton('B-Spline')
-        confirmButton = QPushButton('Confirm', self)
-        cancelButton = QPushButton('Cancel')
-        confirmButton.clicked.connect(self.confirm_curve)
+        self.bezier_button = QRadioButton('Bezier')
+        self.hermite_button = QRadioButton('Hermite')
+        self.bspline_button = QRadioButton('B-Spline')
+        confirm_button = QPushButton('Confirm', self)
+        cancel_button = QPushButton('Cancel')
+        confirm_button.clicked.connect(self.confirm_curve)
         dialogBox = QDialogButtonBox()
         dialogBox.rejected.connect(self.reject)
-        dialogBox.addButton(confirmButton, QDialogButtonBox.AcceptRole)
-        dialogBox.addButton(cancelButton, QDialogButtonBox.RejectRole)
+        dialogBox.addButton(confirm_button, QDialogButtonBox.AcceptRole)
+        dialogBox.addButton(cancel_button, QDialogButtonBox.RejectRole)
 
         layout.addWidget(self.curve_name)
         layout.addWidget(self.curve_coordinates)
         layout.addWidget(self.curve_color)
-        layout.addWidget(self.bezierButton)
-        layout.addWidget(self.hermiteButton)
-        layout.addWidget(self.bsplineButton)
+        layout.addWidget(self.bezier_button)
+        layout.addWidget(self.hermite_button)
+        layout.addWidget(self.bspline_button)
         layout.addWidget(dialogBox)
         generalTab.setLayout(layout)
         return generalTab
 
+    def confirm_object(self, object: Form, FLAG_3D: bool):
+        object.set_color(self.get_color(object).text(), 0)
+        object.set_fill(self.get_fill(object))
+        if FLAG_3D:
+            object.set_edges(self.get_edges())
+        self.viewport.objectList.append(object)
+        self.viewport.draw(object)
+        self.mainWindow.objList.addItem(object.name + ': ' + str(object.id))
 
-    def confirm_object(self):
-        form = self.form_setup(self.object_name.text(), self.object_coordinates.text())
-        form.set_color(self.object_color.text(), 0)
-        form.set_fill(self.check_fill())
-        form.set_edges(self.check_edges())
-        self.viewport.objectList.append(form)
-        self.viewport.draw(form)
-        self.mainWindow.objList.addItem(form.name + ': ' + str(form.id))
+    def confirm_object_2D(self):
+        object = self.form_setup_2D(self.object_name_2D.text(), self.object_coordinates_2D.text())
+        self.confirm_object(object, False)
+
+    def confirm_object_3D(self):
+        object = self.form_setup_3D(self.object_name_3D.text(), self.object_coordinates_3D.text())
+        self.confirm_object(object, True)
+
 
     def confirm_curve(self):
-        form = self.form_setup(self.curve_name.text(), self.curve_coordinates.text())
-        form.set_curvy(True)
-        form.set_color(self.curve_color.text(), 0)
-        if self.hermiteButton.isChecked():
-            form.set_curve_type(1)
-        if self.bezierButton.isChecked():
-            form.set_curve_type(2)
-        self.viewport.objectList.append(form)
-        self.viewport.draw(form)
-        self.mainWindow.objList.addItem(form.name + ': ' + str(form.id))
+        object = self.form_setup_2D(self.curve_name.text(), self.curve_coordinates.text())
+        object.set_curvy(True)
+        if self.hermite_button.isChecked():
+            object.set_curve_type(1)
+        if self.bezier_button.isChecked():
+            object.set_curve_type(2)
+        self.confirm_object(object, False)
 
-    def form_setup(self, name, coordinates_text) -> Form:
-        coordinatesList = list()
-        plaintext = coordinates_text
-        if (self.check(plaintext)):
-            coordinates = plaintext.split(';')
-            for coordinate in coordinates:
-                coordinate = coordinate.replace("(", "")
-                coordinate = coordinate.replace(")", "")
-                xyz = coordinate.split(',')
-                x = int(xyz[0])
-                y = int(xyz[1])
-                z = int(xyz[2])
-                coordinatesList.append((x,y,z))
-            form = Form(name, coordinatesList, len(self.viewport.objectList))
-            return form
+    def form_setup(self, plaintext):
+        coordinates = utils.parse_float(plaintext)
+        return coordinates
+
+    def form_setup_2D(self, name, plaintext) -> Form:
+        coordinates = self.form_setup(plaintext)
+        object = Object2D(name, coordinates, len(self.viewport.objectList))
+        return object
+
+    def form_setup_3D(self, name, plaintext) -> Form:
+        coordinates = self.form_setup(plaintext)
+        object = Object3D(name, coordinates, len(self.viewport.objectList))
+        return object
 
     def check(self, plaintext):
         stack = []
@@ -145,19 +176,20 @@ class ObjectWindow(QDialog):
             return True
         return False
 
-    def check_fill(self):
-        if self.fill_poligon.isChecked():
-            return True
+    def get_fill(self, object: Form):
+        if object.tridimentional():
+            return self.fill_poligon_3D.isChecked()
         else:
-            return False
+            return self.fill_poligon_2D.isChecked()
 
-    def check_edges(self):
+    def get_color(self, object: Form):
+        if object.tridimentional():
+            return self.object_color_3D
+        else:
+            return self.object_color_2D
+
+
+    def get_edges(self):
         plaintext = self.object_edges.text()
-        coordinates = plaintext.split(";")
-        edges = list()
-        for coordinate in coordinates:
-            coordinate = coordinate.replace("(", "").replace(")", "")
-            coordinate_text = coordinate.split(",")
-            edge = (int(coordinate_text[0]), int(coordinate_text[1]))
-            edges.append(edge)
+        edges = utils.parse_int(plaintext)
         return edges

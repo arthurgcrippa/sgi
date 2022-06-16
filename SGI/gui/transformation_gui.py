@@ -9,6 +9,8 @@ from core.transformation_control import Transformation_control
 from model.viewport import Viewport
 from typing import List, Tuple
 
+from utils import utils
+
 t_coordinate = Tuple[float, float, float]
 
 class Trasformation(QDialog):
@@ -53,7 +55,7 @@ class Trasformation(QDialog):
 
         self.tab1.setLayout(self.add_translaction())
         self.tab2.setLayout(self.add_rotation())
-        self.tab3.setLayout(self.add_escalonamento())
+        self.tab3.setLayout(self.add_scaling())
 
         return(tabs)
 
@@ -80,9 +82,7 @@ class Trasformation(QDialog):
         addButton = QPushButton("Adicionar")
         degreeLine = QLineEdit("30")
         pointLine = QLineEdit("(100,100,0)")
-        axisLine = QLineEdit("(100,10,10);(10,100,10)")
         addButton.clicked.connect(lambda: self.create_rotation(2,self.get_degree(degreeLine.text()), self.get_rotation_point(pointLine.text(), self.get_object()), self.get_object()))
-        #addButton.clicked.connect(lambda: self.create_rotation(2,self.get_degree(degreeLine.text()), self.get_rotation_vector(axisLine.text()), self.get_object()))
         layout.addWidget(QLabel('Opções de Rotação'))
         layout.addWidget(originButton)
         layout.addWidget(pointButton)
@@ -91,13 +91,11 @@ class Trasformation(QDialog):
         layout.addWidget(degreeLine)
         layout.addWidget(QLabel('Ponto de Rotação'))
         layout.addWidget(pointLine)
-        layout.addWidget(QLabel('Eixo de Rotação'))
-        layout.addWidget(axisLine)
         layout.addWidget(addButton)
 
         return(layout)
 
-    def add_escalonamento(self) -> QFormLayout:
+    def add_scaling(self) -> QFormLayout:
         layout = QFormLayout()
 
         addButton = QPushButton("Adicionar")
@@ -136,38 +134,22 @@ class Trasformation(QDialog):
     def get_coordinate(self, plaintext: str) -> t_coordinate:
         if plaintext == "":
             return (0,0)
-        plaintext = plaintext.replace("(", "")
-        plaintext = plaintext.replace(")", "")
-        coordinate = plaintext.split(",")
-        return (float(coordinate[0]), float(coordinate[1]), float(coordinate[2]))
+        return utils.parse_float(plaintext)[0]
 
     def get_rotation_point(self, plaintext: str, object: Form) -> t_coordinate:
         axis = self.get_axis()
-        if plaintext == "" and axis == 1:
-            return (0,0)
-        if plaintext == "" and axis == 2:
-            return (0,0) #TODO
-        if plaintext == "" and axis == 3:
+        if axis == 3:
             return object.get_center()
-        return self.get_coordinate(plaintext)
-
-    def get_rotation_vector(self, plaintext: str) -> t_coordinate:
+        if axis == 1:
+            return (0,0)
         if plaintext == "":
-            return (1,1,1)
-        plaintext.replace("(", "")
-        plaintext.replace(")", "")
-        plaintext_split = plaintext.split(";")
-        p1 = self.get_coordinate(plaintext_split[0])
-        p2 = self.get_coordinate(plaintext_split[1])
-        return p1, p2
+            return (0,0)
+        return utils.parse_float(plaintext)[0]
 
     def get_scale(self, plaintext: str) -> t_coordinate:
         if plaintext == "":
             return (1,1,1)
-        plaintext = plaintext.replace("(", "")
-        plaintext = plaintext.replace(")", "")
-        coordinate = plaintext.split(",")
-        return (float(coordinate[0]), float(coordinate[1]), float(coordinate[2]))
+        return utils.parse_float(plaintext)[0]
 
     def get_degree(self, text: str) -> float:
         if text != "":

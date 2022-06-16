@@ -4,8 +4,12 @@ from PyQt5.QtCore import *
 
 from typing import List
 from model.form import Form
+from model.object2D import Object2D
+from model.object3D import Object3D
 from model.window import Window
 from model.transformation import Transformation
+from model.transformation2D import Transformation2D
+from model.transformation3D import Transformation3D
 from model.clipping import Clipper
 
 import math
@@ -19,7 +23,7 @@ class Viewport(QLabel):
         self.window = Window(viewPortHeight, viewPortWidth)
         self.clipper = Clipper(self.window, 0)
         self.vp_init()
-        self.draw_axises(Form)
+        self.draw_axises()
 
     def vp_init(self):
         board = QPixmap(self.vpCoord[0]+20, self.vpCoord[1]+20)
@@ -27,6 +31,11 @@ class Viewport(QLabel):
         self.setPixmap(board)
         self.board = self.pixmap()
         self.board.fill(QColor('white'))
+
+    def vp_trans(self, wCoord, wMin, wMax, vpCoordinate):
+        vp_x = ((wCoord[0] - wMin[0])/(wMax[0]-wMin[0]))*vpCoordinate[0]
+        vp_y = (1-((wCoord[1]-wMin[1])/(wMax[1]-wMin[1])))*vpCoordinate[1]
+        return (int(vp_x), int(vp_y))
 
     def get_wc(self):
         xMin = self.window.xMin
@@ -46,7 +55,7 @@ class Viewport(QLabel):
             r = object.color[0]
             g = object.color[1]
             b = object.color[2]
-            pen.setWidthF(1)
+            pen.setWidthF(3)
             pen.setColor(QColor(r,g,b))
             brush.setColor(QColor(r,g,b))
             brush.setStyle(Qt.SolidPattern)
@@ -60,21 +69,20 @@ class Viewport(QLabel):
         painter = self.get_painter(object)
         xMin, yMin, xMax, yMax = self.get_wc()
         if (object.len() == 1):
-            (x,y) = object.vp_trans(object.normalized[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+            (x,y) = self.vp_trans(object.normalized[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
             visible = self.clipper.clip(object)
             if visible == 1:
-                print("Point: x = "+str(x)+" y = "+str(y))
                 painter.drawPoint(x,y)
         elif (object.len() > 1):
             possible_lines = self.clipper.clip(object)
             if object.fill and object.len() > 2:
                 points = self.clipper.get_points(possible_lines)
                 points_vp = []
-                first_point = object.vp_trans(points[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+                first_point = self.vp_trans(points[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
                 object_path = QPainterPath()
                 FIRST = True
                 for point in points:
-                    point = object.vp_trans(point, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+                    point = self.vp_trans(point, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
                     if FIRST:
                         object_path.moveTo(point[0], point[1])
                         FIRST = False
@@ -84,8 +92,8 @@ class Viewport(QLabel):
             else:
                 for possible_line in possible_lines:
                     (p1, p2), visible = possible_line
-                    (p1_x, p1_y) = object.vp_trans(p1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-                    (p2_x, p2_y) = object.vp_trans(p2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+                    (p1_x, p1_y) = self.vp_trans(p1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+                    (p2_x, p2_y) = self.vp_trans(p2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
                     if visible:
                         painter.drawLine(p1_x, p1_y, p2_x, p2_y)
         self.update()
@@ -93,7 +101,7 @@ class Viewport(QLabel):
 
     def redraw(self):
         self.vp_init()
-        self.draw_axises(Form)
+        self.draw_axises()
         for obj in self.objectList:
             self.draw(obj)
 
@@ -103,12 +111,14 @@ class Viewport(QLabel):
         self.window.theta += degree
         self.redraw()
 
-    def normalize(self, form: Form) -> None:
+    def normalize(self, object: Form) -> None:
         degree = self.window.theta
-        rotation_norm = Transformation(4, -degree, (0,0,0), form, None)
-        rotation_norm.normalize()
+        if object.tridimentional():
+            Transformation3D(4, -degree, (0,0,0), object, None).normalize()
+        else:
+            Transformation2D(2, -degree, (0,0), object, None).normalize()
 
-    def draw_axises(self, form: Form):
+    def draw_axises(self):
         painter = self.get_painter(None)
         xMin, yMin, xMax, yMax = self.get_wc()
 
@@ -130,21 +140,13 @@ class Viewport(QLabel):
         (y1, y2), visible_y = self.clipper.line_clip(y1, y2)
 
 
-        (p1_x, p1_y) = form.vp_trans(self, x1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-        (p2_x, p2_y) = form.vp_trans(self, x2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+        (p1_x, p1_y) = self.vp_trans(x1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+        (p2_x, p2_y) = self.vp_trans(x2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         if visible_x:
-            # print("x1: "+str(p1_x))
-            # print("y1: "+str(p1_y))
-            # print("x2: "+str(p2_x))
-            # print("y2: "+str(p2_y))
             painter.drawLine(p1_x, p1_y, p2_x, p2_y)
-        (p1_x, p1_y) = form.vp_trans(self, y1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-        (p2_x, p2_y) = form.vp_trans(self, y2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+        (p1_x, p1_y) = self.vp_trans(y1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+        (p2_x, p2_y) = self.vp_trans(y2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         if visible_y:
-            # print("x1: "+str(p1_x))
-            # print("y1: "+str(p1_y))
-            # print("x2: "+str(p2_x))
-            # print("y2: "+str(p2_y))
             painter.drawLine(p1_x, p1_y, p2_x, p2_y)
 
         self.update()
