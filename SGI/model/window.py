@@ -40,11 +40,11 @@ class Window():
             self.xMin += diff
             self.xMax += diff
         elif direction == 5:
-            self.zMin = self.zMin += diff
-            self.zMax = self.zMax += diff
+            self.zMin += diff
+            self.zMax += diff
         elif direction == 6:
-            self.zMin = self.zMin -= diff
-            self.zMax = self.zMax -= diff
+            self.zMin -= diff
+            self.zMax -= diff
 
     def zoom(self, sign):
         zoomX = self.vp_width  * sign*ZOOM
@@ -54,5 +54,5 @@ class Window():
         self.xMax -= zoomX
         self.yMin += zoomY
         self.yMax -= zoomY
-        self.zMin = self.zMin += zoomZ
-        self.zMax = self.zMax -= zoomZ
+        self.zMin += zoomZ
+        self.zMax -= zoomZ
