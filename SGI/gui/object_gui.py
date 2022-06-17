@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, QRadioButton, \
     QListWidget, QLayout, QGridLayout, QToolButton, QDialog, QTabWidget, QFormLayout, QLineEdit,QCheckBox, \
     QDialogButtonBox, QMessageBox
-
+from utils import matrices
 from model.form import Form
 from model.object2D import Object2D
 from model.object3D import Object3D
@@ -138,6 +138,7 @@ class ObjectWindow(QDialog):
         else:
             object = self.form_setup_3D(self.object_name_3D.text(), self.object_coordinates_3D.text())
             self.confirm_object(object, True)
+            #matrices.rotation_test(object)
 
 
     def confirm_curve(self):
