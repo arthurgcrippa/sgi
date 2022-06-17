@@ -129,7 +129,7 @@ class Trasformation(QDialog):
 
     def create_scaling(self, type: int, scalestr: str, object: Form):
         error_message = []
-        if parser.malformed_input(pointstr, error_message):
+        if parser.malformed_input(scalestr, error_message):
             self.show_error_message(error_message[0])
         else:
             scale = self.get_scale(scalestr)
