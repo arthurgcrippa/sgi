@@ -132,7 +132,7 @@ class MainWindow(QWidget):
     def vp_setup(self) -> QLayout:
         layout = QVBoxLayout()
         layout.addWidget(QLabel('Viewport'))
-        self.viewport = Viewport(600, 600)
+        self.viewport = Viewport(600, 600, 600)
         layout.addWidget(self.viewport)
         return layout
 

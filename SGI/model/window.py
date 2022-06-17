@@ -4,49 +4,55 @@ from PyQt5.QtGui import QPainter, QPixmap, QPen, QColor
 from typing import List
 from model.form import Form
 
+MOVE = 30
+ZOOM = 0.05
+
 class Window():
-    def __init__(self, viewPortHeight:int, viewPortWidth:int) -> None:
+    def __init__(self, vp_width:int, vp_height:int, vp_depth:int) -> None:
         super().__init__()
-        self.xMin = - float(viewPortWidth/2)
-        self.yMin = - float(viewPortHeight/2)
-        self.xMax = float(viewPortWidth/2)
-        self.yMax = float(viewPortHeight/2)
+        self.vp_width = vp_width
+        self.vp_height = vp_height
+        self.vp_depth = vp_depth
+        self.xMin = - float(vp_width/2)
+        self.yMin = - float(vp_height/2)
+        self.zMin = - float(vp_depth/2)
+        self.xMax = float(vp_width/2)
+        self.yMax = float(vp_height/2)
+        self.zMax = float(vp_depth/2)
         self.theta = 0
         self.last_degree = 0
 
     def normalized(self) -> bool:
         return theta != 0
 
-#   def pan(self, direction: str) -> None:
-#         dist = 20
-#         rad = -math.radians(self.theta)
+    def move(self, direction: int):
+        diff = MOVE
+        if direction == 1:
+            self.yMin = self.yMin + diff
+            self.yMax = self.yMax + diff
+        elif direction == 2:
+            self.yMin = self.yMin - diff
+            self.yMax = self.yMax - diff
+        elif direction == 3:
+            self.xMin = self.xMin - diff
+            self.xMax = self.xMax - diff
+        elif direction == 4:
+            self.xMin = self.xMin + diff
+            self.xMax = self.xMax + diff
+        elif direction == 5:
+            self.zMin = self.zMin + diff
+            self.zMax = self.zMax + diff
+        elif direction == 6:
+            self.zMin = self.zMin - diff
+            self.zMax = self.zMax - diff
 
-#         if direction == 'up':
-#             self.x_min -= math.sin(rad)*dist
-#             self.x_max -= math.sin(rad)*dist
-#             self.y_min += math.cos(rad)*dist
-#             self.y_max += math.cos(rad)*dist
-
-#         elif direction == 'down':
-#             self.x_min += math.sin(rad)*dist
-#             self.x_max += math.sin(rad)*dist
-#             self.y_min -= math.cos(rad)*dist
-#             self.y_max -= math.cos(rad)*dist
-
-#         elif direction == 'right':
-#             self.x_min += math.cos(rad)*dist
-#             self.x_max += math.cos(rad)*dist
-#             self.y_min += math.sin(rad)*dist
-#             self.y_max += math.sin(rad)*dist
-
-#         elif direction == 'left':
-#             self.x_min -= math.cos(rad)*dist
-#             self.x_max -= math.cos(rad)*dist
-#             self.y_min -= math.sin(rad)*dist
-#             self.y_max -= math.sin(rad)*dist
-
-#         self.__update_center()
-
-#     def __update_center(self):
-#         center = ((self.x_max + self.x_min) / 2, (self.y_max + self.y_min) / 2)
-#         self.center = center
+    def zoom(self, sign):
+        zoomX = self.vp_width  * sign*ZOOM
+        zoomY = self.vp_height * sign*ZOOM
+        zoomZ = self.vp_depth  * sign*ZOOM
+        self.xMin = self.xMin + zoomX
+        self.xMax = self.xMax - zoomX
+        self.yMin = self.yMin + zoomY
+        self.yMax = self.yMax - zoomY
+        self.zMin = self.zMin + zoomZ
+        self.zMax = self.zMax - zoomZ

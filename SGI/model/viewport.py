@@ -16,11 +16,11 @@ import math
 import numpy as np
 
 class Viewport(QLabel):
-    def __init__(self, viewPortHeight:int, viewPortWidth:int) -> None:
+    def __init__(self, vp_width:int, vp_height:int, vp_depth: int) -> None:
         super().__init__()
-        self.vpCoord = (int(viewPortWidth), int(viewPortHeight))
+        self.vpCoord = (vp_width, vp_height, vp_depth)
         self.objectList: List[Form] = list()
-        self.window = Window(viewPortHeight, viewPortWidth)
+        self.window = Window(vp_width, vp_height, vp_depth)
         self.clipper = Clipper(self.window, 0)
         self.vp_init()
         self.draw_axises()
@@ -153,43 +153,13 @@ class Viewport(QLabel):
         painter.end()
 
     def move(self, index: int):
-        diff = 30
-        if index == 1:
-            self.window.yMin = self.window.yMin + diff
-            self.window.yMax = self.window.yMax + diff
-        elif index == 2:
-            self.window.yMin = self.window.yMin - diff
-            self.window.yMax = self.window.yMax - diff
-        elif index == 3:
-            self.window.xMin = self.window.xMin - diff
-            self.window.xMax = self.window.xMax - diff
-        elif index == 4:
-            self.window.xMin = self.window.xMin + diff
-            self.window.xMax = self.window.xMax + diff
-        self.redraw()
-
-    def zoom_out(self):
-        zoomVar = 0.05
-
-        zoomX = self.vpCoord[0] * zoomVar
-        zoomY = self.vpCoord[1] * zoomVar
-
-        self.window.xMax = self.window.xMax - zoomX
-        self.window.xMin = self.window.xMin + zoomX
-        self.window.yMax = self.window.yMax - zoomY
-        self.window.yMin = self.window.yMin + zoomY
-
+        self.window.move(index)
         self.redraw()
 
     def zoom_in(self):
-        zoomVar = -0.05
+        self.window.zoom(-1)
+        self.redraw()
 
-        zoomX = self.vpCoord[0] * zoomVar
-        zoomY = self.vpCoord[1] * zoomVar
-
-        self.window.xMax = self.window.xMax - zoomX
-        self.window.xMin = self.window.xMin + zoomX
-        self.window.yMax = self.window.yMax - zoomY
-        self.window.yMin = self.window.yMin + zoomY
-
+    def zoom_out(self):
+        self.window.zoom(1)
         self.redraw()
