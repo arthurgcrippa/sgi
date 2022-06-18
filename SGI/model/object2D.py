@@ -25,6 +25,9 @@ class Object2D(Form):
     def set_fill(self, fill):
         self.fill = fill
 
+    def tridimentional(self):
+        return False
+
     def set_visible(self, visible):
         self.visible = visible
 

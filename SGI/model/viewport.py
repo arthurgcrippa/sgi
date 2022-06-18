@@ -114,7 +114,7 @@ class Viewport(QLabel):
     def normalize(self, object: Form) -> None:
         degree = self.window.theta
         if object.tridimentional():
-            Transformation3D(4, degree, (0,0,0), object, None).normalize()
+            Transformation3D(4, degree, (0,0,0), None, None, object, None).normalize()
         else:
             Transformation2D(2, -degree, (0,0), object, None).normalize()
 
@@ -125,10 +125,11 @@ class Viewport(QLabel):
         theta = -math.radians(self.window.theta)
         sin = np.sin(theta)
         cos = np.cos(theta)
-        vp_x, vp_y = self.vpCoord[0]/2, self.vpCoord[1]/2
+        vp_x, vp_y, vp_z = self.vpCoord[0]/2, self.vpCoord[1]/2, self.vpCoord[2]/2
 
         (x1, x2) = (0, vp_y), (0, -vp_y)
         (y1, y2) = (vp_x, 0), (-vp_x, 0)
+        (z1, z2) = (vp_x,vp_y), (-vp_x,-vp_y)
 
         if (self.window.theta != 0):
             x1 = (vp_x*sin, vp_y*cos)
@@ -138,6 +139,7 @@ class Viewport(QLabel):
 
         (x1, x2), visible_x = self.clipper.line_clip(x1, x2)
         (y1, y2), visible_y = self.clipper.line_clip(y1, y2)
+        (z1, z2), visible_z = self.clipper.line_clip(z1, z2)
 
 
         (p1_x, p1_y) = self.vp_trans(x1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
@@ -148,7 +150,10 @@ class Viewport(QLabel):
         (p2_x, p2_y) = self.vp_trans(y2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         if visible_y:
             painter.drawLine(p1_x, p1_y, p2_x, p2_y)
-
+        (p1_x, p1_y) = self.vp_trans(z1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+        (p2_x, p2_y) = self.vp_trans(z2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+        #if visible_z:
+            #painter.drawLine(p1_x, p1_y, p2_x, p2_y)
         self.update()
         painter.end()
 

@@ -34,6 +34,9 @@ class Object3D(Form):
     def set_curve_type(self, curve_type):
         self.curve_type = curve_type
 
+    def tridimentional(self):
+        return True
+
     def set_visible(self, visible):
         self.visible = visible
 

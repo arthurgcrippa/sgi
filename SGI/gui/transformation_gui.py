@@ -77,6 +77,7 @@ class Trasformation(QDialog):
         originButton = QRadioButton('Rotacionar sobre a origem')
         pointButton = QRadioButton('Rotacionar sobre o ponto')
         objCenterButton = QRadioButton('Rotacionar sobre o centro do objeto')
+        objCenterButton.setChecked(True)
         self.originButton = originButton
         self.pointButton = pointButton
         self.objCenterButton = objCenterButton
@@ -125,7 +126,7 @@ class Trasformation(QDialog):
             self.show_error_message(error_message[0])
         else:
             point = self.get_rotation_point(pointstr, object)
-            self.transformation_control.add_rotation(type, degree, point, object)
+            self.transformation_control.add_rotation(type, degree, point, self.rotate_around_axis(), self.rotate_by_axis(), object)
 
     def create_scaling(self, type: int, scalestr: str, object: Form):
         error_message = []
@@ -138,12 +139,21 @@ class Trasformation(QDialog):
     def get_object(self) -> Form:
         return self.viewport.objectList[(int(self.mainWindow.objList.currentItem().text().split(": ")[1]))]
 
-    def get_axis(self) -> int:
+    def rotate_around_axis(self) -> int:
         if self.originButton.isChecked():
             return 1
         elif self.pointButton.isChecked():
             return 2
         elif self.objCenterButton.isChecked():
+            return 3
+        return 0
+
+    def rotate_by_axis(self) -> int:
+        if self.mainWindow.x.isChecked():
+            return 1
+        elif self.mainWindow.y.isChecked():
+            return 2
+        elif self.mainWindow.z.isChecked():
             return 3
         return 0
 
@@ -153,6 +163,12 @@ class Trasformation(QDialog):
         return parser.parse_float(plaintext)[0]
 
     def get_rotation_point(self, plaintext: str, object: Form) -> t_coordinate:
+        if object.tridimentional():
+            return parser.parse_float(plaintext)[0]
+        else:
+            return self.get_rotation_point_2D(plaintext, object)
+
+    def get_rotation_point_2D(self, plaintext: str, object: Form) -> t_coordinate:
         axis = self.get_axis()
         if axis == 3:
             return object.get_center()
@@ -160,6 +176,9 @@ class Trasformation(QDialog):
             return (0,0)
         if plaintext == "":
             return (0,0)
+        return parser.parse_float(plaintext)[0]
+
+    def get_rotation_point(self, plaintext: str, object: Form) -> t_coordinate:
         return parser.parse_float(plaintext)[0]
 
     def get_scale(self, plaintext: str) -> t_coordinate:

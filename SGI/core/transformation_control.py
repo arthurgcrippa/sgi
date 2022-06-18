@@ -29,23 +29,23 @@ class Transformation_control(QDialog):
         self.transList.clear()
         self.transformation_gui.transformList.clear()
 
-    def transformation_setup(self, type: int, degree: float, point: t_coordinate, object: Form, id: int):
+    def transformation_setup(self, type: int, degree: float, point: t_coordinate, rotate_around_axis: int, rotate_by_axis: int, object: Form, id: int):
         if object.tridimentional():
-            return Transformation3D(type, degree, point, object, id)
+            return Transformation3D(type, degree, point, rotate_around_axis, rotate_by_axis, object, id)
         else:
             return Transformation2D(type, degree, point, object, id)
 
     def add_translaction(self, type: int, point: t_coordinate, object: Form):
-        transformation = self.transformation_setup(type, None, point, object, len(self.transList))
+        transformation = self.transformation_setup(type, None, point, None, None, object, len(self.transList))
         self.transList.append(transformation)
         self.transformation_gui.transformList.addItem("Translada Objeto: " + str(object.id))
 
-    def add_rotation(self, type: int, degree: float, point: t_coordinate, object: Form):
-        transformation = self.transformation_setup(type, degree, point, object, len(self.transList))
+    def add_rotation(self, type: int, degree: float, point: t_coordinate, rotate_around_axis: int, rotate_by_axis: int, object: Form):
+        transformation = self.transformation_setup(type, degree, point, rotate_around_axis, rotate_by_axis, object, len(self.transList))
         self.transList.append(transformation)
         self.transformation_gui.transformList.addItem("Rotaciona Objeto: " + str(object.id) + " em %.1f graus"%degree)
 
     def add_scaling(self, type: int, point: t_coordinate, object: Form):
-        transformation = self.transformation_setup(type, None, point, object, len(self.transList))
+        transformation = self.transformation_setup(type, None, point, None, None, object, len(self.transList))
         self.transList.append(transformation)
         self.transformation_gui.transformList.addItem("Altera Magnitude do Objeto: "+ str(object.id))
