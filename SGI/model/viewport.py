@@ -114,7 +114,7 @@ class Viewport(QLabel):
     def normalize(self, object: Form) -> None:
         degree = self.window.theta
         if object.tridimentional():
-            Transformation3D(4, degree, (0,0,0), None, None, object, None).normalize()
+            Transformation3D(4, degree, (0,0,0), (0,0,0), None, None, object, None).normalize()
         else:
             Transformation2D(2, -degree, (0,0), object, None).normalize()
 

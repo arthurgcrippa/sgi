@@ -3,7 +3,9 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QListWidget, QLayout, QGridLayout, QToolButton, QDialog, QTabWidget, QFormLayout, QLineEdit, QCheckBox, \
-    QDialogButtonBox, QRadioButton, QMessageBox
+    QDialogButtonBox, QRadioButton, QMessageBox, QButtonGroup
+
+from PyQt5.QtCore import Qt
 
 from model.form import Form
 from core.transformation_control import Transformation_control
@@ -73,18 +75,37 @@ class Trasformation(QDialog):
 
     def add_rotation(self) -> QFormLayout:
         layout = QFormLayout()
-
+        layout_axis = QGridLayout()
         originButton = QRadioButton('Rotacionar sobre a origem')
         pointButton = QRadioButton('Rotacionar sobre o ponto')
         objCenterButton = QRadioButton('Rotacionar sobre o centro do objeto')
         objCenterButton.setChecked(True)
+        rotation_type_group = QButtonGroup(layout)
+        rotation_type_group.addButton(originButton)
+        rotation_type_group.addButton(pointButton)
+        rotation_type_group.addButton(objCenterButton)
         self.originButton = originButton
         self.pointButton = pointButton
         self.objCenterButton = objCenterButton
         addButton = QPushButton("Adicionar")
         degreeLine = QLineEdit("30")
         pointLine = QLineEdit("(100,100,0)")
-        addButton.clicked.connect(lambda: self.create_rotation(2,self.get_degree(degreeLine.text()), pointLine.text(), self.get_object()))
+        vectorLine = QLineEdit("(1,0,0)")
+        axis_group = QButtonGroup(layout_axis)
+        axis_x = QRadioButton('x')
+        axis_y = QRadioButton('y')
+        axis_z = QRadioButton('z')
+        vector = QRadioButton('vetor')
+        axis_group.addButton(axis_x)
+        axis_group.addButton(axis_y)
+        axis_group.addButton(axis_z)
+        axis_group.addButton(vector)
+        vector.setChecked(True)
+        self.axis_x = axis_x
+        self.axis_y = axis_y
+        self.axis_z = axis_z
+        self.vector = vector
+        addButton.clicked.connect(lambda: self.create_rotation(2,self.get_degree(degreeLine.text()), pointLine.text(), vectorLine.text(), self.get_object()))
         layout.addWidget(QLabel('Opções de Rotação'))
         layout.addWidget(originButton)
         layout.addWidget(pointButton)
@@ -93,6 +114,13 @@ class Trasformation(QDialog):
         layout.addWidget(degreeLine)
         layout.addWidget(QLabel('Ponto de Rotação'))
         layout.addWidget(pointLine)
+        layout.addWidget(QLabel('Vetor de Rotação'))
+        layout.addWidget(vectorLine)
+        layout_axis.addWidget(axis_x, 0, 1, Qt.Alignment())
+        layout_axis.addWidget(axis_y, 0, 2, Qt.Alignment())
+        layout_axis.addWidget(axis_z, 0, 3, Qt.Alignment())
+        layout_axis.addWidget(vector, 0, 4, Qt.Alignment())
+        layout.addRow(QLabel(''), layout_axis)
         layout.addWidget(addButton)
 
         return(layout)
@@ -120,13 +148,16 @@ class Trasformation(QDialog):
             point = self.get_coordinate(pointstr)
             self.transformation_control.add_translaction(type, point, object)
 
-    def create_rotation(self, type: int, degree: float, pointstr: str, object: Form):
+    def create_rotation(self, type: int, degree: float, pointstr: str, vectorstr: str, object: Form):
         error_message = []
-        if parser.malformed_input(pointstr, error_message):
+        parser.malformed_input(pointstr, error_message)
+        parser.malformed_input(vectorstr, error_message)
+        if len(error_message) > 0:
             self.show_error_message(error_message[0])
         else:
             point = self.get_rotation_point(pointstr, object)
-            self.transformation_control.add_rotation(type, degree, point, self.rotate_around_axis(), self.rotate_by_axis(), object)
+            vector = self.get_coordinate(vectorstr)
+            self.transformation_control.add_rotation(type, degree, point, vector, self.rotate_around_axis(), self.rotate_by_axis(), object)
 
     def create_scaling(self, type: int, scalestr: str, object: Form):
         error_message = []
@@ -149,12 +180,14 @@ class Trasformation(QDialog):
         return 0
 
     def rotate_by_axis(self) -> int:
-        if self.mainWindow.x.isChecked():
+        if self.axis_x.isChecked():
             return 1
-        elif self.mainWindow.y.isChecked():
+        elif self.axis_y.isChecked():
             return 2
-        elif self.mainWindow.z.isChecked():
+        elif self.axis_z.isChecked():
             return 3
+        elif self.vector.isChecked():
+            return 4
         return 0
 
     def get_coordinate(self, plaintext: str) -> t_coordinate:
@@ -176,9 +209,6 @@ class Trasformation(QDialog):
             return (0,0)
         if plaintext == "":
             return (0,0)
-        return parser.parse_float(plaintext)[0]
-
-    def get_rotation_point(self, plaintext: str, object: Form) -> t_coordinate:
         return parser.parse_float(plaintext)[0]
 
     def get_scale(self, plaintext: str) -> t_coordinate:

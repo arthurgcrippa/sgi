@@ -103,3 +103,9 @@ class Object3D(Form):
         else:
             lines = curve.b_spline_curve(self.normalized, self.curve_type)
         return lines
+
+    def show(self):
+        id = 1
+        for coordinate in self.normalized:
+            print("p"+str(id)+" : "+str(coordinate))
+            id += 1

@@ -9,10 +9,11 @@ t_coordinate = Tuple[float, float, float]
 
 class Transformation3D(Transformation):
 
-    def __init__(self, type: int, degree: float, point: t_coordinate, rotate_around_axis: int, rotate_by_axis: int, object: Form, id: int) -> None:
+    def __init__(self, type: int, degree: float, point: t_coordinate, vector: t_coordinate, rotate_around_axis: int, rotate_by_axis: int, object: Form, id: int) -> None:
         self.type = type
         self.degree = degree
         self.point = point
+        self.vector = vector
         self.rotate_around_axis = rotate_around_axis
         self.rotate_by_axis = rotate_by_axis
         self.object = object
@@ -20,6 +21,8 @@ class Transformation3D(Transformation):
         self.create_matrix()
 
     def create_matrix(self):
+        print("rotate_around_axis: "+str(self.rotate_around_axis))
+        print("rotate_by_axis: "+str(self.rotate_by_axis))
         if self.type == 1:
             self.translation()
         elif self.type == 2:
@@ -37,16 +40,54 @@ class Transformation3D(Transformation):
         self.matrix = matrices.translation((x,y,z),matrices.identity())
 
     def rotation(self):
+        vector, point = self.vector, self.point
         if self.rotate_around_axis == 1:
-            self.rotation_axis((0,0,0))
+            point = (0,0,0)
         elif self.rotate_around_axis == 2:
-            self.rotation_axis(self.point)
+            pass
         elif self.rotate_around_axis == 3:
-            self.rotation_vector()
+            point = self.object.get_center()
+        if self.rotate_by_axis == 1:
+            vector = (1,0,0)
+        elif self.rotate_by_axis == 2:
+            vector = (0,1,0)
+        elif self.rotate_by_axis == 3:
+            vector = (0,0,1)
+        print("vector: "+str(vector))
+        print("point: "+str(point))
+        self.rotate(vector, point)
 
-    def rotation_vector(self):
+
+    def rotate(self, vector, point):
+        x, y, z = point[0], point[1], point[2]
+        v1, v2 = (0,0,0), (vector[0], vector[1], vector[2])
+        matrix = matrices.identity()
+        #1 Transladar para a Origem
+        matrix1 = matrices.translation((-x,-y,-z),matrix)
+        #2 Rotacionar sobre o eixo-x
+        p1, p2, p3 = v1, (0, v2[1], v2[2]), (0, v2[1], 0)
+        theta_x = matrices.degree(p1,p2,p3) #SIGN
+        matrix2 = matrices.rotation_x(theta_x, matrix1)
+        #3 Rotacionar sobre o eixo-z
+        m = matrices.rotation_x(theta_x,[v2[0],v2[1],v2[2],1])
+        v2 = (m[0],m[1],m[2])
+        p1, p2, p3 = v1, v2, (0, v2[1], 0)
+        theta_z = matrices.degree(p1,p2,p3)
+        matrix3 = matrices.rotation_z(theta_z, matrix2)
+        #4 Rotacionar sobre o eixo-y
+        theta = self.degree
+        matrix4 = matrices.rotation_y(theta, matrix3)
+        #5 Desfazer Rotação sobre o eixo-z
+        matrix5 = matrices.rotation_z(-theta_z, matrix4)
+        #6 Desfazer Rotação sobre o eixo-x
+        matrix6 = matrices.rotation_x(-theta_x, matrix5)
+        #7 Desfazer Translação
+        matrix7 = matrices.translation((x,y,z), matrix6)
+        self.matrix = matrix7
+
+    def rotation_vector(self, vector):
         x, y, z = self.object.get_center()
-        v1, v2 = (0,0,0), (self.point[0], self.point[1], self.point[2])
+        v1, v2 = (0,0,0), (vector[0], vector[1], vector[2])
         matrix = matrices.identity()
         #1 Transladar para a Origem
         matrix1 = matrices.translation((-x,-y,-z),matrix)
@@ -116,6 +157,7 @@ class Transformation3D(Transformation):
         for line in matrix:
             x, y, z = line[0], line[1], line[2]
             self.object.normalized.append([x,y,z])
+        self.object.show()
 
     def degree(self, p1, p2, p3):
         hipo = self.dist(p1,p2)
