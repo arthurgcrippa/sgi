@@ -21,8 +21,6 @@ class Transformation3D(Transformation):
         self.create_matrix()
 
     def create_matrix(self):
-        print("rotate_around_axis: "+str(self.rotate_around_axis))
-        print("rotate_by_axis: "+str(self.rotate_by_axis))
         if self.type == 1:
             self.translation()
         elif self.type == 2:
@@ -66,7 +64,7 @@ class Transformation3D(Transformation):
         matrix1 = matrices.translation((-x,-y,-z),matrix)
         #2 Rotacionar sobre o eixo-x
         p1, p2, p3 = v1, (0, v2[1], v2[2]), (0, v2[1], 0)
-        theta_x = matrices.degree(p1,p2,p3) #SIGN
+        theta_x = -matrices.degree(p1,p2,p3) #SIGN
         matrix2 = matrices.rotation_x(theta_x, matrix1)
         #3 Rotacionar sobre o eixo-z
         m = matrices.rotation_x(theta_x,[v2[0],v2[1],v2[2],1])
@@ -84,50 +82,6 @@ class Transformation3D(Transformation):
         #7 Desfazer Translação
         matrix7 = matrices.translation((x,y,z), matrix6)
         self.matrix = matrix7
-
-    def rotation_vector(self, vector):
-        x, y, z = self.object.get_center()
-        v1, v2 = (0,0,0), (vector[0], vector[1], vector[2])
-        matrix = matrices.identity()
-        #1 Transladar para a Origem
-        matrix1 = matrices.translation((-x,-y,-z),matrix)
-        #2 Rotacionar sobre o eixo-x
-        p1, p2, p3 = v1, (0, v2[1], v2[2]), (0, v2[1], 0)
-        theta_x = -matrices.degree(p1,p2,p3)
-        matrix2 = matrices.rotation_x(theta_x, matrix1)
-        #3 Rotacionar sobre o eixo-z
-        m = matrices.rotation_x(theta_x,[v2[0],v2[1],v2[2],1])
-        v2 = (m[0],m[1],m[2])
-        p1, p2, p3 = v1, v2, (0, v2[1], 0)
-        theta_z = matrices.degree(p1,p2,p3)
-        matrix3 = matrices.rotation_z(theta_z, matrix2)
-        #4 Rotacionar sobre o eixo-y
-        theta = self.degree
-        matrix4 = matrices.rotation_y(theta, matrix3)
-        #5 Desfazer Rotação sobre o eixo-z
-        matrix5 = matrices.rotation_z(-theta_z, matrix4)
-        #6 Desfazer Rotação sobre o eixo-x
-        matrix6 = matrices.rotation_x(-theta_x, matrix5)
-        #7 Desfazer Translação
-        matrix7 = matrices.translation((x,y,z), matrix6)
-        self.matrix = matrix7
-
-    def rotation_axis(self, point: t_coordinate):
-        axis = self.rotate_by_axis
-        x, y, z = -point[0], -point[1], -point[2]
-        matrix = matrices.identity()
-        matrix = matrices.translation((x,y,z),matrix)
-        if axis == 1:
-            theta_x = self.degree
-            matrix = matrices.rotation_x(theta_x, matrix)
-        elif axis == 2:
-            theta_y = self.degree
-            matrix = matrices.rotation_y(theta_y, matrix)
-        elif axis == 3:
-            theta_z = self.degree
-            matrix = matrices.rotation_z(theta_z, matrix)
-        matrix = matrices.translation((-x,-y,-z), matrix)
-        self.matrix = matrix
 
 
     def scaling(self):
@@ -157,7 +111,7 @@ class Transformation3D(Transformation):
         for line in matrix:
             x, y, z = line[0], line[1], line[2]
             self.object.normalized.append([x,y,z])
-        self.object.show()
+        #self.object.show()
 
     def degree(self, p1, p2, p3):
         hipo = self.dist(p1,p2)

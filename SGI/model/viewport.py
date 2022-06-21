@@ -129,7 +129,7 @@ class Viewport(QLabel):
 
         (x1, x2) = (0, vp_y), (0, -vp_y)
         (y1, y2) = (vp_x, 0), (-vp_x, 0)
-        (z1, z2) = (vp_x,vp_y), (-vp_x,-vp_y)
+        (z1, z2) = (0, 0), (0, 0)
 
         if (self.window.theta != 0):
             x1 = (vp_x*sin, vp_y*cos)

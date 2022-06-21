@@ -118,10 +118,14 @@ class ObjectWindow(QDialog):
         object.set_color(self.get_color(object).text(), 0)
         object.set_fill(self.get_fill(object))
         if FLAG_3D:
-            object.set_edges(self.get_edges())
-        self.viewport.objectList.append(object)
-        self.viewport.draw(object)
-        self.mainWindow.objList.addItem(object.name + ': ' + str(object.id))
+            error_code = []
+            if parser.malformed_input(self.object_edges.text(), error_code):
+                self.show_error_message(error_code[0])
+            else:
+                object.set_edges(self.get_edges())
+                self.viewport.objectList.append(object)
+                self.viewport.draw(object)
+                self.mainWindow.objList.addItem(object.name + ': ' + str(object.id))
 
     def confirm_object_2D(self):
         error_message = []
