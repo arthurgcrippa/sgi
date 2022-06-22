@@ -91,10 +91,10 @@ class MainWindow(QWidget):
         right.setFixedSize(100,25)
         up3d.setFixedSize(100, 25)
         down3d.setFixedSize(100, 25)
-        self.x = QRadioButton("x")
-        self.y = QRadioButton("y")
-        self.z = QRadioButton("z")
-        self.z.setChecked(True)
+        self.axis_x = QRadioButton("x")
+        self.axis_y = QRadioButton("y")
+        self.axis_z = QRadioButton("z")
+        self.axis_z.setChecked(True)
         up.setIcon(QtGui.QIcon("images/cima.png"))
         down.setIcon(QtGui.QIcon("images/baixo.png"))
         right.setIcon(QtGui.QIcon("images/drt.png"))
@@ -108,9 +108,9 @@ class MainWindow(QWidget):
         layoutFunctions.addWidget(up3d, 1, 0, Qt.Alignment())
         layoutFunctions.addWidget(down3d, 1, 2, Qt.Alignment())
         layoutFunctions.addWidget(QLabel("<         3d         >"), 1, 1, Qt.Alignment())
-        layoutFunctions.addWidget(self.x, 5, 0, Qt.Alignment())
-        layoutFunctions.addWidget(self.y, 5, 1, Qt.Alignment())
-        layoutFunctions.addWidget(self.z, 5, 2, Qt.Alignment())
+        layoutFunctions.addWidget(self.axis_x, 5, 0, Qt.Alignment())
+        layoutFunctions.addWidget(self.axis_y, 5, 1, Qt.Alignment())
+        layoutFunctions.addWidget(self.axis_z, 5, 2, Qt.Alignment())
         up.clicked.connect(lambda: self.viewport.move(1))
         down.clicked.connect(lambda: self.viewport.move(2))
         left.clicked.connect(lambda: self.viewport.move(3))
@@ -131,19 +131,18 @@ class MainWindow(QWidget):
 
         right_rotation = QToolButton()
         left_rotation = QToolButton()
-        self.teste = QSpinBox()
-        self.teste.setRange(10, 180)
-        self.teste.setSingleStep(10)
+        self.degree_box = QSpinBox()
+        self.degree_box.setRange(10, 180)
+        self.degree_box.setSingleStep(10)
         right_rotation.setIcon(QtGui.QIcon("images/direita.png"))
         left_rotation.setIcon(QtGui.QIcon("images/esquerda.png"))
         right_rotation.setFixedSize(100,25)
         left_rotation.setFixedSize(100,25)
-        layoutFunctions.addWidget(self.teste, 4, 1, Qt.Alignment())
+        layoutFunctions.addWidget(self.degree_box, 4, 1, Qt.Alignment())
         layoutFunctions.addWidget(right_rotation, 4, 2, Qt.Alignment())
         layoutFunctions.addWidget(left_rotation, 4, 0, Qt.Alignment())
-        right_rotation.clicked.connect(lambda: self.viewport.rotate_window(self.teste.value(), 1))
-        left_rotation.clicked.connect(lambda: self.viewport.rotate_window(self.teste.value(), 0))
-
+        right_rotation.clicked.connect(lambda: self.viewport.rotate_window(self.degree_box.value(), 1, self.get_axis()))
+        left_rotation.clicked.connect(lambda: self.viewport.rotate_window(self.degree_box.value(), 0, self.get_axis()))
         layout.addLayout(layoutObj)
         layout.addLayout(layoutFunctions)
         return layout
@@ -156,7 +155,6 @@ class MainWindow(QWidget):
         return layout
 
     def menu_add_objects(self):
-        # Descriptor(self.viewport)
         self.objWindow.exec()
 
     def show_error_message(self, error: str):
@@ -192,6 +190,15 @@ class MainWindow(QWidget):
         else:
             print("Voce esta usando Linag Barsk")
             return 0
+
+    def get_axis(self):
+        if self.axis_x.isChecked():
+            return 1
+        elif self.axis_y.isChecked():
+            return 2
+        elif self.axis_z.isChecked():
+            return 3
+        return 0
 
     def change_algorithm(self):
         self.viewport.clipper.set_algorithm(self.get_algorithm())

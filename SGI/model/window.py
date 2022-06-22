@@ -19,11 +19,10 @@ class Window():
         self.xMax = float(vp_width/2)
         self.yMax = float(vp_height/2)
         self.zMax = float(vp_depth/2)
-        self.theta = 0
+        self.theta_x = 0
+        self.theta_y = 0
+        self.theta_z = 0
         self.last_degree = 0
-
-    def normalized(self) -> bool:
-        return theta != 0
 
     def move(self, direction: int):
         diff = MOVE

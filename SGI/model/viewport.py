@@ -11,6 +11,7 @@ from model.transformation import Transformation
 from model.transformation2D import Transformation2D
 from model.transformation3D import Transformation3D
 from model.clipping import Clipper
+from utils import matrices
 
 import math
 import numpy as np
@@ -105,37 +106,61 @@ class Viewport(QLabel):
         for obj in self.objectList:
             self.draw(obj)
 
-    def rotate_window(self, degree: int, orientation: int):
+    def rotate_window(self, degree: int, orientation: int, axis: int):
         if orientation:
             degree *= -1
-        self.window.theta += degree
+        if axis == 1:
+            self.window.theta_x += degree
+        elif axis == 2:
+            self.window.theta_y += degree
+        elif axis == 3:
+            self.window.theta_z += degree
         self.redraw()
 
     def normalize(self, object: Form) -> None:
-        degree = self.window.theta
         if object.tridimentional():
-            Transformation3D(4, degree, (0,0,0), (0,0,0), None, None, object, None).normalize()
+            print("x: "+str(self.window.theta_x))
+            print("y: "+str(self.window.theta_y))
+            print("z: "+str(self.window.theta_z))
+            matrix = Transformation3D(2, self.window.theta_x, (0,0,0), (0,0,0), 1, 1, object, None).normalize(object.matrix)
+            matrix = Transformation3D(2, self.window.theta_y, (0,0,0), (0,0,0), 1, 2, object, None).normalize(matrix)
+            matrix = Transformation3D(2, self.window.theta_z, (0,0,0), (0,0,0), 1, 3, object, None).normalize(matrix)
         else:
-            Transformation2D(2, -degree, (0,0), object, None).normalize()
+            Transformation2D(2, -self.window.theta_z, (0,0), object, None).normalize()
 
     def draw_axises(self):
         painter = self.get_painter(None)
         xMin, yMin, xMax, yMax = self.get_wc()
-
-        theta = -math.radians(self.window.theta)
-        sin = np.sin(theta)
-        cos = np.cos(theta)
         vp_x, vp_y, vp_z = self.vpCoord[0]/2, self.vpCoord[1]/2, self.vpCoord[2]/2
 
-        (x1, x2) = (0, vp_y), (0, -vp_y)
-        (y1, y2) = (vp_x, 0), (-vp_x, 0)
-        (z1, z2) = (0, 0), (0, 0)
+        (x1, x2) = (0, vp_y, 0), (0, -vp_y, 0)
+        (y1, y2) = (vp_x, 0, 0), (-vp_x, 0, 0)
+        (z1, z2) = (0, 0, vp_z), (0, 0, -vp_z)
 
-        if (self.window.theta != 0):
-            x1 = (vp_x*sin, vp_y*cos)
-            x2 = (-vp_x*sin, -vp_y*cos)
-            y1 = (vp_x*cos, -vp_y*sin)
-            y2 = (-vp_x*cos, vp_y*sin)
+        theta_x, theta_y, theta_z = self.window.theta_x, self.window.theta_y, self.window.theta_z
+        if theta_x != 0:
+            matrix_y = matrices.rotation_x(theta_x, [[y1[0],y1[1], y1[2], 1], [y2[0],y2[1], y2[2], 1]])
+            matrix_z = matrices.rotation_x(theta_x, [[z1[0],z1[1], z1[2], 1], [z2[0],z2[1], z2[2], 1]])
+            y1 = (matrix_y[0][0], matrix_y[0][1], matrix_y[0][2])
+            y2 = (matrix_y[1][0], matrix_y[1][1], matrix_y[1][2])
+            z1 = (matrix_z[0][0], matrix_z[0][1], matrix_z[0][2])
+            z2 = (matrix_z[1][0], matrix_z[1][1], matrix_z[1][2])
+        if theta_y != 0:
+            matrix_x = matrices.rotation_y(theta_y, [[x1[0],x1[1], x1[2], 1], [x2[0],x2[1], x2[2], 1]])
+            matrix_z = matrices.rotation_y(theta_y, [[z1[0],z1[1], z1[2], 1], [z2[0],z2[1], z2[2], 1]])
+            x1 = (matrix_x[0][0], matrix_x[0][1], matrix_x[0][2])
+            x2 = (matrix_x[1][0], matrix_x[1][1], matrix_x[1][2])
+            z1 = (matrix_z[0][0], matrix_z[0][1], matrix_z[0][2])
+            z2 = (matrix_z[1][0], matrix_z[1][1], matrix_z[1][2])
+        if theta_z != 0:
+            matrix_x = matrices.rotation_z(theta_z, [[x1[0],x1[1], x1[2], 1], [x2[0],x2[1], x2[2], 1]])
+            matrix_y = matrices.rotation_z(theta_z, [[y1[0],y1[1], y1[2], 1], [y2[0],y2[1], y2[2], 1]])
+            x1 = (matrix_x[0][0], matrix_x[0][1], matrix_x[0][2])
+            x2 = (matrix_x[1][0], matrix_x[1][1], matrix_x[1][2])
+            y1 = (matrix_y[0][0], matrix_y[0][1], matrix_y[0][2])
+            y2 = (matrix_y[1][0], matrix_y[1][1], matrix_y[1][2])
+
+
 
         (x1, x2), visible_x = self.clipper.line_clip(x1, x2)
         (y1, y2), visible_y = self.clipper.line_clip(y1, y2)
@@ -152,8 +177,11 @@ class Viewport(QLabel):
             painter.drawLine(p1_x, p1_y, p2_x, p2_y)
         (p1_x, p1_y) = self.vp_trans(z1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
         (p2_x, p2_y) = self.vp_trans(z2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-        #if visible_z:
-            #painter.drawLine(p1_x, p1_y, p2_x, p2_y)
+        if visible_z:
+            print("entrou aqui")
+            coord = [p1_x, p1_y, p2_x, p2_y]
+            print(coord)
+            painter.drawLine(p1_x, p1_y, p2_x, p2_y)
         self.update()
         painter.end()
 

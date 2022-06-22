@@ -105,13 +105,13 @@ class Transformation3D(Transformation):
         #self.object.setMatrix(self.matrix)
         self.object.reform()
 
-    def normalize(self):
-        matrix = np.dot(self.object.matrix, self.matrix)
+    def normalize(self, object_matrix):
+        matrix = np.dot(object_matrix, self.matrix)
         self.object.normalized.clear()
         for line in matrix:
             x, y, z = line[0], line[1], line[2]
             self.object.normalized.append([x,y,z])
-        #self.object.show()
+        return matrix
 
     def degree(self, p1, p2, p3):
         hipo = self.dist(p1,p2)
