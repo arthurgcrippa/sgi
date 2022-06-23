@@ -109,3 +109,4 @@ class Object3D(Form):
         for coordinate in self.normalized:
             print("p"+str(id)+" : "+str(coordinate))
             id += 1
+        print("#########################")

@@ -28,7 +28,7 @@ class Transformation3D(Transformation):
         elif self.type == 3:
             self.scaling()
         elif self.type == 4:
-            self.window_rotation()
+            self.projection()
 
     def set_axis(axis):
         self.axis = axis
@@ -51,8 +51,6 @@ class Transformation3D(Transformation):
             vector = (0,1,0)
         elif self.rotate_by_axis == 3:
             vector = (0,0,1)
-        print("vector: "+str(vector))
-        print("point: "+str(point))
         self.rotate(vector, point)
 
 
@@ -90,15 +88,9 @@ class Transformation3D(Transformation):
         center = self.object.get_center()
         self.matrix = matrices.scaling(scale, center, matrix)
 
-    def window_rotation(self):
-        theta = self.degree
-        x, y, z = self.point
+    def projection(self):
         matrix = matrices.identity()
-        matrix = matrices.translation((-x,-y,-z), matrix)
-        matrix = matrices.rotation_z(theta, matrix)
-        matrix = matrices.translation((x,y,z), matrix)
-        self.matrix = matrix
-
+        self.matrix = matrices.project(-100, matrix)
 
     def apply(self):
         self.object.setMatrix(np.dot(self.object.matrix, self.matrix))
@@ -106,33 +98,28 @@ class Transformation3D(Transformation):
         self.object.reform()
 
     def normalize(self, object_matrix):
-        matrix = np.dot(object_matrix, self.matrix)
+        print("Object Matrix:")
+        matrices.show(object_matrix[0])
+        print("Transformation Matrix: ")
+        matrices.show(self.matrix)
+        matrix = np.dot(object_matrix[0], self.matrix)
+        print("Result Matrix:")
+        matrices.show(matrix)
         self.object.normalized.clear()
         for line in matrix:
-            x, y, z = line[0], line[1], line[2]
+            x, y, z, w = line[0], line[1], line[2], line[3]
+            #print("xyzw before")
+            before = (x,y,z,w)
+            #print(before)
+            if w != 0:
+        #        print("w: "+str(w))
+                x, y, z = x/w, y/w, z/w
+                #print("xyzw after")
+                after = (x,y,z,w)
+                #print(after)
             self.object.normalized.append([x,y,z])
-        return matrix
-
-    def degree(self, p1, p2, p3):
-        hipo = self.dist(p1,p2)
-        cat_op = self.dist(p2,p3)
-        cat_ad = self.dist(p1, p3)
-        sign, x, y = 1, p3[0], p3[1]
-        sin = cat_op/hipo
-        cos = cat_ad/hipo
-        quad = 0
-        degree = np.degrees(np.arcsin(sin))
-        if x < 0:
-            if y < 0: #3rd
-                degree = 180 - degree
-            else:     #2nd
-                degree += 180
-        else:
-            if y < 0: #4th
-                degree += 360
-            else:     #1st
-                pass
-        return degree
+        object_matrix.clear()
+        object_matrix.append(matrix)
 
     def dist(self, p1, p2):
         return math.sqrt((p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2)

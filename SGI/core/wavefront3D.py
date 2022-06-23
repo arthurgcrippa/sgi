@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from model.form import Form
 from model.object2D import Object2D
@@ -165,7 +165,7 @@ def case_line(name, color, line, obj):
     if len(vertices) == 2:
         obj["type"] = "Linha"
 
-    elif vertices[0] == vertices[len(vertices) - 1]:
+    elif len(vertices) > 2:
         obj["type"] = "Wireframe" #TODO
         vertices.pop() # REMOVER OS VERTICES REPETIDOS OU NÃO
 
@@ -224,7 +224,7 @@ def create_forms(vertices, objList):
     id = -1
     for obj in objList:
         id+=1
-        if obj["type"] is "Composto":
+        if obj["type"] == "Composto":
             objects = create_forms(vertices, obj['objects']) # chamada recursiva....
             g = Grupo(obj['name'], objects, (0,0,0))
             built.append(g)
@@ -233,30 +233,30 @@ def create_forms(vertices, objList):
             for v in obj["vertices"]:
                 points.append(vertices[v - 1])
 
-            if obj["type"] is "Ponto":
+            if obj["type"] == "Ponto":
                 p = Object3D(obj["name"], points, id)
-                p.set_color(obj["color"])
+                p.set_color(obj["color"], 0) #rever o formato (pode ser 1)
                 built.append(p)
 
-            elif obj["type"] is "Linha":
+            elif obj["type"] == "Linha":
                 l = Object3D(obj["name"], points, id)
-                l.set_color(obj["color"])
+                l.set_color(obj["color"], 0)
                 built.append(l)
 
-            elif obj["type"] is "Wireframe":
+            elif obj["type"] == "Wireframe":
                 wf = Object3D(obj["name"], points, id)
-                wf.set_color(obj["color"])
+                wf.set_color(obj["color"], 0)
                 built.append(wf)
 
-            elif obj["type"] is "Poligono":
+            elif obj["type"] == "Poligono":
                 pl = Object3D(obj["name"], points, id)
-                pl.set_color(obj["color"])
+                pl.set_color(obj["color"], 0)
                 pl.set_fill(True)
                 built.append(pl)
 
-            elif obj["type"] is "Curva":
+            elif obj["type"] == "Curva":
                 c = Object2D(obj["name"], points, id)
-                c.set_color(obj["color"])
+                c.set_color(obj["color"], 1)
                 c.set_curvy(True)
                 built.append(c)
 
@@ -271,6 +271,7 @@ def create_watercolor(file) -> Dict:
         if line[0] == 'n':
             mtl = line.rstrip().split()[1]
             srgb = f.readline().rstrip().split()[1:]
+            print(srgb)
             watercolour[mtl] = string_to_rgb(srgb)
 
         line = f.readline().rstrip()

@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxL
     QListWidget, QLayout, QGridLayout,  QToolButton, QMessageBox, QSpinBox, QLineEdit, QRadioButton
 
 from core import wavefront2D
+from core import wavefront3D
 
 class MainWindow(QWidget):
     def __init__(self) -> None:
@@ -171,13 +172,13 @@ class MainWindow(QWidget):
             self.transformation.exec()
 
     def save(self, file_name: str) -> None:
-        wavefront2D.write(file_name, self.viewport.objectList)
+        wavefront3D.write(file_name, self.viewport.objectList)
 
     def open(self, file_path: str) -> None:
         self.objList.clear()
         self.viewport.objectList.clear()
         self.viewport.redraw()
-        new_objects = wavefront2D.read(file_path)
+        new_objects = wavefront3D.read(file_path)
         for obj in new_objects:
             self.viewport.objectList.append(obj)
             self.objList.addItem(obj.name + ': ' + str(obj.id))

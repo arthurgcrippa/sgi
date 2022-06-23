@@ -15,7 +15,7 @@ from utils import matrices
 
 import math
 import numpy as np
-
+import sys
 class Viewport(QLabel):
     def __init__(self, vp_width:int, vp_height:int, vp_depth: int) -> None:
         super().__init__()
@@ -56,7 +56,7 @@ class Viewport(QLabel):
             r = object.color[0]
             g = object.color[1]
             b = object.color[2]
-            pen.setWidthF(3)
+            pen.setWidthF(2)
             pen.setColor(QColor(r,g,b))
             brush.setColor(QColor(r,g,b))
             brush.setStyle(Qt.SolidPattern)
@@ -65,8 +65,8 @@ class Viewport(QLabel):
         return painter
 
     def draw(self, object: Form):
-
         self.normalize(object)
+        #object.show()
         painter = self.get_painter(object)
         xMin, yMin, xMax, yMax = self.get_wc()
         if (object.len() == 1):
@@ -78,8 +78,6 @@ class Viewport(QLabel):
             possible_lines = self.clipper.clip(object)
             if object.fill and object.len() > 2:
                 points = self.clipper.get_points(possible_lines)
-                points_vp = []
-                first_point = self.vp_trans(points[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
                 object_path = QPainterPath()
                 FIRST = True
                 for point in points:
@@ -93,6 +91,7 @@ class Viewport(QLabel):
             else:
                 for possible_line in possible_lines:
                     (p1, p2), visible = possible_line
+                    #print("p1: "+str(p1)+" p2: "+str(p2))
                     (p1_x, p1_y) = self.vp_trans(p1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
                     (p2_x, p2_y) = self.vp_trans(p2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
                     if visible:
@@ -119,71 +118,52 @@ class Viewport(QLabel):
 
     def normalize(self, object: Form) -> None:
         if object.tridimentional():
-            print("x: "+str(self.window.theta_x))
-            print("y: "+str(self.window.theta_y))
-            print("z: "+str(self.window.theta_z))
-            matrix = Transformation3D(2, self.window.theta_x, (0,0,0), (0,0,0), 1, 1, object, None).normalize(object.matrix)
-            matrix = Transformation3D(2, self.window.theta_y, (0,0,0), (0,0,0), 1, 2, object, None).normalize(matrix)
-            matrix = Transformation3D(2, self.window.theta_z, (0,0,0), (0,0,0), 1, 3, object, None).normalize(matrix)
+            matrix = [object.matrix]
+            theta_x, theta_y, theta_z = self.window.theta_x, self.window.theta_y, self.window.theta_z
+            if object.name == "eixo-x":
+                theta_x = 0
+            elif object.name == "eixo-y":
+                theta_y = 0
+            elif object.name == "eixo-z":
+                theta_z = 0
+            Transformation3D(2, theta_x, (0,0,0), (0,0,0), 1, 1, object, None).normalize(matrix)
+            Transformation3D(2, theta_y, (0,0,0), (0,0,0), 1, 2, object, None).normalize(matrix)
+            Transformation3D(2, theta_z, (0,0,0), (0,0,0), 1, 3, object, None).normalize(matrix)
+            Transformation3D(4, None, None, None, None, None, object, None).normalize(matrix)
         else:
             Transformation2D(2, -self.window.theta_z, (0,0), object, None).normalize()
 
+    def projection(self, object: Form):
+        pontos = []
+        # d = z
+        d = -400
+        for p in object.normalized:
+            if p[2] == 0:
+                x, y, z = p[0], p[1], p[2]
+                pontos.append([x, y, z])
+            else:
+                # sys.stdout.write("p0: "+str(p[0])+" ")
+                # sys.stdout.write("p1: "+str(p[1])+" ")
+                # sys.stdout.write("p2: "+str(p[2])+" ")
+                #print()
+                x = p[0] / (p[2] / d)
+                y = p[1] / (p[2] / d)
+                z = d
+                pontos.append([x, y, z])
+        return pontos
+
     def draw_axises(self):
-        painter = self.get_painter(None)
-        xMin, yMin, xMax, yMax = self.get_wc()
         vp_x, vp_y, vp_z = self.vpCoord[0]/2, self.vpCoord[1]/2, self.vpCoord[2]/2
+        axis_x = Object3D("eixo-x", [(vp_x, 0, 0), (-vp_x, 0, 0)], -1)
+        axis_y = Object3D("eixo-y", [(0, vp_y, 0), (0, -vp_y, 0)], -2)
+        axis_z = Object3D("eixo-z", [(0, 0, vp_z), (0, 0, -vp_z)], -3)
+        axis_x.set_edges([(1,2)])
+        axis_y.set_edges([(1,2)])
+        axis_z.set_edges([(1,2)])
+        self.draw(axis_x)
+        self.draw(axis_y)
+        self.draw(axis_z)
 
-        (x1, x2) = (0, vp_y, 0), (0, -vp_y, 0)
-        (y1, y2) = (vp_x, 0, 0), (-vp_x, 0, 0)
-        (z1, z2) = (0, 0, vp_z), (0, 0, -vp_z)
-
-        theta_x, theta_y, theta_z = self.window.theta_x, self.window.theta_y, self.window.theta_z
-        if theta_x != 0:
-            matrix_y = matrices.rotation_x(theta_x, [[y1[0],y1[1], y1[2], 1], [y2[0],y2[1], y2[2], 1]])
-            matrix_z = matrices.rotation_x(theta_x, [[z1[0],z1[1], z1[2], 1], [z2[0],z2[1], z2[2], 1]])
-            y1 = (matrix_y[0][0], matrix_y[0][1], matrix_y[0][2])
-            y2 = (matrix_y[1][0], matrix_y[1][1], matrix_y[1][2])
-            z1 = (matrix_z[0][0], matrix_z[0][1], matrix_z[0][2])
-            z2 = (matrix_z[1][0], matrix_z[1][1], matrix_z[1][2])
-        if theta_y != 0:
-            matrix_x = matrices.rotation_y(theta_y, [[x1[0],x1[1], x1[2], 1], [x2[0],x2[1], x2[2], 1]])
-            matrix_z = matrices.rotation_y(theta_y, [[z1[0],z1[1], z1[2], 1], [z2[0],z2[1], z2[2], 1]])
-            x1 = (matrix_x[0][0], matrix_x[0][1], matrix_x[0][2])
-            x2 = (matrix_x[1][0], matrix_x[1][1], matrix_x[1][2])
-            z1 = (matrix_z[0][0], matrix_z[0][1], matrix_z[0][2])
-            z2 = (matrix_z[1][0], matrix_z[1][1], matrix_z[1][2])
-        if theta_z != 0:
-            matrix_x = matrices.rotation_z(theta_z, [[x1[0],x1[1], x1[2], 1], [x2[0],x2[1], x2[2], 1]])
-            matrix_y = matrices.rotation_z(theta_z, [[y1[0],y1[1], y1[2], 1], [y2[0],y2[1], y2[2], 1]])
-            x1 = (matrix_x[0][0], matrix_x[0][1], matrix_x[0][2])
-            x2 = (matrix_x[1][0], matrix_x[1][1], matrix_x[1][2])
-            y1 = (matrix_y[0][0], matrix_y[0][1], matrix_y[0][2])
-            y2 = (matrix_y[1][0], matrix_y[1][1], matrix_y[1][2])
-
-
-
-        (x1, x2), visible_x = self.clipper.line_clip(x1, x2)
-        (y1, y2), visible_y = self.clipper.line_clip(y1, y2)
-        (z1, z2), visible_z = self.clipper.line_clip(z1, z2)
-
-
-        (p1_x, p1_y) = self.vp_trans(x1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-        (p2_x, p2_y) = self.vp_trans(x2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-        if visible_x:
-            painter.drawLine(p1_x, p1_y, p2_x, p2_y)
-        (p1_x, p1_y) = self.vp_trans(y1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-        (p2_x, p2_y) = self.vp_trans(y2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-        if visible_y:
-            painter.drawLine(p1_x, p1_y, p2_x, p2_y)
-        (p1_x, p1_y) = self.vp_trans(z1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-        (p2_x, p2_y) = self.vp_trans(z2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-        if visible_z:
-            print("entrou aqui")
-            coord = [p1_x, p1_y, p2_x, p2_y]
-            print(coord)
-            painter.drawLine(p1_x, p1_y, p2_x, p2_y)
-        self.update()
-        painter.end()
 
     def move(self, index: int):
         self.window.move(index)

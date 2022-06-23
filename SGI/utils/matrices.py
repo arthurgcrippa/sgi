@@ -44,6 +44,13 @@ def rotation_z(theta, matrix):
                          [0,     0,   0,  1]]
     return np.dot(matrix, matrix_rotation_z)
 
+def project(d, matrix):
+    matrix_projection = [[1, 0, 0,   0],
+                         [0, 1, 0,   0],
+                         [0, 0, 1, 1/d],
+                         [0, 0, 0,   0]]
+    return np.dot(matrix_projection, matrix)
+
 def identity():
     matrix = [[1,0,0,0],
               [0,1,0,0],
