@@ -120,16 +120,20 @@ class Viewport(QLabel):
         if object.tridimentional():
             matrix = [object.matrix]
             theta_x, theta_y, theta_z = self.window.theta_x, self.window.theta_y, self.window.theta_z
-            if object.name == "eixo-x":
-                theta_x = 0
-            elif object.name == "eixo-y":
-                theta_y = 0
-            elif object.name == "eixo-z":
-                theta_z = 0
+            # if object.name == "eixo-x":
+            #     theta_x = 0
+            # elif object.name == "eixo-y":
+            #     theta_y = 0
+            # elif object.name == "eixo-z":
+            #     theta_z = 0
             Transformation3D(2, theta_x, (0,0,0), (0,0,0), 1, 1, object, None).normalize(matrix)
+            print(" z = "+str(matrix[0][0][2]))
             Transformation3D(2, theta_y, (0,0,0), (0,0,0), 1, 2, object, None).normalize(matrix)
+            print(" z = "+str(matrix[0][0][2]))
             Transformation3D(2, theta_z, (0,0,0), (0,0,0), 1, 3, object, None).normalize(matrix)
+            print(" z = "+str(matrix[0][0][2]))
             Transformation3D(4, None, None, None, None, None, object, None).normalize(matrix)
+            print(" z = "+str(matrix[0][0][2]))
         else:
             Transformation2D(2, -self.window.theta_z, (0,0), object, None).normalize()
 
@@ -142,10 +146,6 @@ class Viewport(QLabel):
                 x, y, z = p[0], p[1], p[2]
                 pontos.append([x, y, z])
             else:
-                # sys.stdout.write("p0: "+str(p[0])+" ")
-                # sys.stdout.write("p1: "+str(p[1])+" ")
-                # sys.stdout.write("p2: "+str(p[2])+" ")
-                #print()
                 x = p[0] / (p[2] / d)
                 y = p[1] / (p[2] / d)
                 z = d

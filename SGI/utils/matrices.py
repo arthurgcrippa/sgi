@@ -48,7 +48,7 @@ def project(d, matrix):
     matrix_projection = [[1, 0, 0,   0],
                          [0, 1, 0,   0],
                          [0, 0, 1, 1/d],
-                         [0, 0, 0,   0]]
+                         [0, 0, 0,   1]]
     return np.dot(matrix_projection, matrix)
 
 def identity():
@@ -75,8 +75,6 @@ def show(matrix):
         for j in range(len(matrix[i])):
             sys.stdout.write("{:.2f}".format(matrix[i][j])+"  ")
         print()
-
-
 
 def degree(p1, p2, p3):
     if p1 == p2:

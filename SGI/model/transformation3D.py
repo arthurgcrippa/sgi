@@ -60,6 +60,7 @@ class Transformation3D(Transformation):
         matrix = matrices.identity()
         #1 Transladar para a Origem
         matrix1 = matrices.translation((-x,-y,-z),matrix)
+        assert matrix1[0][2] == 0
         #2 Rotacionar sobre o eixo-x
         p1, p2, p3 = v1, (0, v2[1], v2[2]), (0, v2[1], 0)
         theta_x = -matrices.degree(p1,p2,p3) #SIGN
@@ -94,29 +95,15 @@ class Transformation3D(Transformation):
 
     def apply(self):
         self.object.setMatrix(np.dot(self.object.matrix, self.matrix))
-        #self.object.setMatrix(self.matrix)
         self.object.reform()
 
     def normalize(self, object_matrix):
-        print("Object Matrix:")
-        matrices.show(object_matrix[0])
-        print("Transformation Matrix: ")
-        matrices.show(self.matrix)
         matrix = np.dot(object_matrix[0], self.matrix)
-        print("Result Matrix:")
-        matrices.show(matrix)
         self.object.normalized.clear()
         for line in matrix:
             x, y, z, w = line[0], line[1], line[2], line[3]
-            #print("xyzw before")
-            before = (x,y,z,w)
-            #print(before)
-            if w != 0:
-        #        print("w: "+str(w))
+            if self.type == 4 and w != 0:
                 x, y, z = x/w, y/w, z/w
-                #print("xyzw after")
-                after = (x,y,z,w)
-                #print(after)
             self.object.normalized.append([x,y,z])
         object_matrix.clear()
         object_matrix.append(matrix)
