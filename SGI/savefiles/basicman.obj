@@ -1,6 +1,6 @@
 # This file uses centimeters as units for non-parametric coordinates.
 
-mtllib basicman.mtl
+mtllib basicman_adjusted.mtl
 g default
 v -2.778900 4.945600 0.364200
 v -2.729600 4.946200 0.391400

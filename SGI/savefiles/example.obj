@@ -15,7 +15,7 @@ v 300 -300 0.0
 mtllib example_colors.mtl
 o Quadrado
 usemtl Quadrado_mtl
-l 1 2 3 4
+l 1 2 3 4 1
 o Linha
 usemtl Linha_mtl
 l 5 6
@@ -24,10 +24,10 @@ usemtl Ponto_mtl
 p 7
 o Triangulo
 usemtl Triangulo_mtl
-l 8 9 10
+l 8 9 10 8
 o Quadradao
 usemtl Quadradao_mtl
-l 11 12 13 14
+l 11 12 13 14 11
 o Quadrado_Cheio
 usemtl Quadrado_Cheio_mtl
-f 1 2 3 4
+f 1 2 3 4 1

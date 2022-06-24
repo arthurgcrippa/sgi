@@ -42,7 +42,7 @@ class ObjectWindow(QDialog):
         self.object_name_2D = QLineEdit("Nome do Objeto")
         self.object_coordinates_2D = QLineEdit("(-50,1);(1,1);(1,50);(-50,50)")
         self.object_color_2D = QLineEdit("#000000")
-        self.fill_poligon_2D = QCheckBox("Fill object")
+        self.is_poligon_2D = QCheckBox("Fill object")
         self.confirm_button_2D = QPushButton('Confirm', self)
         cancel_button = QPushButton('Cancel')
         self.confirm_button_2D.clicked.connect(self.confirm_object_2D)
@@ -54,7 +54,7 @@ class ObjectWindow(QDialog):
         layout.addWidget(self.object_name_2D)
         layout.addWidget(self.object_coordinates_2D)
         layout.addWidget(self.object_color_2D)
-        layout.addWidget(self.fill_poligon_2D)
+        layout.addWidget(self.is_poligon_2D)
         layout.addWidget(dialogBox)
         generalTab.setLayout(layout)
         return generalTab
@@ -70,7 +70,7 @@ class ObjectWindow(QDialog):
         #self.object_coordinates = QLineEdit("(10,10,10)")
         #self.object_edges = QLineEdit("(1,1)")
         self.object_color_3D = QLineEdit("#000000")
-        self.fill_poligon_3D = QCheckBox("Fill object")
+        self.is_poligon_3D = QCheckBox("Fill object")
         self.confirm_button_3D = QPushButton('Confirm', self)
         cancel_button = QPushButton('Cancel')
         self.confirm_button_3D.clicked.connect(self.confirm_object_3D)
@@ -83,7 +83,7 @@ class ObjectWindow(QDialog):
         layout.addWidget(self.object_coordinates_3D)
         layout.addWidget(self.object_edges)
         layout.addWidget(self.object_color_3D)
-        layout.addWidget(self.fill_poligon_3D)
+        layout.addWidget(self.is_poligon_3D)
         layout.addWidget(dialogBox)
         generalTab.setLayout(layout)
         return generalTab
@@ -117,7 +117,7 @@ class ObjectWindow(QDialog):
 
     def confirm_object(self, object: Form, FLAG_3D: bool):
         object.set_color(self.get_color(object).text(), 0)
-        object.set_fill(self.get_fill(object))
+        object.set_as_polygon(self.is_polygon(object))
         if FLAG_3D:
             error_code = []
             if not parser.malformed_input(self.object_edges.text(), error_code):
@@ -180,11 +180,11 @@ class ObjectWindow(QDialog):
         msg.setWindowTitle("Error")
         msg.exec_()
 
-    def get_fill(self, object: Form):
+    def is_polygon(self, object: Form):
         if object.tridimentional():
-            return self.fill_poligon_3D.isChecked()
+            return self.is_poligon_3D.isChecked()
         else:
-            return self.fill_poligon_2D.isChecked()
+            return self.is_poligon_2D.isChecked()
 
     def get_color(self, object: Form):
         if object.tridimentional():

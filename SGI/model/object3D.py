@@ -6,15 +6,21 @@ t_coordinate = Tuple[float, float, float]
 
 class Object3D(Form):
     def __init__(self, name: str, coordinates: List[t_coordinate], id: int) -> None:
+        #Basic Attriutes
         self.name = name
         self.coordinates = coordinates
+        self.color = [0,0,0]
         self.id = id
+
+        #Normalization Attriutes
         self.matrix = self.getMatrix()
         self.normalized = self.coordinates.copy()
-        self.color = [0,0,0]
-        self.fill = False
-        self.curve_type = 0
-        self.is_curvy = False
+
+        #Flags
+        self.IS_POLYGON = False
+        self.curve_type = 0 #bspline, hermite or bezier
+        self.IS_CURVE = False
+        self.IS_GROUPED = False
 
 
     def set_color(self, color, format):
@@ -26,23 +32,14 @@ class Object3D(Form):
             rgb = tuple(int(color[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
             self.color = rgb
 
-    def set_fill(self, fill):
-        self.fill = fill
+    def set_as_polygon(self, FLAG):
+        self.IS_POLYGON = FLAG
 
-    def set_curvy(self, curvy):
-        self.is_curvy = curvy
+    def set_as_curve(self, FLAG):
+        self.IS_CURVE = FLAG
 
     def set_curve_type(self, curve_type):
         self.curve_type = curve_type
-
-    def tridimentional(self):
-        return True
-
-    def grouped(self):
-        return self.is_grouped
-
-    def set_visible(self, visible):
-        self.visible = visible
 
     def setCoordinates(self, coordinates: List[t_coordinate]):
         self.coordinates = coordinates
@@ -53,22 +50,20 @@ class Object3D(Form):
     def set_edges(self, edges: []):
         self.edges = edges
         if len(edges) in [1,2]:
-            self.is_grouped = False
+            self.IS_GROUPED = False
             return
         _, last_flag = edges[0]
         for _,flag in edges:
             if flag != last_flag:
-                self.is_grouped = True
+                self.IS_GROUPED = True
                 return
-        self.is_grouped = False
+        self.IS_GROUPED = False
 
+    def tridimentional(self):
+        return True
 
-    def connect_edges_sequentially(self):
-        edges = []
-        for i in range(1, len(self.coordinates)+1):
-            edges.append(i)
-        self.edges = (edges, fill)
-
+    def grouped(self):
+        return self.IS_GROUPED
 
     def getMatrix(self) -> []:
         coordinates = self.coordinates
@@ -79,7 +74,7 @@ class Object3D(Form):
         return matrix
 
     def get_lines(self):
-        if self.is_curvy:
+        if self.IS_CURVE:
             return self.curve()
         object_lines = []
         points = self.normalized
@@ -117,9 +112,6 @@ class Object3D(Form):
 
     def len(self)->int:
         return len(self.coordinates)
-
-    def tridimentional(self) -> bool:
-        return len(self.coordinates[0]) == 3
 
     def reform(self):
         matrix = self.matrix

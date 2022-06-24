@@ -49,16 +49,14 @@ def pointsToString(obj, objMap):
     first, last = objMap[obj][0], objMap[obj][1]
     if obj.grouped():
         lines = []
-        for edge in obj.edges:
+        for circuit, polygon in obj.edges:
             line = ""
-            if edge == (0,0):
-                lines.append(line)
-                line += "l "
-            elif edge == (0,1):
-                lines.append(line)
-                line += "f "
-            else:
-                line += str(first+edge[0])
+            header = "f " if polygon else "f "
+            line += header
+            for value in circuit:
+                line += str(first+value)
+            lines.append(line)
+        return lines
 
     line = ""
     if obj.len() == 1:
@@ -66,7 +64,7 @@ def pointsToString(obj, objMap):
     elif obj.len() == 2:
         line += "l "
     elif obj.len() > 2:
-        if obj.fill:
+        if obj.IS_POLYGON:
             line+= "f "
         else:
             line+= "l "
@@ -135,20 +133,20 @@ def read(file):
 
 
 def parse_vertex(line):
-    z = float(line.pop())
-    y = float(line.pop())
-    x = float(line.pop())
+    z = 5*float(line.pop())
+    y = 5*float(line.pop())
+    x = 5*float(line.pop())
     return x, y, z
 
 
 def parse_object(line, f, watercolour):
     obj = dict()
-
+    color = [0,0,0]
     name = line[1]
     line = f.readline().rstrip().split()
 
     if line[0] == 'usemtl':
-        color = watercolour[line[1]]
+        #color = watercolour[line[1]]
         line = f.readline().rstrip().split()
 
     if line[0] == 'p':
@@ -168,37 +166,39 @@ def parse_group(line, f, watercolour, lines):
     name = line[1]
     vertices = []
     edges = []
+    index = 0
+    color = [0,0,0]
     while True:
         line = f.readline().rstrip().split()
         if line[0] in ["o", "g"] or lines == 0:
             break
 
         if line[0] == 'usemtl':
-            color = watercolour[line[1]]
+            #color = watercolour[line[1]]
             line = f.readline().rstrip().split()
 
-        if line[0] == 'p':
-            vertices.append(float(line[1]))
-
         elif line[0] == 'l':
-            edges.append((0,0))
+            polygon = False
             line.pop(0)
-            index = -1
+            index = 0
+            circuit = []
             for vertex in line:
                 index += 1
                 vertices.append(vertex)
-                if index > 0:
-                    edges.append(index, index+1)
+                circuit.append(index)
+            edges.append((circuit, polygon))
 
         elif line[0] == 'f':
-            edges.append(0,1)
+            polygon = True
             line.pop(0)
-            index = -1
+            circuit = []
+            first = index+1
             for vertex in line:
                 index += 1
                 vertices.append(vertex)
-                if index > 0:
-                    edges.append(index, index+1)
+                circuit.append(index)
+            circuit.append(first)
+            edges.append((circuit, polygon))
 
     obj["name"] = name
     obj["type"] = "Group"
@@ -219,33 +219,50 @@ def case_point(name, color, line, obj):
 def case_line(name, color, line, obj):
     line.pop(0)
     vertices = []
+    edges = []
     while line:
         vertices.append(int(line.pop()))
+
+    index = 0
+    circuit = []
+    for v in vertices:
+        index += 1
+        circuit.append(index)
+    edges.append((circuit, False))
 
     if len(vertices) == 2:
         obj["type"] = "Line"
 
     elif len(vertices) > 2:
-        obj["type"] = "Wireframe" #TODO
-        #vertices.pop() # REMOVER OS VERTICES REPETIDOS OU NÃO
+        obj["type"] = "Wireframe"
+
 
     obj["name"] = name
     obj["color"] = color
     obj["vertices"] = vertices
+    obj["edges"] = edges
     return obj
 
 def case_face(name, color, line, obj):
     line.pop(0)
     vertices = []
+    edges = []
     while line:
         vertices.append(int(line.pop()))
+    index = 0
+    circuit = []
+    for v in vertices:
+        index += 1
+        circuit.append(index)
+    edges.append((circuit, False))
     obj["name"] = name
     obj["type"] = "Polygon"
     obj["color"] = color
     obj["vertices"] = vertices
+    obj["edges"] = edges
     return obj
 
-def case_face(name, color, line, obj, fill):
+def case_curve(name, color, line, obj):
     line.pop(0)
     vertices = []
     while line:
@@ -263,8 +280,7 @@ def create_forms(vertices, objList):
         id+=1
         points = list()
         for v in obj["vertices"]:
-            points.append(vertices[v - 1])
-
+            points.append(vertices[int(v) - 1])
         if obj["type"] == "Point":
             p = Object3D(obj["name"], points, id)
             p.set_color(obj["color"], 1)
@@ -273,20 +289,20 @@ def create_forms(vertices, objList):
         elif obj["type"] == "Line":
             l = Object3D(obj["name"], points, id)
             l.set_color(obj["color"], 1)
-            l.set_edges([(1,2)])
+            l.set_edges(obj["edges"])
             built.append(l)
 
         elif obj["type"] == "Wireframe":
             wf = Object3D(obj["name"], points, id)
             wf.set_color(obj["color"], 1)
-            wf.connect_edges_sequentially()
+            wf.set_edges(obj["edges"])
             built.append(wf)
 
         elif obj["type"] == "Polygon":
             pl = Object3D(obj["name"], points, id)
             pl.set_color(obj["color"], 1)
-            pl.set_fill(True)
-            pl.connect_edges_sequentially()
+            pl.set_as_polygon(True)
+            pl.set_edges(obj["edges"])
             built.append(pl)
 
         elif obj["type"] == "Curve":

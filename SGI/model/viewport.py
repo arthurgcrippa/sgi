@@ -84,7 +84,7 @@ class Viewport(QLabel):
                     painter.drawPoint(x,y)
             elif (object.len() > 1):
                 possible_lines = self.clipper.clip(object)
-                if object.fill and object.len() > 2:
+                if object.IS_POLYGON and object.len() > 2:
                     points = self.clipper.get_points(possible_lines)
                     self.draw_polygon(painter, points)
                 else:
@@ -148,20 +148,6 @@ class Viewport(QLabel):
         else:
             Transformation2D(2, -self.window.theta_z, (0,0), object, None).normalize()
 
-    def projection(self, object: Form):
-        pontos = []
-        # d = z
-        d = -400
-        for p in object.normalized:
-            if p[2] == 0:
-                x, y, z = p[0], p[1], p[2]
-                pontos.append([x, y, z])
-            else:
-                x = p[0] / (p[2] / d)
-                y = p[1] / (p[2] / d)
-                z = d
-                pontos.append([x, y, z])
-        return pontos
 
     def draw_axises(self):
         vp_x, vp_y, vp_z = self.vpCoord[0]/2, self.vpCoord[1]/2, self.vpCoord[2]/2

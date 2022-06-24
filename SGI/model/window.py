@@ -66,3 +66,10 @@ class Window():
         self.yMax -= zoomY
         self.zMin += zoomZ
         self.zMax -= zoomZ
+        if self.xMax == self.xMin:
+            self.xMin += zoomX
+            self.xMax -= zoomX
+            self.yMin += zoomY
+            self.yMax -= zoomY
+            self.zMin += zoomZ
+            self.zMax -= zoomZ
