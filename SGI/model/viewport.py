@@ -135,16 +135,16 @@ class Viewport(QLabel):
         if object.tridimentional():
             matrix = [object.matrix]
             theta_x, theta_y, theta_z = self.window.theta_x, self.window.theta_y, self.window.theta_z
-            # if object.name == "eixo-x":
-            #     theta_x = 0
-            # elif object.name == "eixo-y":
-            #     theta_y = 0
-            # elif object.name == "eixo-z":
-            #     theta_z = 0
+            if object.name == "eixo-x":
+                theta_x = 0
+            elif object.name == "eixo-y":
+                theta_y = 0
+            elif object.name == "eixo-z":
+                theta_z = 0
             Transformation3D(2, theta_x, (0,0,0), (0,0,0), 1, 1, object, None).normalize(matrix)
             Transformation3D(2, theta_y, (0,0,0), (0,0,0), 1, 2, object, None).normalize(matrix)
             Transformation3D(2, theta_z, (0,0,0), (0,0,0), 1, 3, object, None).normalize(matrix)
-            Transformation3D(4, None, None, None, None, None, object, None).normalize(matrix)
+            Transformation3D(4, None, self.window.get_cop(), None, None, None, object, None).normalize(matrix)
         else:
             Transformation2D(2, -self.window.theta_z, (0,0), object, None).normalize()
 

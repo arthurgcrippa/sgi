@@ -83,10 +83,7 @@ class Object3D(Form):
             return self.curve()
         object_lines = []
         points = self.normalized
-        print(self.edges)
-        print(len(self.edges))
         for [circuit, _] in self.edges:
-            print(circuit)
             for i in range(0, len(circuit)-1):
                 object_lines.append((points[circuit[i]-1], points[circuit[i+1]-1]))
         return object_lines

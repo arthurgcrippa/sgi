@@ -66,7 +66,7 @@ class ObjectWindow(QDialog):
         #self.object_coordinates = QLineEdit("(-50,1,10);(1,1,10);(1,50,10);(-50,50,10)")
         self.object_coordinates_3D = QLineEdit("(-50,0,-50);(-50,0,50);(50,0,50);(50,0,-50);(0,100,0)")
         #self.object_edges = QLineEdit("(1,2);(2,3);(3,4);(4,1);(1,5);(2,5);(3,5);(4,5)")
-        self.object_edges = QLineEdit("(1,2,3,1);(1,5,2);(3,5,4)")
+        self.object_edges = QLineEdit("(1,2,3,4,1);(1,5,2);(3,5,4)")
         #self.object_coordinates = QLineEdit("(10,10,10)")
         #self.object_edges = QLineEdit("(1,1)")
         self.object_color_3D = QLineEdit("#000000")
@@ -157,7 +157,7 @@ class ObjectWindow(QDialog):
                 object.set_curve_type(1)
             if self.bezier_button.isChecked():
                 object.set_curve_type(2)
-            self.confirm_object(object, False)
+            self.confirm_object(object, True)
 
     def form_setup(self, plaintext):
         coordinates = parser.parse_float(plaintext)

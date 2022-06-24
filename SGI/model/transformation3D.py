@@ -91,7 +91,7 @@ class Transformation3D(Transformation):
 
     def projection(self):
         matrix = matrices.identity()
-        self.matrix = matrices.project(-100, matrix)
+        self.matrix = matrices.project(self.point[2], matrix)
 
     def apply(self):
         self.object.setMatrix(np.dot(self.object.matrix, self.matrix))
