@@ -22,6 +22,17 @@ def parse_input(plaintext: str, floating: bool):
                 coordinates.append((x,y,z))
     return coordinates
 
+
+def parse_edges(plaintext: str):
+    edges = []
+    for circuit in plaintext.split(";"):
+        fill = True if circuit[0] == "f" else False
+        values = []
+        for value in circuit.replace("f", "").replace("(","").replace(")","").split(","):
+            values.append(int(value))
+        edges.append((values, fill))
+    return edges
+
 def malformed_input(plaintext: str, error_message):
     for char in plaintext:
         if char not in set(SYMBOLS).union(NUMBERS): #1 INPUT CAN ONLY CONTAIN NUMBERS AND RESERVED SYMBOLS

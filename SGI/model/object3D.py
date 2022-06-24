@@ -16,6 +16,7 @@ class Object3D(Form):
         self.curve_type = 0
         self.is_curvy = False
 
+
     def set_color(self, color, format):
         if format:
             self.color = color
@@ -37,6 +38,9 @@ class Object3D(Form):
     def tridimentional(self):
         return True
 
+    def grouped(self):
+        return self.is_grouped
+
     def set_visible(self, visible):
         self.visible = visible
 
@@ -48,24 +52,55 @@ class Object3D(Form):
 
     def set_edges(self, edges: []):
         self.edges = edges
+        if len(edges) in [1,2]:
+            self.is_grouped = False
+            return
+        _, last_flag = edges[0]
+        for _,flag in edges:
+            if flag != last_flag:
+                self.is_grouped = True
+                return
+        self.is_grouped = False
+
+
+    def connect_edges_sequentially(self):
+        edges = []
+        for i in range(1, len(self.coordinates)+1):
+            edges.append(i)
+        self.edges = (edges, fill)
+
 
     def getMatrix(self) -> []:
         coordinates = self.coordinates
         matrix = []
         for coordinate in coordinates:
             x, y, z = coordinate[0], coordinate[1], coordinate[2]
-            matrix.append([x,y,z,1]) #ISSO PODE ESTAR ERRADO
+            matrix.append([x,y,z,1])
         return matrix
 
     def get_lines(self):
         if self.is_curvy:
             return self.curve()
         object_lines = []
-        stack = []
         points = self.normalized
-        for p in self.edges:
-            object_lines.append((points[p[0]-1], points[p[1]-1]))
+        print(self.edges)
+        print(len(self.edges))
+        for [circuit, _] in self.edges:
+            print(circuit)
+            for i in range(0, len(circuit)-1):
+                object_lines.append((points[circuit[i]-1], points[circuit[i+1]-1]))
         return object_lines
+
+    def get_group_lines(self):
+        group = []
+        points = self.normalized
+        for (circuit, flag) in self.edges:
+            component = []
+            for i in range(0, len(circuit)-1):
+                component.append((points[circuit[i]], points[circuit[i+1]]))
+            group.append((component, flag))
+        return group
+
 
     def add_cord(self, coordinate: t_coordinate):
         self.coordinates.append(coordinate)

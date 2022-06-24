@@ -35,6 +35,19 @@ class Clipper():
             return possible_lines
         return None
 
+    def clip_lines(self, lines):
+        possible_lines = []
+        for line in lines:
+            possible_line = self.clipper.line_clip(line[0], line[1])
+            possible_lines.append(possible_line)
+        return possible_lines
+
+    def get_lines(self, points):
+        object_lines = []
+        for i in range(1, len(points)):
+            object_lines.append((points[i], points[i+1]))
+        return object_lines
+
     def point_clip(self, point: t_coordinate):
         return self.point_visible(point)
 

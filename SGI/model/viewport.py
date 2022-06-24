@@ -66,38 +66,53 @@ class Viewport(QLabel):
 
     def draw(self, object: Form):
         self.normalize(object)
-        #object.show()
         painter = self.get_painter(object)
         xMin, yMin, xMax, yMax = self.get_wc()
-        if (object.len() == 1):
-            (x,y) = self.vp_trans(object.normalized[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-            visible = self.clipper.clip(object)
-            if visible == 1:
-                painter.drawPoint(x,y)
-        elif (object.len() > 1):
-            possible_lines = self.clipper.clip(object)
-            if object.fill and object.len() > 2:
-                points = self.clipper.get_points(possible_lines)
-                object_path = QPainterPath()
-                FIRST = True
-                for point in points:
-                    point = self.vp_trans(point, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-                    if FIRST:
-                        object_path.moveTo(point[0], point[1])
-                        FIRST = False
-                        continue
-                    object_path.lineTo(point[0], point[1])
-                painter.fillPath(object_path, painter.brush())
-            else:
-                for possible_line in possible_lines:
-                    (p1, p2), visible = possible_line
-                    #print("p1: "+str(p1)+" p2: "+str(p2))
-                    (p1_x, p1_y) = self.vp_trans(p1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-                    (p2_x, p2_y) = self.vp_trans(p2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
-                    if visible:
-                        painter.drawLine(p1_x, p1_y, p2_x, p2_y)
+        if object.grouped():
+            for (group_lines, polygon) in object.get_group_lines():
+                possible_lines = self.clipper.clip_lines(group_lines)
+                if polygon:
+                    points = self.clipper.get_points(possible_lines) #REVER SE POSSIVEL
+                    self.draw_polygon(painter, possible_lines)
+                else:
+                    self.draw_wireframe(painter, possible_lines)
+        else:
+            if (object.len() == 1):
+                (x,y) = self.vp_trans(object.normalized[0], (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+                visible = self.clipper.clip(object)
+                if visible == 1:
+                    painter.drawPoint(x,y)
+            elif (object.len() > 1):
+                possible_lines = self.clipper.clip(object)
+                if object.fill and object.len() > 2:
+                    points = self.clipper.get_points(possible_lines)
+                    self.draw_polygon(painter, points)
+                else:
+                    self.draw_wireframe(painter, possible_lines)
         self.update()
         painter.end()
+
+    def draw_wireframe(self, painter, possible_lines):
+        xMin, yMin, xMax, yMax = self.get_wc()
+        for possible_line in possible_lines:
+            (p1, p2), visible = possible_line
+            (p1_x, p1_y) = self.vp_trans(p1, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+            (p2_x, p2_y) = self.vp_trans(p2, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+            if visible:
+                painter.drawLine(p1_x, p1_y, p2_x, p2_y)
+
+    def draw_polygon(self, painter, points):
+        xMin, yMin, xMax, yMax = self.get_wc()
+        object_path = QPainterPath()
+        FIRST = True
+        for point in points:
+            point = self.vp_trans(point, (xMin,yMin), (xMax,yMax), (self.vpCoord[0], self.vpCoord[1]))
+            if FIRST:
+                object_path.moveTo(point[0], point[1])
+                FIRST = False
+                continue
+            object_path.lineTo(point[0], point[1])
+        painter.fillPath(object_path, painter.brush())
 
     def redraw(self):
         self.vp_init()
@@ -127,13 +142,9 @@ class Viewport(QLabel):
             # elif object.name == "eixo-z":
             #     theta_z = 0
             Transformation3D(2, theta_x, (0,0,0), (0,0,0), 1, 1, object, None).normalize(matrix)
-            print(" z = "+str(matrix[0][0][2]))
             Transformation3D(2, theta_y, (0,0,0), (0,0,0), 1, 2, object, None).normalize(matrix)
-            print(" z = "+str(matrix[0][0][2]))
             Transformation3D(2, theta_z, (0,0,0), (0,0,0), 1, 3, object, None).normalize(matrix)
-            print(" z = "+str(matrix[0][0][2]))
             Transformation3D(4, None, None, None, None, None, object, None).normalize(matrix)
-            print(" z = "+str(matrix[0][0][2]))
         else:
             Transformation2D(2, -self.window.theta_z, (0,0), object, None).normalize()
 
@@ -157,9 +168,9 @@ class Viewport(QLabel):
         axis_x = Object3D("eixo-x", [(vp_x, 0, 0), (-vp_x, 0, 0)], -1)
         axis_y = Object3D("eixo-y", [(0, vp_y, 0), (0, -vp_y, 0)], -2)
         axis_z = Object3D("eixo-z", [(0, 0, vp_z), (0, 0, -vp_z)], -3)
-        axis_x.set_edges([(1,2)])
-        axis_y.set_edges([(1,2)])
-        axis_z.set_edges([(1,2)])
+        axis_x.set_edges([([1,2], False)])
+        axis_y.set_edges([([1,2], False)])
+        axis_z.set_edges([([1,2], False)])
         self.draw(axis_x)
         self.draw(axis_y)
         self.draw(axis_z)

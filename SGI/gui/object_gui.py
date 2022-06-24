@@ -65,7 +65,8 @@ class ObjectWindow(QDialog):
         self.object_name_3D = QLineEdit("Nome do Objeto")
         #self.object_coordinates = QLineEdit("(-50,1,10);(1,1,10);(1,50,10);(-50,50,10)")
         self.object_coordinates_3D = QLineEdit("(-50,0,-50);(-50,0,50);(50,0,50);(50,0,-50);(0,100,0)")
-        self.object_edges = QLineEdit("(1,2);(2,3);(3,4);(4,1);(1,5);(2,5);(3,5);(4,5)")
+        #self.object_edges = QLineEdit("(1,2);(2,3);(3,4);(4,1);(1,5);(2,5);(3,5);(4,5)")
+        self.object_edges = QLineEdit("(1,2,3,1);(1,5,2);(3,5,4)")
         #self.object_coordinates = QLineEdit("(10,10,10)")
         #self.object_edges = QLineEdit("(1,1)")
         self.object_color_3D = QLineEdit("#000000")
@@ -119,7 +120,7 @@ class ObjectWindow(QDialog):
         object.set_fill(self.get_fill(object))
         if FLAG_3D:
             error_code = []
-            if parser.malformed_input(self.object_edges.text(), error_code):
+            if not parser.malformed_input(self.object_edges.text(), error_code):
                 self.show_error_message(error_code[0])
             else:
                 object.set_edges(self.get_edges())
@@ -194,5 +195,5 @@ class ObjectWindow(QDialog):
 
     def get_edges(self):
         plaintext = self.object_edges.text()
-        edges = parser.parse_int(plaintext)
+        edges = parser.parse_edges(plaintext)
         return edges
