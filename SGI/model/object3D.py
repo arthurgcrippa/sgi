@@ -1,6 +1,6 @@
 from typing import List, Tuple
 from model.form import Form
-from utils import curve
+from utils import curve, surface
 import numpy as np
 t_coordinate = Tuple[float, float, float]
 
@@ -19,7 +19,9 @@ class Object3D(Form):
         #Flags
         self.IS_POLYGON = False
         self.curve_type = 0 #bspline, hermite or bezier
+        self.surface_type = 0
         self.IS_CURVE = False
+        self.IS_SURFACE = False
         self.IS_GROUPED = False
 
 
@@ -38,8 +40,14 @@ class Object3D(Form):
     def set_as_curve(self, FLAG):
         self.IS_CURVE = FLAG
 
+    def set_as_surface(self, FLAG):
+        self.IS_SURFACE = FLAG
+
     def set_curve_type(self, curve_type):
         self.curve_type = curve_type
+
+    def set_surface_type(self, surface_type):
+        self.surface_type = surface_type
 
     def setCoordinates(self, coordinates: List[t_coordinate]):
         self.coordinates = coordinates
@@ -76,6 +84,8 @@ class Object3D(Form):
     def get_lines(self):
         if self.IS_CURVE:
             return self.curve()
+        if self.IS_SURFACE:
+            return self.surface()
         object_lines = []
         points = self.normalized
         for [circuit, _] in self.edges:
@@ -126,6 +136,14 @@ class Object3D(Form):
             lines = curve.blending_curve(self.normalized, self.curve_type)
         else:
             lines = curve.b_spline_curve(self.normalized, self.curve_type)
+        return lines
+
+    def surface(self):
+        lines = []
+        if self.surface_type:
+            lines = surface.blending_surface(self.normalized, self.surface_type)
+        else:
+            lines = surface.b_spline_curve(self.normalized, self.surface_type)
         return lines
 
     def show(self):

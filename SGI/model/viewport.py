@@ -135,12 +135,6 @@ class Viewport(QLabel):
         if object.tridimentional():
             matrix = [object.matrix]
             theta_x, theta_y, theta_z = self.window.theta_x, self.window.theta_y, self.window.theta_z
-            if object.name == "eixo-x":
-                theta_x = 0
-            elif object.name == "eixo-y":
-                theta_y = 0
-            elif object.name == "eixo-z":
-                theta_z = 0
             Transformation3D(2, theta_x, (0,0,0), (0,0,0), 1, 1, object, None).normalize(matrix)
             Transformation3D(2, theta_y, (0,0,0), (0,0,0), 1, 2, object, None).normalize(matrix)
             Transformation3D(2, theta_z, (0,0,0), (0,0,0), 1, 3, object, None).normalize(matrix)
@@ -157,6 +151,9 @@ class Viewport(QLabel):
         axis_x.set_edges([([1,2], False)])
         axis_y.set_edges([([1,2], False)])
         axis_z.set_edges([([1,2], False)])
+        axis_x.set_color("#ff0000", 0)
+        axis_y.set_color("#00ff00", 0)
+        axis_z.set_color("#0000ff", 0)
         self.draw(axis_x)
         self.draw(axis_y)
         self.draw(axis_z)

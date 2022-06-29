@@ -51,13 +51,6 @@ def project(d, matrix):
                          [0, 0, 0,   1]]
     return np.dot(matrix_projection, matrix)
 
-def project2(d, matrix):
-    matrix_projection = [[1, 0, 0,   0],
-                         [0, 1, 0,   0],
-                         [0, 0, 1, 1/d],
-                         [0, 0, 0,   0]]
-    return np.dot(matrix_projection, matrix)
-
 def identity():
     matrix = [[1,0,0,0],
               [0,1,0,0],
@@ -65,7 +58,7 @@ def identity():
               [0,0,0,1]]
     return matrix
 
-def equals(m1, m2): #EQUALS
+def equals(m1, m2):
     if len(m1) != len(m2):
         return False
     for i in range(len(m1)):

@@ -69,7 +69,7 @@ def bezier(p0, p1, p2, p3, t):
     s3, s2 = s**3, s**2
     x = s3 * p0[0] + 3 * s2 * t * p1[0] + 3 * s * t2 * p2[0] + t3 * p3[0]
     y = s3 * p0[1] + 3 * s2 * t * p1[1] + 3 * s * t2 * p2[1] + t3 * p3[1]
-    y = s3 * p0[2] + 3 * s2 * t * p1[2] + 3 * s * t2 * p2[2] + t3 * p3[2]
+    z = s3 * p0[2] + 3 * s2 * t * p1[2] + 3 * s * t2 * p2[2] + t3 * p3[2]
     return x,y,z
 
 def hermite(p1, r1, r4, p4, t):

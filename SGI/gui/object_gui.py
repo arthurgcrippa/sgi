@@ -23,7 +23,7 @@ class ObjectWindow(QDialog):
         self.mainWindow = mainWindow
 
     def add_object_window(self) -> None:
-        self.resize(300,300)
+        self.resize(400,300)
         self.setWindowTitle("Adicionar Objetos")
         layout = QVBoxLayout()
         layout.addWidget(self.add_tabs())
@@ -34,6 +34,7 @@ class ObjectWindow(QDialog):
         tabs.addTab(self.object_tab_2D(), "Objeto 2D")
         tabs.addTab(self.object_tab_3D(), "Objeto 3D")
         tabs.addTab(self.curve_tab(), "Curva")
+        tabs.addTab(self.surface_tab(), "Superficie")
         return tabs
 
     def object_tab_2D(self) -> QWidget:
@@ -115,6 +116,35 @@ class ObjectWindow(QDialog):
         generalTab.setLayout(layout)
         return generalTab
 
+    def surface_tab(self) -> QWidget:
+        generalTab = QWidget()
+        layout = QVBoxLayout()
+        self.surface_name = QLineEdit("Nome da Superficie")
+        self.surface_coordinates = QLineEdit("(0,0,0);(0,30,40);(0,60,30);(0,100,0);(30,0,20);(20,25,50);(30,60,50);(40,80,20);(60,0,20);(80,30,50);(70,60,45);(60,100,25);(100,0,0);(110,30,40);(110,60,30);(100,90,0)")
+        self.surface_color = QLineEdit("#000000")
+        self.bezier_surface_button = QRadioButton('Bezier')
+        self.hermite_surface_button = QRadioButton('Hermite')
+        self.bspline_surface_button = QRadioButton('B-Spline')
+        self.bezier_surface_button.setChecked(True)
+        confirm_button = QPushButton('Confirm', self)
+        cancel_button = QPushButton('Cancel')
+        confirm_button.clicked.connect(self.confirm_surface)
+        dialogBox = QDialogButtonBox()
+        dialogBox.rejected.connect(self.reject)
+        dialogBox.addButton(confirm_button, QDialogButtonBox.AcceptRole)
+        dialogBox.addButton(cancel_button, QDialogButtonBox.RejectRole)
+
+        layout.addWidget(self.surface_name)
+        layout.addWidget(self.surface_coordinates)
+        layout.addWidget(self.surface_color)
+        layout.addWidget(self.bezier_surface_button)
+        layout.addWidget(self.hermite_surface_button)
+        layout.addWidget(self.bspline_surface_button)
+        layout.addWidget(dialogBox)
+        generalTab.setLayout(layout)
+        return generalTab
+
+
     def confirm_object(self, object: Form, FLAG_3D: bool):
         object.set_color(self.get_color(object).text(), 0)
         object.set_as_polygon(self.is_polygon(object))
@@ -152,11 +182,24 @@ class ObjectWindow(QDialog):
             self.show_error_message(error_message[0])
         else:
             object = self.form_setup_3D(self.curve_name.text(), self.curve_coordinates.text())
-            object.set_curvy(True)
+            object.set_as_curve(True)
             if self.hermite_button.isChecked():
                 object.set_curve_type(1)
             if self.bezier_button.isChecked():
                 object.set_curve_type(2)
+            self.confirm_object(object, True)
+
+    def confirm_surface(self):
+        error_message = []
+        if parser.malformed_input(self.surface_coordinates.text(), error_message):
+            self.show_error_message(error_message[0])
+        else:
+            object = self.form_setup_3D(self.surface_name.text(), self.surface_coordinates.text())
+            object.set_as_surface(True)
+            if self.hermite_surface_button.isChecked():
+                object.set_surface_type(1)
+            if self.bezier_surface_button.isChecked():
+                object.set_surface_type(2)
             self.confirm_object(object, True)
 
     def form_setup(self, plaintext):

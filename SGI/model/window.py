@@ -23,15 +23,16 @@ class Window():
         self.theta_x = 0
         self.theta_y = 0
         self.theta_z = 0
-        self.last_degree = 0
+        self.projection_diff = 0
 
     def get_cop(self):
         cop = (0,0,-1000)
+        diff = self.projection_diff
         cop_mat = [cop[0], cop[1], cop[2], 1]
         rotx_mat = matrices.rotation_x(self.theta_x, cop_mat)
         roty_mat = matrices.rotation_y(self.theta_y, rotx_mat)
         rotz_mat = matrices.rotation_z(self.theta_z, roty_mat)
-        cop = (rotz_mat[0], rotz_mat[1], rotz_mat[2])
+        cop = (rotz_mat[0], rotz_mat[1], rotz_mat[2]+diff)
         return cop
 
 
@@ -52,9 +53,11 @@ class Window():
         elif direction == 5:
             self.zMin += diff
             self.zMax += diff
+            self.projection_diff += diff
         elif direction == 6:
             self.zMin -= diff
             self.zMax -= diff
+            self.projection_diff -= diff
 
     def zoom(self, sign):
         zoomX = self.vp_width  * sign*ZOOM
