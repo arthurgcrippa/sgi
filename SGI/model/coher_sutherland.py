@@ -25,7 +25,6 @@ class CS_Clipper():
 
     def region_code(self, point: t_coordinate):
         region_code = 0 #0000
-        print(point)
         x, y = point[0], point[1]
         left, bottom, right, top = self.get_wc()
 
