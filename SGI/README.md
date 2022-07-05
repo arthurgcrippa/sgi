@@ -1,5 +1,4 @@
 # Trabalho 1 da Disciplina de Computação Gráfica  
-Este trabalho possui entregas semanais
 
 Object3D:
 Você pode adicionar um objeto pela interface colocando sua lista de pontos no formato (x1,y1,z1);(x2,y2,z2)... especificado no input padrão da UI e logo abaixo colocar as sequencias de arestas entre os pontos de modo que (1,2,3,4) significa que os pontos (p1,p2) , (p2,p3) e (p3,p4) pertencerão ao objeto. Para desenhar um poliedro onde não é possível ligar todas as arestas partindo de uma você pode colocar sequências de arestas seguindo o modelo padrão do input. (1,2,3,4,1);(1,5);(2,5);(3,5);(4,5) ou alternativamente (1,2,3,4,1);(1,5,2);(3,5,4).
