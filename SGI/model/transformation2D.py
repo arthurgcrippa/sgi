@@ -1,12 +1,12 @@
-from form import Form
-from viewport import Viewport
+from model.form import Form
+from model.transformation import Transformation
 from typing import Tuple, List
 import numpy as np
 import math
 
 t_coordinate = Tuple[float, float]
 
-class Transformation():
+class Transformation2D(Transformation):
 
     def __init__(self, type: int, degree: float, point: t_coordinate, object: Form, id: int) -> None:
         self.type = type
@@ -66,6 +66,14 @@ class Transformation():
 
         self.matrix = np.dot(np.dot(matrix_translation, matrix_scaling), matrix_reverse_translation)
 
+
     def apply(self):
         self.object.setMatrix(np.dot(self.object.matrix, self.matrix))
         self.object.reform()
+
+    def normalize(self):
+        matrix = np.dot(self.object.matrix, self.matrix)
+        self.object.normalized.clear()
+        for line in matrix:
+            x, y = line[0], line[1]
+            self.object.normalized.append([x,y])

@@ -1,5 +1,5 @@
-from form import Form
-from viewport import Viewport
+from model.form import Form
+from model.viewport import Viewport
 
 class Object():
     def __init__(self, viewport: Viewport) -> None:
@@ -36,7 +36,6 @@ class Object():
                 return False
             stack.append(char)
             if prev == '(' and ((not char.isnumeric()) and char != '-'):
-                print(2)
                 return False
             if prev == ')' and char != ';':
                 return False

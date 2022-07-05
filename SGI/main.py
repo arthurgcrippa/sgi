@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxL
 
 import sys
 
-from gui import MainWindow
+from gui.gui import MainWindow
 
 def main():
     app = QApplication([])
@@ -14,4 +14,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
