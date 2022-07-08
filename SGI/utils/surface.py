@@ -103,6 +103,8 @@ def polynomial_surface(mx, my, mz, surface_type):
     return lines
 
 def forwarding_surface(mx, my, mz, surface_type):
+    mat.show(mx)
+    print(mx)
     method_matrix = mat.get_curve(surface_type)
     method_matrix_t = mat.transpose(method_matrix)
     mx = np.dot(method_matrix, np.dot(mx, method_matrix_t))

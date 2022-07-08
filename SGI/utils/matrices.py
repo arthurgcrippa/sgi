@@ -88,7 +88,7 @@ def get_curve(type):
         return get_bezier()
 
 def get_curve_aux(type):
-    return transpose(get_curve_aux(type))
+    return transpose(get_curve(type))
 
 def get_delta(delta):
     d3, d2, d1 = delta**3, delta**2, delta
