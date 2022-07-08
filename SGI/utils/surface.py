@@ -4,7 +4,7 @@ import numpy as np
 
 STEPS_T = 10
 STEPS_S = 10
-ALGO = 1 # Forwarding
+ALGO = 0 # Forwarding
 
 def surface(normalized, surface_type):
     lines = []
@@ -103,13 +103,12 @@ def polynomial_surface(mx, my, mz, surface_type):
     return lines
 
 def forwarding_surface(mx, my, mz, surface_type):
-    mat.show(mx)
-    print(mx)
     method_matrix = mat.get_curve(surface_type)
     method_matrix_t = mat.transpose(method_matrix)
-    mx = np.dot(method_matrix, np.dot(mx, method_matrix_t))
-    my = np.dot(method_matrix, np.dot(my, method_matrix_t))
-    mz = np.dot(method_matrix, np.dot(mz, method_matrix_t))
+    mx = np.dot(np.dot(method_matrix, mx), method_matrix_t)
+    my = np.dot(np.dot(method_matrix, my), method_matrix_t)
+    mz = np.dot(np.dot(method_matrix, mz), method_matrix_t)
+
     delta_s, delta_t = 1/STEPS_S, 1/STEPS_T
     ms = mat.get_delta(delta_s)
     mt = mat.get_delta(delta_t)
@@ -119,26 +118,44 @@ def forwarding_surface(mx, my, mz, surface_type):
     ddz = np.dot(ms, np.dot(mz, mt_t))
     ddx_t, ddy_t, ddz_t = mat.transpose(ddx), mat.transpose(ddy), mat.transpose(ddz)
     lines = []
-    for i in range(STEPS_S):
+    for i in range(STEPS_S+1):
         p1 = (ddx[0][0], ddy[0][0], ddz[0][0])
         p2 = (ddx[0][1], ddy[0][1], ddz[0][1])
         p3 = (ddx[0][2], ddy[0][2], ddz[0][2])
         p4 = (ddx[0][3], ddy[0][3], ddz[0][3])
-        for line in curve.forwarding_differences(STEPS_T, p1, p2, p3, p4, surface_type):
+        for line in forwarding_differences(STEPS_T, p1, p2, p3, p4):
             lines.append(line)
         ddx = forward_update(ddx)
         ddy = forward_update(ddy)
         ddz = forward_update(ddz)
-    for i in range(STEPS_T):
+    for i in range(STEPS_T+1):
         p1 = (ddx_t[0][0], ddy_t[0][0], ddz_t[0][0])
         p2 = (ddx_t[0][1], ddy_t[0][1], ddz_t[0][1])
         p3 = (ddx_t[0][2], ddy_t[0][2], ddz_t[0][2])
         p4 = (ddx_t[0][3], ddy_t[0][3], ddz_t[0][3])
-        for line in curve.forwarding_differences(STEPS_S, p1, p2, p3, p4, surface_type):
+        for line in forwarding_differences(STEPS_S, p1, p2, p3, p4):
             lines.append(line)
         ddx_t = forward_update(ddx_t)
         ddy_t = forward_update(ddy_t)
         ddz_t = forward_update(ddz_t)
+    return lines
+
+def forwarding_differences(n, p1, p2, p3, p4):
+
+    x, dx, d2x, d3x = p1[0], p2[0], p3[0], p4[0]
+    y, dy, d2y, d3y = p1[1], p2[1], p3[1], p4[1]
+    z, dz, d2z, d3z = p1[2], p2[2], p3[2], p4[2]
+    lines = []
+    x1 = x
+    y1 = y
+    z1 = z
+    for i in range(n):
+        x, dx, d2x = x + dx, dx + d2x, d2x + d3x
+        y, dy, d2y = y + dy, dy + d2y, d2y + d3y
+        z, dz, d2z = z + dz, dz + d2z, d2z + d3z
+        x2,y2,z2 = x,y,z
+        lines.append(((x1,y1,z1),(x2,y2,z2)))
+        x1, y1, z1 = x2, y2, z2
     return lines
 
 def forward_update(matrix):

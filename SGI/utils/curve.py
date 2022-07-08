@@ -99,7 +99,7 @@ def forwarding_differences(n, p1, p2, p3, p4, curve_type):
     x1 = x
     y1 = y
     z1 = z
-    for i in range(STEPS):
+    for i in range(n):
         x, dx, d2x = x + dx, dx + d2x, d2x + d3x
         y, dy, d2y = y + dy, dy + d2y, d2y + d3y
         z, dz, d2z = z + dz, dz + d2z, d2z + d3z
