@@ -4,22 +4,19 @@ STEPS = 1000
 
 def blending_curve(normalized, curve_type):
     lines = []
-    if (len(normalized)-1) % 3 != 0:
-        print("Problemas! Não há como formar p1, p2, ")
-        print(len(normalized))
-    else:
-        p1 = normalized[0]
-        for i in range(1, len(normalized)):
-            if i % 3 == 0:
-                p2 = normalized[i]
-                partial_lines = curve_segment(p1,r1,r2,p2, curve_type)
-                p1 = p2
-                for line in partial_lines:
-                    lines.append(line)
-            if i % 3 == 1:
-                r1 = normalized[i]
-            if i % 3 == 2:
-                r2 = normalized[i]
+    assert len(normalized)-1 % 3 != 0
+    p1 = normalized[0]
+    for i in range(1, len(normalized)):
+        if i % 3 == 0:
+            p2 = normalized[i]
+            partial_lines = curve_segment(p1,r1,r2,p2, curve_type)
+            p1 = p2
+            for line in partial_lines:
+                lines.append(line)
+        if i % 3 == 1:
+            r1 = normalized[i]
+        if i % 3 == 2:
+            r2 = normalized[i]
     return lines
 
 def b_spline_curve(normalized, curve_type):
@@ -51,7 +48,7 @@ def curve_segment(p1, p2, p3, p4, curve_type):
             x1, y1, z1 = x2, y2, z2
         return lines
     else:
-        return forwarding_differences(p1, p2, p3, p4, curve_type)
+        return forwarding_differences(STEPS, p1, p2, p3, p4, curve_type)
 
 def polynomial_function(p1, p2, p3, p4, t, curve_type):
     t3, t2 = t**3, t**2
@@ -86,13 +83,13 @@ def b_spline(p1, p2, p3, p4, t):
     z = (-t3+3*t2-3*t+1)*p1[2]/6 + (3*t3 -6*t2 + 4)*p2[2]/6 + (-3*t3 + 3*t2 + 3*t + 1)*p3[2]/6 + (t3)*p4[2]/6
     return x,y,z
 
-def forwarding_differences(p1, p2, p3, p4, curve_type):
+def forwarding_differences(n, p1, p2, p3, p4, curve_type):
 
     ax, bx, cx, dx = polynomial_coeficients(p1[0], p2[0], p3[0], p4[0], curve_type)
     ay, by, cy, dy = polynomial_coeficients(p1[1], p2[1], p3[1], p4[1], curve_type)
     az, bz, cz, dz = polynomial_coeficients(p1[2], p2[2], p3[2], p4[2], curve_type)
 
-    _d, _d2, _d3 = get_delta()
+    _d, _d2, _d3 = get_delta(n)
 
     x, y, z = dx, dy, dz
     dx, dy, dz = ax*_d3 + bx*_d2 + cx*_d, ay*_d3 + by*_d2 + cy*_d, az*_d3 + bz*_d2 + cz*_d
@@ -131,7 +128,7 @@ def polynomial_coeficients(v1, v2, v3, v4, curve_type):
         d = (+1/6)*v1+(+4/6)*v2+(+1/6)*v3+(+0/6)*v4
         return a, b, c, d
 
-def get_delta():
-    _d = 1/STEPS
+def get_delta(n):
+    _d = 1/n
     _d2, _d3 = _d**2, _d**3
     return _d, _d2, _d3

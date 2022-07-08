@@ -139,12 +139,7 @@ class Object3D(Form):
         return lines
 
     def surface(self):
-        lines = []
-        if self.surface_type:
-            lines = surface.blending_surface(self.normalized, self.surface_type)
-        else:
-            lines = surface.b_spline_curve(self.normalized, self.surface_type)
-        return lines
+        return surface.surface(self.normalized, self.surface_type)
 
     def show(self):
         id = 1

@@ -1,28 +1,72 @@
 from utils import curve
+from utils import matrices as mat
 import numpy as np
 
 STEPS_T = 10
 STEPS_S = 10
-def blending_surface(normalized, surface_type):
-    p = normalized
-    matrix_x = [[p[0][0],  p[1][0],  p[2][0],  p[3][0]],
-                [p[4][0],  p[5][0],  p[6][0],  p[7][0]],
-                [p[8][0],  p[9][0],  p[10][0], p[11][0]],
-                [p[12][0], p[13][0], p[14][0], p[15][0]]]
+ALGO = 1 # Forwarding
 
-    matrix_y = [[p[0][1],  p[1][1],  p[2][1],  p[3][1]],
-                [p[4][1],  p[5][1],  p[6][1],  p[7][1]],
-                [p[8][1],  p[9][1],  p[10][1], p[11][1]],
-                [p[12][1], p[13][1], p[14][1], p[15][1]]]
+def surface(normalized, surface_type):
+    lines = []
+    matrices = create_matrices(normalized)
+    for matrix in matrices:
+        matrix_x, matrix_y, matrix_z = matrix[0], matrix[1], matrix[2]
+        partial_lines = partial_surface(matrix_x, matrix_y, matrix_z, surface_type)
+        for line in partial_lines:
+            lines.append(line)
+    return lines
 
-    matrix_z = [[p[0][2],  p[1][2],  p[2][2],  p[3][2]],
-                [p[4][2],  p[5][2],  p[6][2],  p[7][2]],
-                [p[8][2],  p[9][2],  p[10][2], p[11][2]],
-                [p[12][2], p[13][2], p[14][2], p[15][2]]]
+def create_matrices(normalized):
+    matrices = []
+    size = int(np.sqrt(len(normalized)))
+    assert size >= 4
+    for i in range(int(size/4)):
+        matrices.append(create_non_overlapping_matrix(normalized, i))
+    if size % 4 != 0:
+        matrices.append(create_overlapping_matrix(normalized, size))
+    return matrices
 
-    combined_matrix_x = get_coeficients(matrix_x, surface_type)
-    combined_matrix_y = get_coeficients(matrix_y, surface_type)
-    combined_matrix_z = get_coeficients(matrix_z, surface_type)
+def create_overlapping_matrix(normalized, index):
+    return create_4x4_matrix(normalized, index, True)
+
+def create_non_overlapping_matrix(normalized, index):
+    return create_4x4_matrix(normalized, index, False)
+
+def create_4x4_matrix(normalized, index, OVERLAP):
+    matrix_x = []
+    matrix_y = []
+    matrix_z = []
+    size = 4
+    first = 0
+    if OVERLAP:
+        size = index
+        first = size-4
+    else:
+        first += size*index
+        size *= index+1
+    for i in range(first, size):
+        line_x = []
+        line_y = []
+        line_z = []
+        for j in range(first, size):
+            line_x.append(normalized[i*size+j][0])
+            line_y.append(normalized[i*size+j][1])
+            line_z.append(normalized[i*size+j][2])
+        matrix_x.append(line_x)
+        matrix_y.append(line_y)
+        matrix_z.append(line_z)
+    return (matrix_x, matrix_y, matrix_z)
+
+def partial_surface(mx, my, mz, surface_type):
+    if ALGO:
+        return forwarding_surface(mx, my, mz, surface_type)
+    else:
+        return polynomial_surface(mx, my, mz, surface_type)
+
+def polynomial_surface(mx, my, mz, surface_type):
+    combined_matrix_x = get_coeficients(mx, surface_type)
+    combined_matrix_y = get_coeficients(my, surface_type)
+    combined_matrix_z = get_coeficients(mz, surface_type)
     lines = []
     s_list = []
     t_list = []
@@ -58,22 +102,61 @@ def blending_surface(normalized, surface_type):
             x1, y1, z1 = x2, y2, z2
     return lines
 
+def forwarding_surface(mx, my, mz, surface_type):
+    method_matrix = mat.get_curve(surface_type)
+    method_matrix_t = mat.transpose(method_matrix)
+    mx = np.dot(method_matrix, np.dot(mx, method_matrix_t))
+    my = np.dot(method_matrix, np.dot(my, method_matrix_t))
+    mz = np.dot(method_matrix, np.dot(mz, method_matrix_t))
+    delta_s, delta_t = 1/STEPS_S, 1/STEPS_T
+    ms = mat.get_delta(delta_s)
+    mt = mat.get_delta(delta_t)
+    mt_t = mat.transpose(mt)
+    ddx = np.dot(ms, np.dot(mx, mt_t))
+    ddy = np.dot(ms, np.dot(my, mt_t))
+    ddz = np.dot(ms, np.dot(mz, mt_t))
+    ddx_t, ddy_t, ddz_t = mat.transpose(ddx), mat.transpose(ddy), mat.transpose(ddz)
+    lines = []
+    for i in range(STEPS_S):
+        p1 = (ddx[0][0], ddy[0][0], ddz[0][0])
+        p2 = (ddx[0][1], ddy[0][1], ddz[0][1])
+        p3 = (ddx[0][2], ddy[0][2], ddz[0][2])
+        p4 = (ddx[0][3], ddy[0][3], ddz[0][3])
+        for line in curve.forwarding_differences(STEPS_T, p1, p2, p3, p4, surface_type):
+            lines.append(line)
+        ddx = forward_update(ddx)
+        ddy = forward_update(ddy)
+        ddz = forward_update(ddz)
+    for i in range(STEPS_T):
+        p1 = (ddx_t[0][0], ddy_t[0][0], ddz_t[0][0])
+        p2 = (ddx_t[0][1], ddy_t[0][1], ddz_t[0][1])
+        p3 = (ddx_t[0][2], ddy_t[0][2], ddz_t[0][2])
+        p4 = (ddx_t[0][3], ddy_t[0][3], ddz_t[0][3])
+        for line in curve.forwarding_differences(STEPS_S, p1, p2, p3, p4, surface_type):
+            lines.append(line)
+        ddx_t = forward_update(ddx_t)
+        ddy_t = forward_update(ddy_t)
+        ddz_t = forward_update(ddz_t)
+    return lines
+
+def forward_update(matrix):
+    r1, r2, r3, r4 = matrix
+    r1 = sum(r1, r2)
+    r2 = sum(r2, r3)
+    r3 = sum(r3, r4)
+    return [r1, r2, r3, r4]
+
+def sum(r1, r2):
+    r = []
+    assert(len(r1) == len(r2))
+    for i in range(len(r1)):
+        r.append(r1[i]+r2[i])
+    return r
+
 def get_coeficients(matrix, type):
+    if type == 0:
+        return np.dot(matrix, mat.get_bspline())
     if type == 1:
-        return get_hermite_coeficients(matrix)
+        return np.dot(matrix, mat.get_hermite())
     if type == 2:
-        return get_bezier_coeficients(matrix)
-
-def get_bezier_coeficients(matrix):
-    matrix_bezier = [[-1,  3, -3, 1],
-                     [ 3, -6,  3, 0],
-                     [-3,  3,  0, 0],
-                     [ 1,  0,  0, 0]]
-    return np.dot(matrix, matrix_bezier)
-
-def get_hermite_coeficients(matrix):
-    matrix_hermite = [[-2,  -3,  0, 1],
-                      [ 1,  -2,  1, 0],
-                      [ 1,  -1,  0, 0],
-                      [-2,   3,  0, 0]]
-    return np.dot(matrix, matrix_hermite)
+        return np.dot(matrix, mat.get_bezier())

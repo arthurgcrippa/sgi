@@ -58,6 +58,56 @@ def identity():
               [0,0,0,1]]
     return matrix
 
+def get_bezier():
+    bezier = [[-1,  3, -3, 1],
+              [ 3, -6,  3, 0],
+              [-3,  3,  0, 0],
+              [ 1,  0,  0, 0]]
+    return bezier
+
+def get_hermite():
+    hermite = [[-2,  -3,  0, 1],
+               [ 1,  -2,  1, 0],
+               [ 1,  -1,  0, 0],
+               [-2,   3,  0, 0]]
+    return hermite
+
+def get_bspline():
+    bspline = [[(-1/6),(+3/6),(-3/6),(+1/6)],
+               [(+3/6),(-6/6),(+0/6),(+4/6)],
+               [(-3/6),(+3/6),(+3/6),(+1/6)],
+               [(+1/6),(+0/6),(+0/6),(+0/6)]]
+    return bspline
+
+def get_curve(type):
+    if type == 0:
+        return get_bspline()
+    if type == 1:
+        return get_hermite()
+    if type == 2:
+        return get_bezier()
+
+def get_curve_aux(type):
+    return transpose(get_curve_aux(type))
+
+def get_delta(delta):
+    d3, d2, d1 = delta**3, delta**2, delta
+    delta = [[   0,    0,  0, 1],
+             [  d3,   d2, d1, 0],
+             [6*d3, 2*d2,  0, 0],
+             [6*d3,    0,  0, 0]]
+    return delta
+
+def transpose(matrix):
+    new_matrix = []
+    n_rows = len(matrix)
+    n_cols = len(matrix[0])
+    for i in range(n_cols):
+        new_matrix.append([])
+        for j in range(n_rows):
+            new_matrix[i].append(matrix[j][i])
+    return new_matrix
+
 def equals(m1, m2):
     if len(m1) != len(m2):
         return False
