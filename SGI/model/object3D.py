@@ -17,6 +17,7 @@ class Object3D(Form):
         self.normalized = self.coordinates.copy()
 
         #Flags
+        self.IS_WINDOW = False
         self.IS_POLYGON = False
         self.curve_type = 0 #bspline, hermite or bezier
         self.surface_type = 0
@@ -33,6 +34,9 @@ class Object3D(Form):
             lv = len(color)
             rgb = tuple(int(color[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
             self.color = rgb
+
+    def set_as_window(self, FLAG):
+        self.IS_WINDOW = FLAG
 
     def set_as_polygon(self, FLAG):
         self.IS_POLYGON = FLAG

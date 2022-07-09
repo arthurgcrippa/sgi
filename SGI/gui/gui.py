@@ -40,7 +40,7 @@ class MainWindow(QWidget):
 
         openObjButton = QPushButton("Abrir Objeto")
         saveObjButton = QPushButton("Salvar Objeto")
-        fileText = QLineEdit("example.obj")
+        fileText = QLineEdit("dinomech.obj")
         openObjButton.clicked.connect(lambda: self.open(fileText.text()))
         saveObjButton.clicked.connect(lambda: self.save(fileText.text()))
 
@@ -180,9 +180,12 @@ class MainWindow(QWidget):
         self.viewport.redraw()
         new_objects = wavefront3D.read(file_path)
         for obj in new_objects:
-            self.viewport.objectList.append(obj)
-            self.objList.addItem(obj.name + ': ' + str(obj.id))
-            self.viewport.redraw()
+            if obj.IS_WINDOW:
+                self.viewport.update_window(obj.coordinates)
+            else:
+                self.viewport.objectList.append(obj)
+                self.objList.addItem(obj.name + ': ' + str(obj.id))
+        self.viewport.redraw()
 
     def get_algorithm(self):
         if self.cs_algorithm.isChecked():

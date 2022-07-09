@@ -98,6 +98,10 @@ def create_color(color: Tuple[float, float, float]) -> str:
     line = "Kd " + r + " " + g + " " + b + "\n\n"
     return line
 
+def readline(f):
+    return f.readline().decode('utf-8')
+
+
 
 def read(file):
     vertices = []
@@ -105,9 +109,11 @@ def read(file):
     watercolour = {}
     name = file.split('/')[-1]
     lines = rawcount(file) + 1
-
-    with open("savefiles/"+file, "r") as f:
-        for line in f:
+    with open("savefiles/"+file, "rb") as f:
+        while True:
+            if lines == 0:
+                break
+            line = readline(f)
             lines -= 1
             if line.rstrip():
                 line = line.split()
@@ -133,9 +139,9 @@ def read(file):
 
 
 def parse_vertex(line):
-    z = 5*float(line.pop())
-    y = 5*float(line.pop())
-    x = 5*float(line.pop())
+    z = float(line.pop())
+    y = float(line.pop())
+    x = float(line.pop())
     return x, y, z
 
 
@@ -143,11 +149,11 @@ def parse_object(line, f, watercolour):
     obj = dict()
     color = [0,0,0]
     name = line[1]
-    line = f.readline().rstrip().split()
+    line = readline(f).rstrip().split()
 
     if line[0] == 'usemtl':
-        #color = watercolour[line[1]]
-        line = f.readline().rstrip().split()
+        color = watercolour[line[1]]
+        line = readline(f).rstrip().split()
 
     if line[0] == 'p':
         return case_point(name, color, line, obj)
@@ -157,6 +163,9 @@ def parse_object(line, f, watercolour):
 
     elif line[0] == 'f':
         return case_face(name, color, line, obj)
+
+    elif line[0] == 'w':
+        return case_window(name, color, line, obj)
 
     elif line[0] == 'bspline':
         return case_bspline(name, color, line, obj)
@@ -168,14 +177,26 @@ def parse_group(line, f, watercolour, lines):
     edges = []
     index = 0
     color = [0,0,0]
+    GROUP_SEQUENCE = True
     while True:
-        line = f.readline().rstrip().split()
-        if line[0] in ["o", "g"] or lines == 0:
+        line_b = readline(f)
+        line = line_b.rstrip().split()
+        if GROUP_SEQUENCE:
+            if line[0] == "g":
+                line_b = readline(f)
+                line = line_b.rstrip().split()
+            GROUP_SEQUENCE = False
+        if line[0] in ["o", "g", "v"] or lines == 0:
+            print(line_b)
+            f.seek(-len(line_b),1)
+            # line_b = readline(f)
+            # print(line_b)
             break
 
         if line[0] == 'usemtl':
-            #color = watercolour[line[1]]
-            line = f.readline().rstrip().split()
+            color = watercolour[line[1]]
+            line_b = readline(f)
+            line = line_b.rstrip().split()
 
         elif line[0] == 'l':
             polygon = False
@@ -273,6 +294,17 @@ def case_curve(name, color, line, obj):
     obj["vertices"] = vertices
     return obj
 
+def case_window(name, color, line, obj):
+    line.pop(0)
+    vertices = []
+    while line:
+        vertices.append(int(line.pop()))
+    obj["name"] = name
+    obj["type"] = "Window"
+    obj["color"] = color
+    obj["vertices"] = vertices
+    return obj
+
 def create_forms(vertices, objList):
     built = list()
     id = -1
@@ -317,23 +349,27 @@ def create_forms(vertices, objList):
             g.set_edges(obj["edges"])
             built.append(g)
 
+        elif obj["type"] == "Window":
+            g = Object3D(obj["name"], points, id)
+            g.set_color(obj["color"], 1)
+            g.set_as_window(True)
+            built.append(g)
+
     return built
 
 def create_watercolor(file) -> Dict:
-    f = open("savefiles/"+file, "r")
     watercolour = {}
-
-    line = f.readline().rstrip()
-    while line:
-        if line[0] == 'n':
-            mtl = line.rstrip().split()[1]
-            srgb = f.readline().rstrip().split()[1:]
-            watercolour[mtl] = string_to_rgb(srgb)
-
-        line = f.readline().rstrip()
-        line = f.readline().rstrip()
-
-    f.close()
+    lines = rawcount(file) + 1
+    with open("savefiles/"+file, "r") as f:
+        for line in f:
+            lines -= 1
+            line = line.rstrip().split()
+            if len(line) > 1 and line[0] == "newmtl":
+                mtl = line[1]
+                while line[0] != "Kd":
+                    line = f.readline().rstrip().split()
+                srgb = line[1:]
+                watercolour[mtl] = string_to_rgb(srgb)
     return watercolour
 
 def string_to_rgb(srgb: List[str]):

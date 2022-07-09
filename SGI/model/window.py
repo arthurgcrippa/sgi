@@ -5,21 +5,20 @@ from typing import List
 from model.form import Form
 from utils import matrices
 
-MOVE = 30
 ZOOM = 0.05
 
 class Window():
-    def __init__(self, vp_width:int, vp_height:int, vp_depth:int) -> None:
+    def __init__(self, width:int, height:int, depth:int) -> None:
         super().__init__()
-        self.vp_width = vp_width
-        self.vp_height = vp_height
-        self.vp_depth = vp_depth
-        self.xMin = - float(vp_width/2)
-        self.yMin = - float(vp_height/2)
-        self.zMin = - float(vp_depth/2)
-        self.xMax = float(vp_width/2)
-        self.yMax = float(vp_height/2)
-        self.zMax = float(vp_depth/2)
+        self.width = width
+        self.height = height
+        self.depth = depth
+        self.xMin = - float(width/2)
+        self.yMin = - float(height/2)
+        self.zMin = - float(depth/2)
+        self.xMax = float(width/2)
+        self.yMax = float(height/2)
+        self.zMax = float(depth/2)
         self.theta_x = 0
         self.theta_y = 0
         self.theta_z = 0
@@ -35,34 +34,48 @@ class Window():
         cop = (rotz_mat[0], rotz_mat[1], rotz_mat[2]+diff)
         return cop
 
+    def update_window(self, width, height, depth):
+        self.width = width
+        self.height = height
+        self.depth = depth
+        self.xMin = - float(width/2)
+        self.yMin = - float(height/2)
+        self.zMin = - float(depth/2)
+        self.xMax = float(width/2)
+        self.yMax = float(height/2)
+        self.zMax = float(depth/2)
+        self.theta_x = 0
+        self.theta_y = 0
+        self.theta_z = 0
+        self.projection_diff = 0
 
     def move(self, direction: int):
-        diff = MOVE
+        diff_x, diff_y, diff_z = self.width/20, self.height/20, self.depth/20
         if direction == 1:
-            self.yMin += diff
-            self.yMax += diff
+            self.yMin += diff_y
+            self.yMax += diff_y
         elif direction == 2:
-            self.yMin -= diff
-            self.yMax -= diff
+            self.yMin -= diff_y
+            self.yMax -= diff_y
         elif direction == 3:
-            self.xMin -= diff
-            self.xMax -= diff
+            self.xMin -= diff_x
+            self.xMax -= diff_x
         elif direction == 4:
-            self.xMin += diff
-            self.xMax += diff
+            self.xMin += diff_x
+            self.xMax += diff_x
         elif direction == 5:
-            self.zMin += diff
-            self.zMax += diff
-            self.projection_diff += diff
+            self.zMin += diff_z
+            self.zMax += diff_z
+            self.projection_diff += diff_z
         elif direction == 6:
             self.zMin -= diff
             self.zMax -= diff
-            self.projection_diff -= diff
+            self.projection_diff -= diff_z
 
     def zoom(self, sign):
-        zoomX = self.vp_width  * sign*ZOOM
-        zoomY = self.vp_height * sign*ZOOM
-        zoomZ = self.vp_depth  * sign*ZOOM
+        zoomX = self.width  * sign*ZOOM
+        zoomY = self.height * sign*ZOOM
+        zoomZ = self.depth  * sign*ZOOM
         self.xMin += zoomX
         self.xMax -= zoomX
         self.yMin += zoomY

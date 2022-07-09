@@ -120,6 +120,12 @@ class Viewport(QLabel):
         for obj in self.objectList:
             self.draw(obj)
 
+    def recenter(self, wc):
+        for obj in self.objectList:
+            print(obj.name)
+            matrix = [obj.matrix]
+            Transformation3D(1, (-wc[0], -wc[1], -wc[2]), (0,0,0), (0,0,0), 1, 1, obj, None).normalize(matrix)
+
     def rotate_window(self, degree: int, orientation: int, axis: int):
         if orientation:
             degree *= -1
@@ -157,6 +163,20 @@ class Viewport(QLabel):
         self.draw(axis_x)
         self.draw(axis_y)
         self.draw(axis_z)
+
+    def update_window(self, coordinates):
+        for coord in coordinates:
+            print(coord)
+        vpn = coordinates[0]
+        vup = coordinates[1]
+        (width, height, depth) = coordinates[2]
+        wc = coordinates[3]
+        print(wc)
+        print("width: "+str(width))
+        print("height: "+str(height))
+        print("depth: "+str(depth))
+        self.window.update_window(width, height, depth)
+        #self.recenter(wc)
 
 
     def move(self, index: int):
