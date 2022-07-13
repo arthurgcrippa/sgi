@@ -119,6 +119,7 @@ def read(file):
                 line = line.split()
                 if line[0] == 'v':
                     vertex = parse_vertex(line)
+                    print("vertex "+str(vertex))
                     vertices.append(vertex)
 
                 elif line[0] == 'mtllib':
@@ -139,9 +140,10 @@ def read(file):
 
 
 def parse_vertex(line):
-    z = float(line.pop())
-    y = float(line.pop())
-    x = float(line.pop())
+    z = float(line.pop().split("/")[0])
+    y = float(line.pop().split("/")[0])
+    x = float(line.pop().split("/")[0])
+    print("parse vertex: "+str(x)+" "+str(y)+" "+str(z))
     return x, y, z
 
 
@@ -180,15 +182,18 @@ def parse_group(line, f, watercolour, lines):
     GROUP_SEQUENCE = True
     while True:
         line_b = readline(f)
+        lines -= 1
         line = line_b.rstrip().split()
         if GROUP_SEQUENCE:
             if line[0] == "g":
                 line_b = readline(f)
+                lines -= 1
                 line = line_b.rstrip().split()
             GROUP_SEQUENCE = False
         if line[0] in ["o", "g", "v"] or lines == 0:
             print(line_b)
             f.seek(-len(line_b),1)
+            lines += 1
             # line_b = readline(f)
             # print(line_b)
             break
@@ -196,6 +201,7 @@ def parse_group(line, f, watercolour, lines):
         if line[0] == 'usemtl':
             color = watercolour[line[1]]
             line_b = readline(f)
+            lines-= 1
             line = line_b.rstrip().split()
 
         elif line[0] == 'l':
@@ -205,7 +211,8 @@ def parse_group(line, f, watercolour, lines):
             circuit = []
             for vertex in line:
                 index += 1
-                vertices.append(vertex)
+                print("vertex "+str(vertex))
+                vertices.append(vertex.split("/")[0])
                 circuit.append(index)
             edges.append((circuit, polygon))
 
@@ -216,21 +223,27 @@ def parse_group(line, f, watercolour, lines):
             first = index+1
             for vertex in line:
                 index += 1
-                vertices.append(vertex)
+                print("vertex "+str(vertex))
+                vertices.append(vertex.split("/")[0])
                 circuit.append(index)
             circuit.append(first)
             edges.append((circuit, polygon))
+
+    if edges == []:
+        return None
 
     obj["name"] = name
     obj["type"] = "Group"
     obj["color"] = color
     obj["vertices"] = vertices
     obj["edges"] = edges
+    print("case group")
+    print(edges)
     return obj
 
 
 def case_point(name, color, line, obj):
-    vertex = [int(line[1])]
+    vertex = [int(line[1].split("/")[0])]
     obj["name"] = name
     obj["type"] = "Point"
     obj["color"] = color
@@ -242,7 +255,10 @@ def case_line(name, color, line, obj):
     vertices = []
     edges = []
     while line:
-        vertices.append(int(line.pop()))
+        vertex = line.pop()
+        vertices.append(int(vertex.split("/")[0]))
+        print(vertex)
+        print(vertex.split("/")[0])
 
     index = 0
     circuit = []
@@ -262,6 +278,8 @@ def case_line(name, color, line, obj):
     obj["color"] = color
     obj["vertices"] = vertices
     obj["edges"] = edges
+    print("case line")
+    print(edges)
     return obj
 
 def case_face(name, color, line, obj):
@@ -269,7 +287,10 @@ def case_face(name, color, line, obj):
     vertices = []
     edges = []
     while line:
-        vertices.append(int(line.pop()))
+        vertex = line.pop()
+        vertices.append(int(vertex.split("/")[0]))
+        print(vertex)
+        print(vertex.split("/")[0])
     index = 0
     circuit = []
     for v in vertices:
@@ -281,13 +302,18 @@ def case_face(name, color, line, obj):
     obj["color"] = color
     obj["vertices"] = vertices
     obj["edges"] = edges
+    print("case face")
+    print(edges)
     return obj
 
 def case_curve(name, color, line, obj):
     line.pop(0)
     vertices = []
     while line:
-        vertices.append(int(line.pop()))
+        vertex = line.pop()
+        vertices.append(int(vertex.split("/")[0]))
+        print(vertex)
+        print(vertex.split("/")[0])
     obj["name"] = name
     obj["type"] = "Curve"
     obj["color"] = color
@@ -298,7 +324,10 @@ def case_window(name, color, line, obj):
     line.pop(0)
     vertices = []
     while line:
-        vertices.append(int(line.pop()))
+        vertex = line.pop()
+        vertices.append(int(vertex.split("/")[0]))
+        print(vertex)
+        print(vertex.split("/")[0])
     obj["name"] = name
     obj["type"] = "Window"
     obj["color"] = color
@@ -359,10 +388,10 @@ def create_forms(vertices, objList):
 
 def create_watercolor(file) -> Dict:
     watercolour = {}
-    lines = rawcount(file) + 1
+    #lines = rawcount(file) + 1
     with open("savefiles/"+file, "r") as f:
         for line in f:
-            lines -= 1
+            #lines -= 1
             line = line.rstrip().split()
             if len(line) > 1 and line[0] == "newmtl":
                 mtl = line[1]

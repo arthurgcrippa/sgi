@@ -4,7 +4,7 @@ import numpy as np
 
 STEPS_T = 10
 STEPS_S = 10
-ALGO = 0 # Forwarding
+ALGO = 1 # Forwarding
 
 def surface(normalized, surface_type):
     lines = []
