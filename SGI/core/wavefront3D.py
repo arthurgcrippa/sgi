@@ -26,7 +26,7 @@ def write(file_path: str, objList: List[Form]):
 
     create_mtl(mtl_path, watercolour)
 
-    f = open("savefiles/"+file_path, "w")
+    f = open(file_path, "w")
 
     for v in vertices:
         line = "v " + "{:.1f}".format(v[0]) + " {:.1f}".format(v[1]) + " {:.1f}".format(v[2]) + "\n"
@@ -78,7 +78,8 @@ def pointsToString(obj, objMap):
 
 
 def create_mtl(file_path, watercolour) -> None:
-    mtl = open("savefiles/"+file_path, "w")
+    # mtl = open("savefiles/"+file_path, "w")
+    mtl = open(file_path, "w")
 
     for name, color in watercolour.items():
         mtl.write(create_name(name))
@@ -109,7 +110,8 @@ def read(file):
     watercolour = {}
     name = file.split('/')[-1]
     lines = rawcount(file) + 1
-    with open("savefiles/"+file, "rb") as f:
+    # with open("savefiles/"+file, "rb") as f:
+    with open(file, "rb") as f:
         while True:
             if lines == 0:
                 break
@@ -360,7 +362,8 @@ def create_forms(vertices, objList):
 def create_watercolor(file) -> Dict:
     watercolour = {}
     lines = rawcount(file) + 1
-    with open("savefiles/"+file, "r") as f:
+    # with open("savefiles/"+file, "r") as f:
+    with open(file, "r") as f:
         for line in f:
             lines -= 1
             line = line.rstrip().split()
@@ -379,7 +382,8 @@ def string_to_rgb(srgb: List[str]):
     return r, g, b
 
 def rawcount(filename):
-    f = open("savefiles/"+filename, 'rb')
+    # f = open("savefiles/"+filename, 'rb')
+    f = open(filename, 'rb')
     lines = 0
     buf_size = 1024 * 1024
     read_f = f.raw.read
