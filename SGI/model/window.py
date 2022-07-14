@@ -76,11 +76,10 @@ class Window():
         zoomX = self.width  * sign*ZOOM
         zoomY = self.height * sign*ZOOM
         zoomZ = self.depth  * sign*ZOOM
-        self.xMin += zoomX
-        self.xMax -= zoomX
-        self.yMin += zoomY
-        self.yMax -= zoomY
-        self.zMin += zoomZ
-        self.zMax -= zoomZ
-        if self.xMax == self.xMin:
-            self.zoom(sign)
+        if self.xMax-zoomX != self.xMin+zoomX:
+            self.xMin += zoomX
+            self.xMax -= zoomX
+            self.yMin += zoomY
+            self.yMax -= zoomY
+            self.zMin += zoomZ
+            self.zMax -= zoomZ
