@@ -1,7 +1,7 @@
 from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets
 from PyQt5 import QtGui
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
 from gui.object_gui import ObjectWindow
 from model.viewport import Viewport
 from gui.transformation_gui import Trasformation
@@ -40,9 +40,9 @@ class MainWindow(QWidget):
 
         openObjButton = QPushButton("Abrir Objeto")
         saveObjButton = QPushButton("Salvar Objeto")
-        fileText = QLineEdit("dinomech.obj")
-        openObjButton.clicked.connect(lambda: self.open(fileText.text()))
-        saveObjButton.clicked.connect(lambda: self.save(fileText.text()))
+        # fileText = QLineEdit("dinomech.obj")
+        openObjButton.clicked.connect(lambda: self.open())
+        saveObjButton.clicked.connect(lambda: self.save())
 
         self.cs_algorithm = QRadioButton("Coher Sutherland")
         self.lb_algorithm = QRadioButton("Liang Barsky")
@@ -57,7 +57,7 @@ class MainWindow(QWidget):
         layoutObj.addWidget(label_arquivos)
         layoutObj.addWidget(openObjButton)
         layoutObj.addWidget(saveObjButton)
-        layoutObj.addWidget(fileText)
+        # layoutObj.addWidget(fileText)
         layoutObj.addWidget(QLabel(''))
         label_algorithm = QLabel('Algoritmo de clipping')
         label_algorithm.setAlignment(Qt.AlignCenter)
@@ -174,22 +174,30 @@ class MainWindow(QWidget):
         else:
             self.transformation.exec()
 
-    def save(self, file_name: str) -> None:
-        wavefront3D.write(file_name, self.viewport.objectList)
+    def save(self) -> None:
+        file_name = QFileDialog.getSaveFileName(self)
+        if file_name[0] != '':
+            wavefront3D.write(file_name[0]+'.obj', self.viewport.objectList)
+        else:
+            self.show_error_message("Nenhum arquivo selecionado")
 
-    def open(self, file_path: str) -> None:
-        self.objList.clear()
-        self.viewport.objectList.clear()
-        self.viewport.redraw()
-        new_objects = wavefront3D.read(file_path)
-        for obj in new_objects:
-            if obj.IS_WINDOW:
-                self.viewport.objectList.append(obj)
-                self.viewport.update_window(obj.coordinates)
-            else:
-                self.viewport.objectList.append(obj)
-                self.objList.addItem(obj.name + ': ' + str(obj.id))
-        self.viewport.redraw()
+    def open(self) -> None:
+        obj_name = QFileDialog.getOpenFileName(self)
+        if obj_name[0] != '':
+            self.objList.clear()
+            self.viewport.objectList.clear()
+            self.viewport.redraw()
+            new_objects = wavefront3D.read(str(obj_name[0]))
+            for obj in new_objects:
+                if obj.IS_WINDOW:
+                    self.viewport.update_window(obj.coordinates)
+                    self.viewport.objectList.append(obj)
+                else:
+                    self.viewport.objectList.append(obj)
+                    self.objList.addItem(obj.name + ': ' + str(obj.id))
+            self.viewport.redraw()
+        else:
+            self.show_error_message("Nenhum arquivo selecionado")
 
     def get_algorithm(self):
         if self.cs_algorithm.isChecked():

@@ -155,9 +155,9 @@ class Viewport(QLabel):
 
     def draw_axises(self):
         vp_x, vp_y, vp_z = self.vpCoord[0]/2, self.vpCoord[1]/2, self.vpCoord[2]/2
-        axis_x = Object3D("eixo-x", [(vp_x, 0, 0), (-vp_x, 0, 0)], -1)
-        axis_y = Object3D("eixo-y", [(0, vp_y, 0), (0, -vp_y, 0)], -2)
-        axis_z = Object3D("eixo-z", [(0, 0, vp_z), (0, 0, -vp_z)], -3)
+        axis_x = Object3D("eixo-x", [(1000, 0, 0), (-1000, 0, 0)], -1)
+        axis_y = Object3D("eixo-y", [(0, 1000, 0), (0, -1000, 0)], -2)
+        axis_z = Object3D("eixo-z", [(0, 0, 1000), (0, 0, -1000)], -3)
         axis_x.set_edges([([1,2], False)])
         axis_y.set_edges([([1,2], False)])
         axis_z.set_edges([([1,2], False)])
