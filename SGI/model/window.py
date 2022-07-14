@@ -5,8 +5,6 @@ from typing import List
 from model.form import Form
 from utils import matrices
 
-ZOOM = 0.05
-
 class Window():
     def __init__(self, width:int, height:int, depth:int) -> None:
         super().__init__()
@@ -23,6 +21,21 @@ class Window():
         self.theta_y = 0
         self.theta_z = 0
         self.projection_diff = 0
+        self.zoom_const = 0.05
+        self.zoom_stack = []
+
+    def reset(self):
+        self.xMin = - float(self.width/2)
+        self.yMin = - float(self.height/2)
+        self.zMin = - float(self.depth/2)
+        self.xMax = float(self.width/2)
+        self.yMax = float(self.height/2)
+        self.zMax = float(self.depth/2)
+        self.theta_x = 0
+        self.theta_y = 0
+        self.theta_z = 0
+        self.projection_diff = 0
+        self.zoom_const = 0.05
 
     def get_cop(self):
         cop = (0,0,-1000)
@@ -68,19 +81,30 @@ class Window():
             self.zMax += diff_z
             self.projection_diff += diff_z
         elif direction == 6:
-            self.zMin -= diff
-            self.zMax -= diff
+            self.zMin -= diff_z
+            self.zMax -= diff_z
             self.projection_diff -= diff_z
 
     def zoom(self, sign):
-        zoomX = self.width  * sign*ZOOM
-        zoomY = self.height * sign*ZOOM
-        zoomZ = self.depth  * sign*ZOOM
+        zoomX, zoomY, zoomZ = self.get_zoom_diffs(sign, self.zoom_const)
+        if self.xMin + zoomX >= self.xMax - zoomX:
+            if sign > 0:
+                self.zoom_const /= 2
+        if sign > 0:
+            self.zoom_stack.append(self.zoom_const)
+        if sign < 0 and len(self.zoom_stack) > 0:
+            self.zoom_const = self.zoom_stack.pop()
+
+        zoomX, zoomY, zoomZ = self.get_zoom_diffs(sign, self.zoom_const)
         self.xMin += zoomX
         self.xMax -= zoomX
         self.yMin += zoomY
         self.yMax -= zoomY
         self.zMin += zoomZ
         self.zMax -= zoomZ
-        if self.xMax == self.xMin:
-            self.zoom(sign)
+
+    def get_zoom_diffs(self, sign, ZOOM):
+        zoomX = self.width  * sign*ZOOM
+        zoomY = self.height * sign*ZOOM
+        zoomZ = self.depth  * sign*ZOOM
+        return zoomX, zoomY, zoomZ

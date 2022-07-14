@@ -1,15 +1,13 @@
-
-CURVE_ALGO = 0
 STEPS = 1000
 
-def blending_curve(normalized, curve_type):
+def blending_curve(normalized, curve_type, curve_algorythm):
     lines = []
     assert len(normalized)-1 % 3 != 0
     p1 = normalized[0]
     for i in range(1, len(normalized)):
         if i % 3 == 0:
             p2 = normalized[i]
-            partial_lines = curve_segment(p1,r1,r2,p2, curve_type)
+            partial_lines = curve_segment(p1,r1,r2,p2, curve_type, curve_algorythm)
             p1 = p2
             for line in partial_lines:
                 lines.append(line)
@@ -19,27 +17,27 @@ def blending_curve(normalized, curve_type):
             r2 = normalized[i]
     return lines
 
-def b_spline_curve(normalized, curve_type):
+def b_spline_curve(normalized, curve_type, curve_algorythm):
     lines = []
     if len(normalized) < 4:
         print("Problemas! Não há como formar p1, p2, ")
         print(len(normalized))
     else:
         p0, p1, p2, p3 = normalized[0], normalized[1], normalized[2], normalized[3]
-        lines = curve_segment(p0,p1,p2,p3, curve_type)
+        lines = curve_segment(p0,p1,p2,p3, curve_type, curve_algorythm)
         for i in range(len(normalized)-4):
             p0 = p1
             p1 = p2
             p2 = p3
             p3 = normalized[i+4]
-            segment_lines = curve_segment(p0, p1, p2, p3, curve_type)
+            segment_lines = curve_segment(p0, p1, p2, p3, curve_type, curve_algorythm)
             for line in segment_lines:
                 lines.append(line)
     return lines
 
-def curve_segment(p1, p2, p3, p4, curve_type):
+def curve_segment(p1, p2, p3, p4, curve_type, curve_algorythm):
     lines = []
-    if CURVE_ALGO:
+    if curve_algorythm:
         x1, y1, z1 = polynomial_function(p1, p2, p3, p4, 0, curve_type)
         for i in range(1, STEPS+1):
             t = i/STEPS

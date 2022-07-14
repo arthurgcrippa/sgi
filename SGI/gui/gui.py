@@ -85,6 +85,7 @@ class MainWindow(QWidget):
         right = QToolButton()
         up3d = QToolButton()
         down3d = QToolButton()
+        rst = QPushButton("Reset")
 
         up.setFixedSize(100,25)
         down.setFixedSize(100,25)
@@ -92,6 +93,7 @@ class MainWindow(QWidget):
         right.setFixedSize(100,25)
         up3d.setFixedSize(100, 25)
         down3d.setFixedSize(100, 25)
+        rst.setFixedSize(100, 25)
         self.axis_x = QRadioButton("x")
         self.axis_y = QRadioButton("y")
         self.axis_z = QRadioButton("z")
@@ -108,6 +110,7 @@ class MainWindow(QWidget):
         layoutFunctions.addWidget(right, 2, 2, Qt.Alignment())
         layoutFunctions.addWidget(up3d, 1, 0, Qt.Alignment())
         layoutFunctions.addWidget(down3d, 1, 2, Qt.Alignment())
+        layoutFunctions.addWidget(rst, 3, 1, Qt.Alignment())
         layoutFunctions.addWidget(QLabel("<         3d         >"), 1, 1, Qt.Alignment())
         layoutFunctions.addWidget(self.axis_x, 5, 0, Qt.Alignment())
         layoutFunctions.addWidget(self.axis_y, 5, 1, Qt.Alignment())
@@ -118,7 +121,7 @@ class MainWindow(QWidget):
         right.clicked.connect(lambda: self.viewport.move(4))
         up3d.clicked.connect(lambda: self.viewport.move(5))
         down3d.clicked.connect(lambda: self.viewport.move(6))
-
+        rst.clicked.connect(lambda: self.viewport.reset())
         zoomIn = QToolButton()
         zoomOut = QToolButton()
         zoomIn.setIcon(QtGui.QIcon("images/mais.png"))
@@ -181,6 +184,7 @@ class MainWindow(QWidget):
         new_objects = wavefront3D.read(file_path)
         for obj in new_objects:
             if obj.IS_WINDOW:
+                self.viewport.objectList.append(obj)
                 self.viewport.update_window(obj.coordinates)
             else:
                 self.viewport.objectList.append(obj)

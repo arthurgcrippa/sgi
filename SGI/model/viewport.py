@@ -33,6 +33,9 @@ class Viewport(QLabel):
         self.board = self.pixmap()
         self.board.fill(QColor('white'))
 
+    def test_degrees(self):
+        matrices.test_degrees()
+
     def vp_trans(self, wCoord, wMin, wMax, vpCoordinate):
         vp_x = ((wCoord[0] - wMin[0])/(wMax[0]-wMin[0]))*vpCoordinate[0]
         vp_y = (1-((wCoord[1]-wMin[1])/(wMax[1]-wMin[1])))*vpCoordinate[1]
@@ -65,10 +68,12 @@ class Viewport(QLabel):
         return painter
 
     def draw(self, object: Form):
+        if object.IS_WINDOW:
+            return None
         self.normalize(object)
         painter = self.get_painter(object)
         xMin, yMin, xMax, yMax = self.get_wc()
-        if object.grouped():
+        if object.IS_GROUPED:
             for (group_lines, polygon) in object.get_group_lines():
                 possible_lines = self.clipper.clip_lines(group_lines)
                 if polygon:
@@ -122,7 +127,6 @@ class Viewport(QLabel):
 
     def recenter(self, wc):
         for obj in self.objectList:
-            print(obj.name)
             matrix = [obj.matrix]
             Transformation3D(1, (-wc[0], -wc[1], -wc[2]), (0,0,0), (0,0,0), 1, 1, obj, None).normalize(matrix)
 
@@ -167,11 +171,10 @@ class Viewport(QLabel):
     def update_window(self, coordinates):
         for coord in coordinates:
             print(coord)
-        vpn = coordinates[0]
-        vup = coordinates[1]
-        (width, height, depth) = coordinates[2]
-        wc = coordinates[3]
-        print(wc)
+        vpn = coordinates[3]
+        vup = coordinates[2]
+        (width, height, depth) = coordinates[1]
+        wc = coordinates[0]
         print("width: "+str(width))
         print("height: "+str(height))
         print("depth: "+str(depth))
@@ -189,4 +192,8 @@ class Viewport(QLabel):
 
     def zoom_out(self):
         self.window.zoom(1)
+        self.redraw()
+
+    def reset(self):
+        self.window.reset()
         self.redraw()

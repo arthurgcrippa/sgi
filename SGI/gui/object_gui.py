@@ -1,11 +1,9 @@
-#from unicodedata import name
-#from PyQt5.QtCore import Qt
-#from PyQt5 import QtWidgets
+from cProfile import label
 from PyQt5.QtWidgets import QApplication, QMainWindow
-
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, QRadioButton, \
     QListWidget, QLayout, QGridLayout, QToolButton, QDialog, QTabWidget, QFormLayout, QLineEdit,QCheckBox, \
-    QDialogButtonBox, QMessageBox
+    QDialogButtonBox, QMessageBox, QRadioButton, QButtonGroup
+from PyQt5.QtCore import Qt
 from utils import matrices
 from model.form import Form
 from model.object2D import Object2D
@@ -13,7 +11,6 @@ from model.object3D import Object3D
 from model.viewport import Viewport
 
 from utils import parser
-# from gui import MainWindow
 
 class ObjectWindow(QDialog):
     def __init__(self, viewport: Viewport, mainWindow) -> None:
@@ -91,16 +88,41 @@ class ObjectWindow(QDialog):
 
     def curve_tab(self) -> QWidget:
         generalTab = QWidget()
-        layout = QVBoxLayout()
+        layout = QFormLayout()
+        algo_options_layout = QGridLayout()
+        method_options_layout = QGridLayout()
+
+        algo_options_group = QButtonGroup(algo_options_layout)
+        method_options_group = QButtonGroup(method_options_layout)
+
         self.curve_name = QLineEdit("Nome da Curva")
         self.curve_coordinates = QLineEdit("(-100,-100,-100);(-50,-150,-50);(-50,150,50);(1,1,1);(50,50,50);(50,100,50);(100,100,100)")
         self.curve_color = QLineEdit("#000000")
         self.bezier_button = QRadioButton('Bezier')
         self.hermite_button = QRadioButton('Hermite')
         self.bspline_button = QRadioButton('B-Spline')
+        self.curve_blending_button = QRadioButton('Blending Functions')
+        self.curve_forwarding_button = QRadioButton('Forwarding Differences')
+
+        self.bezier_button.setChecked(True)
+        self.curve_blending_button.setChecked(True)
+
+        method_options_group.addButton(self.bezier_button)
+        method_options_group.addButton(self.hermite_button)
+        method_options_group.addButton(self.bspline_button)
+        algo_options_group.addButton(self.curve_blending_button)
+        algo_options_group.addButton(self.curve_forwarding_button)
+
+        algo_options_layout.addWidget(self.curve_blending_button, 1, 1, Qt.Alignment())
+        algo_options_layout.addWidget(self.curve_forwarding_button, 1, 2, Qt.Alignment())
+        method_options_layout.addWidget(self.bezier_button, 0, 1, Qt.Alignment())
+        method_options_layout.addWidget(self.hermite_button, 0, 2, Qt.Alignment())
+        method_options_layout.addWidget(self.bspline_button, 0, 3, Qt.Alignment())
+
         confirm_button = QPushButton('Confirm', self)
         cancel_button = QPushButton('Cancel')
         confirm_button.clicked.connect(self.confirm_curve)
+
         dialogBox = QDialogButtonBox()
         dialogBox.rejected.connect(self.reject)
         dialogBox.addButton(confirm_button, QDialogButtonBox.AcceptRole)
@@ -109,26 +131,51 @@ class ObjectWindow(QDialog):
         layout.addWidget(self.curve_name)
         layout.addWidget(self.curve_coordinates)
         layout.addWidget(self.curve_color)
-        layout.addWidget(self.bezier_button)
-        layout.addWidget(self.hermite_button)
-        layout.addWidget(self.bspline_button)
+        layout.addRow(QLabel(''), method_options_layout)
+        layout.addRow(QLabel(''), algo_options_layout)
+        layout.addRow(QLabel(''), QVBoxLayout())
+        layout.addRow(QLabel(''), QVBoxLayout())
         layout.addWidget(dialogBox)
         generalTab.setLayout(layout)
         return generalTab
 
     def surface_tab(self) -> QWidget:
         generalTab = QWidget()
-        layout = QVBoxLayout()
+        layout = QFormLayout()
+        algo_options_layout = QGridLayout()
+        method_options_layout = QGridLayout()
+
+        algo_options_group = QButtonGroup(algo_options_layout)
+        method_options_group = QButtonGroup(method_options_layout)
+
         self.surface_name = QLineEdit("Nome da Superficie")
         self.surface_coordinates = QLineEdit("(0,0,0);(0,30,40);(0,60,30);(0,100,0);(30,0,20);(20,25,50);(30,60,50);(40,80,20);(60,0,20);(80,30,50);(70,60,45);(60,100,25);(100,0,0);(110,30,40);(110,60,30);(100,90,0)")
         self.surface_color = QLineEdit("#000000")
         self.bezier_surface_button = QRadioButton('Bezier')
         self.hermite_surface_button = QRadioButton('Hermite')
         self.bspline_surface_button = QRadioButton('B-Spline')
+        self.surface_blending_button = QRadioButton('Blending Functions')
+        self.surface_forwarding_button = QRadioButton('Forwarding Differences')
+
         self.bezier_surface_button.setChecked(True)
+        self.surface_blending_button.setChecked(True)
+
+        method_options_group.addButton(self.bezier_surface_button)
+        method_options_group.addButton(self.hermite_surface_button)
+        method_options_group.addButton(self.bspline_surface_button)
+        algo_options_group.addButton(self.surface_blending_button)
+        algo_options_group.addButton(self.surface_forwarding_button)
+
+        algo_options_layout.addWidget(self.surface_blending_button, 1, 1, Qt.Alignment())
+        algo_options_layout.addWidget(self.surface_forwarding_button, 1, 2, Qt.Alignment())
+        method_options_layout.addWidget(self.bezier_surface_button, 0, 1, Qt.Alignment())
+        method_options_layout.addWidget(self.hermite_surface_button, 0, 2, Qt.Alignment())
+        method_options_layout.addWidget(self.bspline_surface_button, 0, 3, Qt.Alignment())
+
         confirm_button = QPushButton('Confirm', self)
         cancel_button = QPushButton('Cancel')
         confirm_button.clicked.connect(self.confirm_surface)
+
         dialogBox = QDialogButtonBox()
         dialogBox.rejected.connect(self.reject)
         dialogBox.addButton(confirm_button, QDialogButtonBox.AcceptRole)
@@ -137,9 +184,13 @@ class ObjectWindow(QDialog):
         layout.addWidget(self.surface_name)
         layout.addWidget(self.surface_coordinates)
         layout.addWidget(self.surface_color)
-        layout.addWidget(self.bezier_surface_button)
-        layout.addWidget(self.hermite_surface_button)
-        layout.addWidget(self.bspline_surface_button)
+        layout.addRow(QLabel(''), method_options_layout)
+        layout.addRow(QLabel(''), algo_options_layout)
+        layout.addRow(QLabel(''), QVBoxLayout())
+        layout.addRow(QLabel(''), QVBoxLayout())
+        # layout.addWidget(self.bezier_surface_button)
+        # layout.addWidget(self.hermite_surface_button)
+        # layout.addWidget(self.bspline_surface_button)
         layout.addWidget(dialogBox)
         generalTab.setLayout(layout)
         return generalTab
@@ -152,11 +203,12 @@ class ObjectWindow(QDialog):
             error_code = []
             if not parser.malformed_input(self.object_edges.text(), error_code):
                 self.show_error_message(error_code[0])
+                return
             else:
                 object.set_edges(self.get_edges())
-                self.viewport.objectList.append(object)
-                self.viewport.draw(object)
-                self.mainWindow.objList.addItem(object.name + ': ' + str(object.id))
+        self.viewport.objectList.append(object)
+        self.viewport.draw(object)
+        self.mainWindow.objList.addItem(object.name + ': ' + str(object.id))
 
     def confirm_object_2D(self):
         error_message = []
@@ -187,6 +239,10 @@ class ObjectWindow(QDialog):
                 object.set_curve_type(1)
             if self.bezier_button.isChecked():
                 object.set_curve_type(2)
+            if self.curve_blending_button.isChecked():
+                object.set_curve_algorythm(1)
+            if self.curve_forwarding_button.isChecked():
+                object.set_curve_algorythm(0)
             self.confirm_object(object, True)
 
     def confirm_surface(self):
@@ -200,6 +256,10 @@ class ObjectWindow(QDialog):
                 object.set_surface_type(1)
             if self.bezier_surface_button.isChecked():
                 object.set_surface_type(2)
+            if self.surface_blending_button.isChecked():
+                object.set_surface_algorythm(0)
+            if self.surface_forwarding_button.isChecked():
+                object.set_surface_algorythm(1)
             self.confirm_object(object, True)
 
     def form_setup(self, plaintext):

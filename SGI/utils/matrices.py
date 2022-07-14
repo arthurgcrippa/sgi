@@ -142,7 +142,7 @@ def degree(p1, p2, p3):
     elif x<0 and y>=0: #2nd
         degree = 180 - degree
     elif x>=0 and y < 0: #4th
-        degree = 360 + degree
+        degree = 360 - degree
     return degree
 
 def dist(p1, p2):

@@ -17,8 +17,8 @@ def write(file_path: str, objList: List[Form]):
         objMap[obj] = (i, i + len(obj.coordinates) - 1)
         i += len(obj.coordinates)
 
-        mtl = 'r' + str(obj.color[0]) + '_g' + str(obj.color[1]) + '_b' + str(obj.color[2])
-        watercolour[obj.cor] = mtl
+        #mtl = 'r' + str(obj.color[0]) + '_g' + str(obj.color[1]) + '_b' + str(obj.color[2])
+        watercolour[obj.name] = obj.color
 
     obj_name = file_path.split('/').pop()
     mtl_name = obj_name.split('.')[0] + ".mtl"
@@ -33,11 +33,11 @@ def write(file_path: str, objList: List[Form]):
         f.write(line)
 
     f.write("mtllib " + mtl_name + "\n")
-
+    window = None
     for obj in objList:
         header = "g " if obj.grouped() else "o "
         f.write(header + obj.name + "\n")
-        f.write("usemtl " + watercolour[obj.color] + "\n")
+        f.write("usemtl " + obj.name + "\n")
         lines = pointsToString(obj, objMap)
         for line in lines:
             f.write(line)
@@ -51,7 +51,7 @@ def pointsToString(obj, objMap):
         lines = []
         for circuit, polygon in obj.edges:
             line = ""
-            header = "f " if polygon else "f "
+            header = "f " if polygon else "l "
             line += header
             for value in circuit:
                 line += str(first+value)
@@ -66,6 +66,8 @@ def pointsToString(obj, objMap):
     elif obj.len() > 2:
         if obj.IS_POLYGON:
             line+= "f "
+        elif obj.IS_WINDOW:
+            line += "w "
         else:
             line+= "l "
     else:
@@ -79,7 +81,6 @@ def pointsToString(obj, objMap):
 
 def create_mtl(file_path, watercolour) -> None:
     mtl = open("savefiles/"+file_path, "w")
-
     for name, color in watercolour.items():
         mtl.write(create_name(name))
         mtl.write(create_color(color))
@@ -119,7 +120,6 @@ def read(file):
                 line = line.split()
                 if line[0] == 'v':
                     vertex = parse_vertex(line)
-                    print("vertex "+str(vertex))
                     vertices.append(vertex)
 
                 elif line[0] == 'mtllib':
@@ -143,7 +143,6 @@ def parse_vertex(line):
     z = float(line.pop().split("/")[0])
     y = float(line.pop().split("/")[0])
     x = float(line.pop().split("/")[0])
-    print("parse vertex: "+str(x)+" "+str(y)+" "+str(z))
     return x, y, z
 
 
@@ -191,7 +190,6 @@ def parse_group(line, f, watercolour, lines):
                 line = line_b.rstrip().split()
             GROUP_SEQUENCE = False
         if line[0] in ["o", "g", "v"] or lines == 0:
-            print(line_b)
             f.seek(-len(line_b),1)
             lines += 1
             # line_b = readline(f)
@@ -211,7 +209,6 @@ def parse_group(line, f, watercolour, lines):
             circuit = []
             for vertex in line:
                 index += 1
-                print("vertex "+str(vertex))
                 vertices.append(vertex.split("/")[0])
                 circuit.append(index)
             edges.append((circuit, polygon))
@@ -223,7 +220,6 @@ def parse_group(line, f, watercolour, lines):
             first = index+1
             for vertex in line:
                 index += 1
-                print("vertex "+str(vertex))
                 vertices.append(vertex.split("/")[0])
                 circuit.append(index)
             circuit.append(first)
@@ -237,8 +233,6 @@ def parse_group(line, f, watercolour, lines):
     obj["color"] = color
     obj["vertices"] = vertices
     obj["edges"] = edges
-    print("case group")
-    print(edges)
     return obj
 
 
@@ -257,8 +251,6 @@ def case_line(name, color, line, obj):
     while line:
         vertex = line.pop()
         vertices.append(int(vertex.split("/")[0]))
-        print(vertex)
-        print(vertex.split("/")[0])
 
     index = 0
     circuit = []
@@ -278,8 +270,6 @@ def case_line(name, color, line, obj):
     obj["color"] = color
     obj["vertices"] = vertices
     obj["edges"] = edges
-    print("case line")
-    print(edges)
     return obj
 
 def case_face(name, color, line, obj):
@@ -289,8 +279,7 @@ def case_face(name, color, line, obj):
     while line:
         vertex = line.pop()
         vertices.append(int(vertex.split("/")[0]))
-        print(vertex)
-        print(vertex.split("/")[0])
+
     index = 0
     circuit = []
     for v in vertices:
@@ -302,8 +291,6 @@ def case_face(name, color, line, obj):
     obj["color"] = color
     obj["vertices"] = vertices
     obj["edges"] = edges
-    print("case face")
-    print(edges)
     return obj
 
 def case_curve(name, color, line, obj):
@@ -312,8 +299,7 @@ def case_curve(name, color, line, obj):
     while line:
         vertex = line.pop()
         vertices.append(int(vertex.split("/")[0]))
-        print(vertex)
-        print(vertex.split("/")[0])
+
     obj["name"] = name
     obj["type"] = "Curve"
     obj["color"] = color
@@ -326,8 +312,6 @@ def case_window(name, color, line, obj):
     while line:
         vertex = line.pop()
         vertices.append(int(vertex.split("/")[0]))
-        print(vertex)
-        print(vertex.split("/")[0])
     obj["name"] = name
     obj["type"] = "Window"
     obj["color"] = color
@@ -342,6 +326,7 @@ def create_forms(vertices, objList):
         points = list()
         for v in obj["vertices"]:
             points.append(vertices[int(v) - 1])
+        points.reverse()
         if obj["type"] == "Point":
             p = Object3D(obj["name"], points, id)
             p.set_color(obj["color"], 1)

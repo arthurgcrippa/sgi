@@ -4,14 +4,13 @@ import numpy as np
 
 STEPS_T = 10
 STEPS_S = 10
-ALGO = 1 # Forwarding
 
-def surface(normalized, surface_type):
+def surface(normalized, surface_type, surface_algorythm):
     lines = []
     matrices = create_matrices(normalized)
     for matrix in matrices:
         matrix_x, matrix_y, matrix_z = matrix[0], matrix[1], matrix[2]
-        partial_lines = partial_surface(matrix_x, matrix_y, matrix_z, surface_type)
+        partial_lines = partial_surface(matrix_x, matrix_y, matrix_z, surface_type, surface_algorythm)
         for line in partial_lines:
             lines.append(line)
     return lines
@@ -57,8 +56,8 @@ def create_4x4_matrix(normalized, index, OVERLAP):
         matrix_z.append(line_z)
     return (matrix_x, matrix_y, matrix_z)
 
-def partial_surface(mx, my, mz, surface_type):
-    if ALGO:
+def partial_surface(mx, my, mz, surface_type, surface_algorythm):
+    if surface_algorythm:
         return forwarding_surface(mx, my, mz, surface_type)
     else:
         return polynomial_surface(mx, my, mz, surface_type)

@@ -6,7 +6,7 @@ t_coordinate = Tuple[float, float, float]
 
 class Object3D(Form):
     def __init__(self, name: str, coordinates: List[t_coordinate], id: int) -> None:
-        #Basic Attriutes
+        #Basic Attributes
         self.name = name
         self.coordinates = coordinates
         self.color = [0,0,0]
@@ -21,6 +21,8 @@ class Object3D(Form):
         self.IS_POLYGON = False
         self.curve_type = 0 #bspline, hermite or bezier
         self.surface_type = 0
+        self.curve_algorythm = 0
+        self.surface_algorythm = 0
         self.IS_CURVE = False
         self.IS_SURFACE = False
         self.IS_GROUPED = False
@@ -52,6 +54,12 @@ class Object3D(Form):
 
     def set_surface_type(self, surface_type):
         self.surface_type = surface_type
+
+    def set_curve_algorythm(self, curve_algorythm):
+        self.curve_algorythm = curve_algorythm
+
+    def set_surface_algorythm(self, surface_algorythm):
+        self.surface_algorythm = surface_algorythm
 
     def setCoordinates(self, coordinates: List[t_coordinate]):
         self.coordinates = coordinates
@@ -137,13 +145,13 @@ class Object3D(Form):
     def curve(self):
         lines = []
         if self.curve_type:
-            lines = curve.blending_curve(self.normalized, self.curve_type)
+            lines = curve.blending_curve(self.normalized, self.curve_type, self.curve_algorythm)
         else:
-            lines = curve.b_spline_curve(self.normalized, self.curve_type)
+            lines = curve.b_spline_curve(self.normalized, self.curve_type, self.curve_algorythm)
         return lines
 
     def surface(self):
-        return surface.surface(self.normalized, self.surface_type)
+        return surface.surface(self.normalized, self.surface_type, self.surface_algorythm)
 
     def show(self):
         id = 1

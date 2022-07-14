@@ -5,13 +5,20 @@ t_coordinate = Tuple[float, float]
 
 class Object2D(Form):
     def __init__(self, name: str, coordinates: List[t_coordinate], id: int) -> None:
+        #Basic Attributes
         self.name = name
         self.coordinates = coordinates
+        self.color = [0,0,0]
         self.id = id
+
+        #Normalization Attributes
         self.matrix = self.getMatrix()
         self.normalized = self.coordinates.copy()
-        self.color = [0,0,0]
-        self.fill = False
+
+        #Flags
+        self.IS_WINDOW = False
+        self.IS_POLYGON = False
+        self.IS_GROUPED = False
 
     def set_color(self, color, format):
         if format:
@@ -22,8 +29,11 @@ class Object2D(Form):
             rgb = tuple(int(color[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
             self.color = rgb
 
-    def set_fill(self, fill):
-        self.fill = fill
+    def set_as_window(self, FLAG):
+        self.IS_WINDOW = FLAG
+
+    def set_as_polygon(self, FLAG):
+        self.IS_POLYGON = FLAG
 
     def tridimentional(self):
         return False

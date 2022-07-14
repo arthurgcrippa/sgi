@@ -1,0 +1,30 @@
+v 20.0 20.0 0.0
+v 20.0 10.0 0.0
+v 10.0 10.0 0.0
+v 10.0 20.0 0.0
+v 106.0 50.4 0.0
+v 111.0 59.0 0.0
+v 119.6 54.0 0.0
+v 114.6 45.4 0.0
+v -69.4 46.3 0.0
+v 39.4 -76.3 0.0
+v -50.0 50.0 0.0
+v 13.8 226.1 0.0
+v 61.8 46.8 0.0
+v -51.8 112.4 0.0
+mtllib teste2.mtl
+o square#1
+usemtl square#1
+l 1 2 3 4 
+o square#2
+usemtl square#2
+l 5 6 7 8 
+o line
+usemtl line
+l 9 10 
+o point
+usemtl point
+p 11 
+o triangle
+usemtl triangle
+l 12 13 14 
