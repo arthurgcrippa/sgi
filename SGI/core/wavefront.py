@@ -16,8 +16,6 @@ def write(file_path: str, objList: List[Form]):
         vertices.extend(obj.coordinates)
         objMap[obj] = (i, i + len(obj.coordinates) - 1)
         i += len(obj.coordinates)
-
-        #mtl = 'r' + str(obj.color[0]) + '_g' + str(obj.color[1]) + '_b' + str(obj.color[2])
         watercolour[obj.name] = obj.color
 
     obj_name = file_path.split('/').pop()
@@ -80,7 +78,6 @@ def pointsToString(obj, objMap):
 
 
 def create_mtl(file_path, watercolour) -> None:
-    # mtl = open("savefiles/"+file_path, "w")
     mtl = open(file_path, "w")
 
     for name, color in watercolour.items():
@@ -112,7 +109,6 @@ def read(file):
     watercolour = {}
     name = file.split('/')[-1]
     lines = rawcount(file) + 1
-    # with open("savefiles/"+file, "rb") as f:
     with open(file, "rb") as f:
         while True:
             if lines == 0:
@@ -135,7 +131,7 @@ def read(file):
                         objList.append(obj)
 
                 elif line[0] == 'g':
-                    obj = parse_group(line, f, watercolour, lines) #TODO
+                    obj = parse_group(line, f, watercolour, lines)
                     if obj:
                         objList.append(obj)
 
@@ -154,9 +150,14 @@ def parse_object(line, f, watercolour):
     color = [0,0,0]
     name = line[1]
     line = readline(f).rstrip().split()
+    cstype = ""
 
     if line[0] == 'usemtl':
         color = watercolour[line[1]]
+        line = readline(f).rstrip().split()
+
+    if line[0] == 'cstype':
+        cstype = line[1]
         line = readline(f).rstrip().split()
 
     if line[0] == 'p':
@@ -171,8 +172,12 @@ def parse_object(line, f, watercolour):
     elif line[0] == 'w':
         return case_window(name, color, line, obj)
 
-    elif line[0] == 'bspline':
-        return case_bspline(name, color, line, obj)
+    elif line[0] == 'curv':
+        return case_curve(name, color, line, obj, cstype)
+
+    elif line[0] == 'surf':
+        return case_surface(name, color, line, obj, cstype)
+
 
 def parse_group(line, f, watercolour, lines):
     obj = dict()
@@ -195,8 +200,6 @@ def parse_group(line, f, watercolour, lines):
         if line[0] in ["o", "g", "v"] or lines == 0:
             f.seek(-len(line_b),1)
             lines += 1
-            # line_b = readline(f)
-            # print(line_b)
             break
 
         if line[0] == 'usemtl':
@@ -296,9 +299,16 @@ def case_face(name, color, line, obj):
     obj["edges"] = edges
     return obj
 
-def case_curve(name, color, line, obj):
+def case_curve(name, color, line, obj, cstype):
     line.pop(0)
     vertices = []
+
+    ctype = 0
+    if cstype == "bezier":
+        ctype = 1
+    if cstype == "hermite":
+        ctype = 2
+
     while line:
         vertex = line.pop()
         vertices.append(int(vertex.split("/")[0]))
@@ -307,6 +317,33 @@ def case_curve(name, color, line, obj):
     obj["type"] = "Curve"
     obj["color"] = color
     obj["vertices"] = vertices
+    obj["cstype"] = ctype
+    return obj
+
+def case_surface(name, color, line, obj, cstype):
+    line.pop(0)
+    vertices = []
+    stype = 0
+    if cstype == "bezier":
+        stype = 1
+    if cstype == "hermite":
+        stype = 2
+    if len(line) == 1:
+        it = line[0].split("-")
+        begin = int(it[0])
+        end = int(it[1])
+        for i in range(begin, end+1):
+            vertices.append(i)
+    else:
+        while line:
+            vertex = line.pop()
+            vertices.append(int(vertex.split("/")[0]))
+
+    obj["name"] = name
+    obj["type"] = "Surface"
+    obj["color"] = color
+    obj["vertices"] = vertices
+    obj["cstype"] = stype
     return obj
 
 def case_window(name, color, line, obj):
@@ -357,7 +394,15 @@ def create_forms(vertices, objList):
         elif obj["type"] == "Curve":
             c = Object3D(obj["name"], points, id)
             c.set_color(obj["color"], 1)
-            c.set_curvy(True)
+            c.set_as_curve(True)
+            c.set_curve_type(obj["cstype"])
+            built.append(c)
+
+        elif obj["type"] == "Surface":
+            c = Object3D(obj["name"], points, id)
+            c.set_color(obj["color"], 1)
+            c.set_as_surface(True)
+            c.set_surface_type(obj["cstype"])
             built.append(c)
 
         elif obj["type"] == "Group":
@@ -376,8 +421,6 @@ def create_forms(vertices, objList):
 
 def create_watercolor(file) -> Dict:
     watercolour = {}
-    #lines = rawcount(file) + 1
-    # with open("savefiles/"+file, "r") as f:
     with open(file, "r") as f:
         for line in f:
             #lines -= 1
@@ -397,7 +440,6 @@ def string_to_rgb(srgb: List[str]):
     return r, g, b
 
 def rawcount(filename):
-    # f = open("savefiles/"+filename, 'rb')
     f = open(filename, 'rb')
     lines = 0
     buf_size = 1024 * 1024

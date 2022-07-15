@@ -12,7 +12,7 @@ v 300 300 0.0
 v -300 300 0.0
 v -300 -300 0.0
 v 300 -300 0.0
-mtllib example_colors.mtl
+mtllib example.mtl
 o Quadrado
 usemtl Quadrado_mtl
 l 1 2 3 4 1

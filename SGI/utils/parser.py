@@ -22,6 +22,14 @@ def parse_input(plaintext: str, floating: bool):
                 coordinates.append((x,y,z))
     return coordinates
 
+def parse_surface(plaintext: str):
+    lines = plaintext.split("\n")
+    coordinates = []
+    for line in lines:
+        partial_coords = parse_float(line)
+        for coord in partial_coords:
+            coordinates.append(coord)
+    return coordinates
 
 def parse_edges(plaintext: str):
     edges = []
@@ -33,9 +41,17 @@ def parse_edges(plaintext: str):
         edges.append((values, fill))
     return edges
 
+def malformed_surface(plaintext: str, error_message):
+    lines = plaintext.split("\n")
+    for line in lines:
+        malformed_input(line, error_message)
+        if len(error_message) > 0:
+            return True
+    return False
+
 def malformed_input(plaintext: str, error_message):
     for char in plaintext:
-        if char not in set(SYMBOLS).union(NUMBERS): #1 INPUT CAN ONLY CONTAIN NUMBERS AND RESERVED SYMBOLS
+        if char not in set(SYMBOLS).union(NUMBERS) and char != "\n": #1 INPUT CAN ONLY CONTAIN NUMBERS AND RESERVED SYMBOLS
             error_message.append(get_error_message(1))
             return True
     size = len(plaintext)
@@ -55,7 +71,7 @@ def malformed_input(plaintext: str, error_message):
             if c1 in SYMBOLS and c1 == c2: #CANNOT REPEAT NON-NUMERIC CHARACTERS
                 error_message.append(get_error_message(5))
                 return True
-            if c1 == ")" and c2 != ";": #CLOSING BRACKET ")" FOLLOWS ";" COORDINATE SEPARATOR
+            if c1 == ")" and c2 not in [";", "\n"]: #CLOSING BRACKET ")" FOLLOWS ";" COORDINATE SEPARATOR
                 error_message.append(get_error_message(6))
                 return True
             if c1 == ";" and c2 != "(": #COORDINATE SEPARATOR ";" PRECEDES "(" OPENING BRACKET
@@ -96,6 +112,18 @@ def malformed_input(plaintext: str, error_message):
             return True
         lenghts.append(length)
     return len(set(lenghts)) != 1
+
+# def test():
+#     f = open("utils/test.txt", "r")
+#     for line in f:
+#         error_code = []
+#         line = line.replace("\n", "")
+#         malformed = malformed_input(line, error_code)
+#         if malformed:
+#             print(error_code[0])
+#         else:
+
+
 
 def get_error_message(error_code: int):
     if error_code == 1:

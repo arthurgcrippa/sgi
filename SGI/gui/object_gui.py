@@ -2,7 +2,7 @@ from cProfile import label
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, QRadioButton, \
     QListWidget, QLayout, QGridLayout, QToolButton, QDialog, QTabWidget, QFormLayout, QLineEdit,QCheckBox, \
-    QDialogButtonBox, QMessageBox, QRadioButton, QButtonGroup
+    QDialogButtonBox, QMessageBox, QRadioButton, QButtonGroup, QTextEdit, QFileDialog
 from PyQt5.QtCore import Qt
 from utils import matrices
 from model.form import Form
@@ -61,12 +61,8 @@ class ObjectWindow(QDialog):
         generalTab = QWidget()
         layout = QVBoxLayout()
         self.object_name_3D = QLineEdit("Nome do Objeto")
-        #self.object_coordinates = QLineEdit("(-50,1,10);(1,1,10);(1,50,10);(-50,50,10)")
         self.object_coordinates_3D = QLineEdit("(-50,0,-50);(-50,0,50);(50,0,50);(50,0,-50);(0,100,0)")
-        #self.object_edges = QLineEdit("(1,2);(2,3);(3,4);(4,1);(1,5);(2,5);(3,5);(4,5)")
         self.object_edges = QLineEdit("(1,2,3,4,1);(1,5,2);(3,5,4)")
-        #self.object_coordinates = QLineEdit("(10,10,10)")
-        #self.object_edges = QLineEdit("(1,1)")
         self.object_color_3D = QLineEdit("#000000")
         self.is_poligon_3D = QCheckBox("Fill object")
         self.confirm_button_3D = QPushButton('Confirm', self)
@@ -149,7 +145,12 @@ class ObjectWindow(QDialog):
         method_options_group = QButtonGroup(method_options_layout)
 
         self.surface_name = QLineEdit("Nome da Superficie")
-        self.surface_coordinates = QLineEdit("(0,0,0);(0,30,40);(0,60,30);(0,100,0);(30,0,20);(20,25,50);(30,60,50);(40,80,20);(60,0,20);(80,30,50);(70,60,45);(60,100,25);(100,0,0);(110,30,40);(110,60,30);(100,90,0)")
+        #self.surface_coordinates = QTextEdit("(0,0,0);(0,30,40);(0,60,30);(0,100,0)\n(30,0,20);(20,25,50);(30,60,50);(40,80,20)\n(60,0,20);(80,30,50);(70,60,45);(60,100,25)\n(100,0,0);(110,30,40);(110,60,30);(100,90,0)")
+        self.surface_coordinates = QTextEdit()
+        self.surface_coordinates.append('(0,0,0);(0,30,40);(0,60,30);(0,100,0)\n'       +
+                                        '(30,0,20);(20,25,50);(30,60,50);(40,80,20)\n'  +
+                                        '(60,0,20);(80,30,50);(70,60,45);(60,100,25)\n' +
+                                        '(100,0,0);(110,30,40);(110,60,30);(100,90,0)')
         self.surface_color = QLineEdit("#000000")
         self.bezier_surface_button = QRadioButton('Bezier')
         self.hermite_surface_button = QRadioButton('Hermite')
@@ -159,6 +160,10 @@ class ObjectWindow(QDialog):
 
         self.bezier_surface_button.setChecked(True)
         self.surface_blending_button.setChecked(True)
+
+        self.surface_coordinates.resize(200,200)
+
+        load_surface_button = QPushButton("Carregar Exemplo")
 
         method_options_group.addButton(self.bezier_surface_button)
         method_options_group.addButton(self.hermite_surface_button)
@@ -181,16 +186,16 @@ class ObjectWindow(QDialog):
         dialogBox.addButton(confirm_button, QDialogButtonBox.AcceptRole)
         dialogBox.addButton(cancel_button, QDialogButtonBox.RejectRole)
 
+        load_surface_button.clicked.connect(lambda: self.load_surface())
+
         layout.addWidget(self.surface_name)
-        layout.addWidget(self.surface_coordinates)
+        layout.addRow(QLabel(''), self.surface_coordinates)
         layout.addWidget(self.surface_color)
         layout.addRow(QLabel(''), method_options_layout)
         layout.addRow(QLabel(''), algo_options_layout)
+        layout.addWidget(load_surface_button)
         layout.addRow(QLabel(''), QVBoxLayout())
         layout.addRow(QLabel(''), QVBoxLayout())
-        # layout.addWidget(self.bezier_surface_button)
-        # layout.addWidget(self.hermite_surface_button)
-        # layout.addWidget(self.bspline_surface_button)
         layout.addWidget(dialogBox)
         generalTab.setLayout(layout)
         return generalTab
@@ -247,10 +252,11 @@ class ObjectWindow(QDialog):
 
     def confirm_surface(self):
         error_message = []
-        if parser.malformed_input(self.surface_coordinates.text(), error_message):
+        if parser.malformed_surface(self.surface_coordinates.toPlainText(), error_message):
             self.show_error_message(error_message[0])
         else:
-            object = self.form_setup_3D(self.surface_name.text(), self.surface_coordinates.text())
+            coordinates = parser.parse_surface(self.surface_coordinates.toPlainText())
+            object = Object3D(self.surface_name.text(), coordinates, len(self.viewport.objectList))
             object.set_as_surface(True)
             if self.hermite_surface_button.isChecked():
                 object.set_surface_type(1)
@@ -300,3 +306,14 @@ class ObjectWindow(QDialog):
         plaintext = self.object_edges.text()
         edges = parser.parse_edges(plaintext)
         return edges
+
+    def load_surface(self):
+        self.surface_coordinates.setText('')
+        filename = QFileDialog.getOpenFileName(self)
+        if filename[0] != '':
+            f = open(str(filename[0]), "r")
+            for line in f:
+                line = line.replace("\n", "")
+                self.surface_coordinates.append(line)
+        else:
+            self.show_error_message("Nenhum arquivo selecionado")

@@ -8,9 +8,7 @@ from gui.transformation_gui import Trasformation
 
 from PyQt5.QtWidgets import QLabel, QWidget, QDesktopWidget, QHBoxLayout, QVBoxLayout, QPushButton, \
     QListWidget, QLayout, QGridLayout,  QToolButton, QMessageBox, QSpinBox, QLineEdit, QRadioButton
-
-from core import wavefront2D
-from core import wavefront3D
+from core import wavefront
 
 class MainWindow(QWidget):
     def __init__(self) -> None:
@@ -35,12 +33,14 @@ class MainWindow(QWidget):
         addObjButton = QPushButton("Adicionar Objeto")
         addObjButton.clicked.connect(self.menu_add_objects)
 
+        rmvObjButton = QPushButton("Remover Objeto")
+        rmvObjButton.clicked.connect(self.remove_object)
+
         transformObjButton = QPushButton("Transformar Objeto")
         transformObjButton.clicked.connect(self.menu_tranformations)
 
         openObjButton = QPushButton("Abrir Objeto")
         saveObjButton = QPushButton("Salvar Objeto")
-        # fileText = QLineEdit("dinomech.obj")
         openObjButton.clicked.connect(lambda: self.open())
         saveObjButton.clicked.connect(lambda: self.save())
 
@@ -57,7 +57,6 @@ class MainWindow(QWidget):
         layoutObj.addWidget(label_arquivos)
         layoutObj.addWidget(openObjButton)
         layoutObj.addWidget(saveObjButton)
-        # layoutObj.addWidget(fileText)
         layoutObj.addWidget(QLabel(''))
         label_algorithm = QLabel('Algoritmo de clipping')
         label_algorithm.setAlignment(Qt.AlignCenter)
@@ -70,6 +69,7 @@ class MainWindow(QWidget):
         label_objetos.setAlignment(Qt.AlignCenter)
         layoutObj.addWidget(label_objetos)
         layoutObj.addWidget(addObjButton)
+        layoutObj.addWidget(rmvObjButton)
         layoutObj.addWidget(transformObjButton)
         layoutObj.addWidget(self.objList)
         layoutObj.addWidget(QLabel(''))
@@ -170,14 +170,31 @@ class MainWindow(QWidget):
 
     def menu_tranformations(self):
         if(self.objList.currentItem() == None):
-            self.show_error_message("Você nao selecionou nenhum objeto da lista")
+            self.show_error_message("Você não selecionou nenhum objeto da lista")
         else:
             self.transformation.exec()
+
+    def remove_object(self):
+        if(self.objList.currentItem() == None):
+            self.show_error_message("Você não selecionou nenhum objeto da lista")
+        else:
+            curr = self.objList.currentItem().text()
+            self.objList.clear()
+            to_remove = None
+            for obj in self.viewport.objectList:
+                if obj.id == int(curr.split(": ")[1]):
+                    to_remove = obj
+                else:
+                    self.objList.addItem(obj.name + ': ' + str(obj.id))
+
+            if to_remove != None:
+                self.viewport.objectList.remove(to_remove)
+                self.viewport.redraw()
 
     def save(self) -> None:
         file_name = QFileDialog.getSaveFileName(self)
         if file_name[0] != '':
-            wavefront3D.write(file_name[0]+'.obj', self.viewport.objectList)
+            wavefront.write(file_name[0]+'.obj', self.viewport.objectList)
         else:
             self.show_error_message("Nenhum arquivo selecionado")
 
@@ -187,7 +204,7 @@ class MainWindow(QWidget):
             self.objList.clear()
             self.viewport.objectList.clear()
             self.viewport.redraw()
-            new_objects = wavefront3D.read(str(obj_name[0]))
+            new_objects = wavefront.read(str(obj_name[0]))
             for obj in new_objects:
                 if obj.IS_WINDOW:
                     self.viewport.update_window(obj.coordinates)

@@ -167,8 +167,14 @@ class Trasformation(QDialog):
             scale = self.get_scale(scalestr)
             self.transformation_control.add_scaling(type, scale, object)
 
+    # def get_object(self) -> Form:
+    #     return self.viewport.objectList[(int(self.mainWindow.objList.currentItem().text().split(": ")[1]))]
+
     def get_object(self) -> Form:
-        return self.viewport.objectList[(int(self.mainWindow.objList.currentItem().text().split(": ")[1]))]
+        curr = self.mainWindow.objList.currentItem().text()
+        for obj in self.viewport.objectList:
+            if obj.id == int(curr.split(": ")[1]):
+                return obj
 
     def rotate_around_axis(self) -> int:
         if self.originButton.isChecked():
