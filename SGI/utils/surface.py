@@ -15,16 +15,6 @@ def surface(normalized, surface_type, surface_algorythm):
             lines.append(line)
     return lines
 
-def create_matrices2(normalized):
-    matrices = []
-    size = int(np.sqrt(len(normalized)))
-    assert size >= 4
-    for i in range(int(size/4)):
-        matrices.append(create_non_overlapping_matrix(normalized, i))
-    if size % 4 != 0:
-        matrices.append(create_overlapping_matrix(normalized, size))
-    return matrices
-
 def create_matrices(normalized):
     matrices = []
     size = int(np.sqrt(len(normalized)))
@@ -44,36 +34,6 @@ def create_4x4_matrix(n, size, i, j, axis):
               [n[size*(i+2)+j][axis], n[size*(i+2)+j+1][axis], n[size*(i+2)+j+2][axis], n[size*(i+2)+j+3][axis]],
               [n[size*(i+3)+j][axis], n[size*(i+3)+j+1][axis], n[size*(i+3)+j+2][axis], n[size*(i+3)+j+3][axis]]]
     return matrix
-def create_overlapping_matrix(normalized, index):
-    return create_4x4_matrix(normalized, index, True)
-
-def create_non_overlapping_matrix(normalized, index):
-    return create_4x4_matrix(normalized, index, False)
-
-def create_4x4_matrix_2(normalized, index, OVERLAP):
-    matrix_x = []
-    matrix_y = []
-    matrix_z = []
-    size = 4
-    first = 0
-    if OVERLAP:
-        size = index
-        first = size-4
-    else:
-        first += size*index
-        size *= index+1
-    for i in range(first, size):
-        line_x = []
-        line_y = []
-        line_z = []
-        for j in range(first, size):
-            line_x.append(normalized[i*size+j][0])
-            line_y.append(normalized[i*size+j][1])
-            line_z.append(normalized[i*size+j][2])
-        matrix_x.append(line_x)
-        matrix_y.append(line_y)
-        matrix_z.append(line_z)
-    return (matrix_x, matrix_y, matrix_z)
 
 def partial_surface(mx, my, mz, surface_type, surface_algorythm):
     if surface_algorythm:
