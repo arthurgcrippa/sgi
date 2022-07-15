@@ -26,13 +26,24 @@ class Clipper():
         points = object.normalized
         if object.len() == 1:
             return self.point_clip(points[0])
-        elif object.len() > 1:
+        elif object.len() > 1 and not (object.IS_POLYGON and object.tridimentional()):
             possible_lines = []
             object_lines = object.get_lines()
             for line in object_lines:
                 possible_line = self.clipper.line_clip(line[0], line[1])
                 possible_lines.append(possible_line)
             return possible_lines
+        elif object.len() > 1 and object.IS_POLYGON and object.tridimentional():
+            possible_lines = []
+            lines_by_shape = object.get_group_lines()
+            possible_lines_by_shape = []
+            for (lines, flag) in lines_by_shape:
+                component = []
+                for line in lines:
+                    possible_line = self.clipper.line_clip(line[0], line[1])
+                    component.append(possible_line)
+                possible_lines_by_shape.append(component)
+            return possible_lines_by_shape
         return None
 
     def clip_lines(self, lines):

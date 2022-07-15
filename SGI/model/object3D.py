@@ -111,10 +111,9 @@ class Object3D(Form):
         for (circuit, flag) in self.edges:
             component = []
             for i in range(0, len(circuit)-1):
-                component.append((points[circuit[i]], points[circuit[i+1]]))
+                component.append((points[circuit[i]-1], points[circuit[i+1]-1]))
             group.append((component, flag))
         return group
-
 
     def add_cord(self, coordinate: t_coordinate):
         self.coordinates.append(coordinate)

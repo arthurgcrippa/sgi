@@ -23,6 +23,7 @@ class Viewport(QLabel):
         self.objectList: List[Form] = list()
         self.window = Window(vp_width, vp_height, vp_depth)
         self.clipper = Clipper(self.window, 0)
+        self.PERSPECTIVE = False
         self.vp_init()
         self.draw_axises()
 
@@ -40,6 +41,9 @@ class Viewport(QLabel):
         vp_x = ((wCoord[0] - wMin[0])/(wMax[0]-wMin[0]))*vpCoordinate[0]
         vp_y = (1-((wCoord[1]-wMin[1])/(wMax[1]-wMin[1])))*vpCoordinate[1]
         return (int(vp_x), int(vp_y))
+
+    def set_as_perspective(self, PERSPECTIVE: bool):
+        self.PERSPECTIVE = PERSPECTIVE
 
     def get_wc(self):
         xMin = self.window.xMin
@@ -90,8 +94,13 @@ class Viewport(QLabel):
             elif (object.len() > 1):
                 possible_lines = self.clipper.clip(object)
                 if object.IS_POLYGON and object.len() > 2:
-                    points = self.clipper.get_points(possible_lines)
-                    self.draw_polygon(painter, points)
+                    if not object.tridimentional():
+                        points = self.clipper.get_points(possible_lines)
+                        self.draw_polygon(painter, points)
+                    else:
+                        for lines_by_shape in possible_lines:
+                            points = self.clipper.get_points(lines_by_shape)
+                            self.draw_polygon(painter, points)
                 else:
                     self.draw_wireframe(painter, possible_lines)
         self.update()
@@ -148,7 +157,8 @@ class Viewport(QLabel):
             Transformation3D(2, theta_x, (0,0,0), (0,0,0), 1, 1, object, None).normalize(matrix)
             Transformation3D(2, theta_y, (0,0,0), (0,0,0), 1, 2, object, None).normalize(matrix)
             Transformation3D(2, theta_z, (0,0,0), (0,0,0), 1, 3, object, None).normalize(matrix)
-            Transformation3D(4, None, self.window.get_cop(), None, None, None, object, None).normalize(matrix)
+            if self.PERSPECTIVE:
+                Transformation3D(4, None, self.window.get_cop(), None, None, None, object, None).normalize(matrix)
         else:
             Transformation2D(2, -self.window.theta_z, (0,0), object, None).normalize()
 
@@ -169,15 +179,11 @@ class Viewport(QLabel):
         self.draw(axis_z)
 
     def update_window(self, coordinates):
-        for coord in coordinates:
-            print(coord)
+
         vpn = coordinates[3]
         vup = coordinates[2]
         (width, height, depth) = coordinates[1]
         wc = coordinates[0]
-        print("width: "+str(width))
-        print("height: "+str(height))
-        print("depth: "+str(depth))
         self.window.update_window(width, height, depth)
         #self.recenter(wc)
 

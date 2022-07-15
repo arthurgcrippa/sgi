@@ -50,6 +50,12 @@ class MainWindow(QWidget):
         change_algorithm = QPushButton("Alterar Algoritmo")
         change_algorithm.clicked.connect(lambda: self.change_algorithm())
 
+        self.ortogonal_projection = QRadioButton("Projeção Ortogonal")
+        self.perspective_projection = QRadioButton("Projeção em Perspectiva")
+        self.ortogonal_projection.setChecked(True)
+        change_projection = QPushButton("Alterar Projeção")
+        change_projection.clicked.connect(lambda: self.change_projection())
+
         self.objList = QListWidget()
 
         label_arquivos = QLabel('Manipulação de Arquivos')
@@ -64,7 +70,10 @@ class MainWindow(QWidget):
         layoutObj.addWidget(self.cs_algorithm)
         layoutObj.addWidget(self.lb_algorithm)
         layoutObj.addWidget(change_algorithm)
-        layoutObj.addWidget(QLabel(''))
+        label_projection = QLabel('Projeção')
+        label_projection.setAlignment(Qt.AlignCenter)
+        layoutObj.addWidget(label_projection)
+        layoutObj.addWidget(change_projection)
         label_objetos = QLabel('Objetos')
         label_objetos.setAlignment(Qt.AlignCenter)
         layoutObj.addWidget(label_objetos)
@@ -168,6 +177,13 @@ class MainWindow(QWidget):
         msg.setWindowTitle("Error")
         msg.exec_()
 
+    def show_info_message(self, info: str):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText(info)
+        msg.setWindowTitle("Information")
+        msg.exec_()
+
     def menu_tranformations(self):
         if(self.objList.currentItem() == None):
             self.show_error_message("Você não selecionou nenhum objeto da lista")
@@ -218,7 +234,7 @@ class MainWindow(QWidget):
 
     def get_algorithm(self):
         if self.cs_algorithm.isChecked():
-            print("Voce esta usando coher suterland")
+            print("Voce esta usando Coher Suterland")
             return 1
         else:
             print("Voce esta usando Linag Barsk")
@@ -235,3 +251,11 @@ class MainWindow(QWidget):
 
     def change_algorithm(self):
         self.viewport.clipper.set_algorithm(self.get_algorithm())
+
+    def change_projection(self):
+        self.viewport.set_as_perspective(not self.viewport.PERSPECTIVE)
+        if self.viewport.PERSPECTIVE:
+            self.show_info_message("Agora você está usando Projeção em Perspectiva")
+        else:
+            self.show_info_message("Agora você está usando Projeção Ortogonal")
+        self.viewport.redraw()

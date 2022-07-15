@@ -62,7 +62,7 @@ class ObjectWindow(QDialog):
         layout = QVBoxLayout()
         self.object_name_3D = QLineEdit("Nome do Objeto")
         self.object_coordinates_3D = QLineEdit("(-50,0,-50);(-50,0,50);(50,0,50);(50,0,-50);(0,100,0)")
-        self.object_edges = QLineEdit("(1,2,3,4,1);(1,5,2);(3,5,4)")
+        self.object_edges = QLineEdit("(1,2,3,4,1);(1,5,2,1);(2,5,3,2);(3,5,4,3);(4,5,1,4)")
         self.object_color_3D = QLineEdit("#000000")
         self.is_poligon_3D = QCheckBox("Fill object")
         self.confirm_button_3D = QPushButton('Confirm', self)
